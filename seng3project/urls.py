@@ -18,7 +18,7 @@ from django.contrib import admin
 
 urlpatterns = [
     # Pointing root URLconf to the eventstudyapi URLs
-    url(r'eventapi/', include('eventstudyapi.urls')),
+    url(r'eventapi/', include('seng3project.eventstudyapi.urls')),
 
     url(r'^admin/', admin.site.urls),
 ]
