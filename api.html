@@ -23,18 +23,23 @@
         </header>
 
         <section id="downloads" class="clearfix">
-          <a id="download-api-v1" href="api.html"><span>Event Study API v1.0</span></a>
+          <a id="download-api-v1" href="index.html"><span>Back to home</span></a>
         </section>
         <hr>
 
         <section id="main_content">
           <h2>
-          <a id="team-cool" class="anchor" href="#team-cool" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Group Members</h2>
-          Bronte Kalebic - z3461009 <br>
-          Damon Ho - z5016966 <br>
-          Dhruv Kaushik - z5017483 <br>
-          Henry Zhang - z5019181 <br>
-          Palwasha Pordeli -z3335004 <br>
+          <a id="team-cool" class="anchor" href="#team-cool" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Event Study API v1.0</h2>
+          Our API can be accessed at <em>wherever</em>.<p>
+          Send a HTTP POST request to <em>wherever</em> containing the files, and parameters in the body. Convert parameters to lower case and replace spaces with underscores (eg. for the lower bound of a 'earthquake in china' parameter, use "lower_earthquake_in_china=0.5"). Separate parameters with '&'.
+          <p>
+          Alternatively, you can submit a request using this form:
+          <form method="post" type="multipart/form-data">
+          Price file: <input type="file" name="price_file"></input><p>
+          Event file: <input type="file" name="event_file"></input><p>
+          Parameters: <p><input type="text" name="params" placeholder="Enter parameters"></input>
+          <p><button type="submit">Submit</button>
+          </form>
         </section>
 
         <footer>
