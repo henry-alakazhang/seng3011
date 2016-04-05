@@ -66,13 +66,14 @@ class Data:
                 if priceData["Last"] != "":           
                     if 'prevPrice' not in locals():                    
                         prevPrice = float(priceData["Last"])                  
-                    currCumRet = prevCumRet + float(priceData["Last"]) - prevPrice
+                    currCumRet = prevCumRet + (float(priceData["Last"]) - prevPrice)/prevPrice
+#                     print (currCumRet, prevPrice, priceData["Last"], priceData["Date[L]"], priceData["#RIC"])
                     self.CumRet[RIC][priceData["Date[L]"]] = currCumRet
                     prevCumRet = currCumRet
                     prevPrice = float(priceData["Last"])
                 else:
-                    self.CumRet[RIC][priceData["Date[L]"]] = prevCumRet       
-        
+                    self.CumRet[RIC][priceData["Date[L]"]] = prevCumRet  
+            del prevPrice     
     #Check if a given variable was in File2
     def isExistingVariable(self,var):
         if var in map(str.lower,self.Variables):
