@@ -26,12 +26,15 @@ class Parser:
                     if not row[0] in self.fileData:
                         self.fileData[row[0]] = []
                     entry = {}
-                    for i in range(1, len(self.heads)):
+                    for i in range(0, len(self.heads)):
                         entry[self.heads[i]] = row[i]
                     self.fileData[row[0]].append(entry)
 
     def getRICs(self):
         return list(self.fileData.keys())
 
+    def getVars(self):
+        return list(next(iter(self.fileData[next(iter(self.fileData))])).keys())
+        
     def getInfo(self, ric):
         return self.fileData[ric]

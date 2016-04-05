@@ -14,18 +14,20 @@ class Request:
         
     #Process all optional parameters    
     def processVar(self,optVar):
-        for params in optVar:
-            if (self.Data.isExistingVariable(params.getVar())):
-                self.optVarNames.append(params.getVar())
-                self.optVar[params.getVar()] = OptVar(params.getMin().params.getMax())
+        self.optVarNames = list()
+        self.optVar = dict()
+        for params in map(str.lower,optVar):
+            if (self.Data.isExistingVariable(params)):
+                self.optVarNames.append(params)
+                self.optVar[params] = OptVar(optVar[params]["min"],optVar[params]["max"])
             else:
-                raise Exception('Invalid Variable ' + params.getVar())
+                raise Exception('Invalid Variable ' + params)
     
     #Checks if a given stock characteristic fulfils the request
     def matchesReq(self,stockChar):
-        for varData in stockChar.getInfo():
-            if varData.getName() in self.optVarNames:
-                if self.optVar[varData.getName()].matches(varData.getValue()):
+        for varData in stockChar:
+            if varData.lower() in self.optVar:                
+                if not self.optVar[varData.lower()].matches(stockChar[varData]):
                     return False
         return True
         
@@ -37,36 +39,47 @@ class OptVar:
     
     #Check if value fulfils object criteria
     def matches(self,value):
+        if self.varMax is None:           
+            return value >= self.varMin
+        if self.varMin is None:
+            return value <= self.varMax        
         return value >= self.varMin and value <= self.varMax
+            
 
 class Data:
     #Takes the output of the parsers and puts it all into one object
-    def processFiles(self,F1,F2):
+    def __init__(self,F1,F2):
         self.RIC = F1.getRICs()
-        self.PriceInfo = F1.getPriceInfo()
+        self.PriceInfo = F1
         self.Variables = F2.getVars()
-        self.CharInfo = F2.getCharInfo()
+        self.CharInfo = F2
         self.calcCumRet()
         
     #Calculate the cumulative return for all data
     def calcCumRet(self):
+        self.CumRet = dict()
         for RIC in self.RIC:
+            self.CumRet[RIC] = dict()
             stockPriceInfo = self.PriceInfo.getInfo(RIC)
             prevCumRet = 0
-            prevPrice = stockPriceInfo.getFirstPrice()
             for priceData in stockPriceInfo:
-                currCumRet = prevCumRet + priceData.getPrice() - prevPrice
-                self.CumRet[RIC][priceData.getDate()] = currCumRet
-                prevCumRet = currCumRet
-                prevPrice = priceData.getPrice()            
+                if priceData["Last"] != "":           
+                    if 'prevPrice' not in locals():                    
+                        prevPrice = float(priceData["Last"])                  
+                    currCumRet = prevCumRet + float(priceData["Last"]) - prevPrice
+                    self.CumRet[RIC][priceData["Date[L]"]] = currCumRet
+                    prevCumRet = currCumRet
+                    prevPrice = float(priceData["Last"])
+                else:
+                    self.CumRet[RIC][priceData["Date[L]"]] = prevCumRet       
         
     #Check if a given variable was in File2
     def isExistingVariable(self,var):
-        if var in self.Variables:
+        if var in map(str.lower,self.Variables):
             return True
         else:
             return False
         
     #Gets the cumulative return for a stock at a given date
-    def getCumRet(self,stockName,eventDate):
-        return self.cumRet[stockName][eventDate]
+    def getCumRet(self,stockChar,eventDate):
+        return self.CumRet[stockChar["#RIC"]][eventDate]

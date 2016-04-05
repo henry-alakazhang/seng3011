@@ -16,7 +16,8 @@ def process(request):
     result = dict()
     for stockChar in charsToProcess:
         result[stockChar] = calcCumRet(stockChar,upperWindow,lowerWindow,data)
-        
+    return result
+
 #Process each individual stock characteristic
 def calcCumRet(stockChar,upperWindow,lowerWindow,data):
     cumRet = dict()
