@@ -5,7 +5,7 @@ from eventstudyapi.upload_handler import handle_uploaded_file
 from . import requestProcessor
 from eventstudyapi.parser import Parser
 from eventstudyapi.request import Request, Data
-
+import datetime
 
 def index(request):
     return HttpResponse("Hello world, you are at the Event Study API index.")
@@ -61,18 +61,21 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
     for chars in cumRets:
         dateFound = False
         indivCumRets = list()
-        for i in range(int(lowerWindow),int(upperWindow)):
-            print (i)
+        for i in range(int(lowerWindow),int(upperWindow)):            
             indivCumRets.append(chars[1][i])
         for event in JsonCumRets["events"]:
-            if event["date"] == chars[0]["Event Date"]:   
+            date = reformat_date(chars[0]["Event Date"])
+            if event["date"] == date:
                 event["returns"][chars[0]["#RIC"]] = indivCumRets       
                 dateFound = True      
                 break
         if not dateFound:
             event = dict()
-            event["date"] = chars[0]["Event Date"]
+            event["date"] = reformat_date(chars[0]["Event Date"])
             event["returns"] = dict()
             event["returns"][chars[0]["#RIC"]] = indivCumRets   
             JsonCumRets["events"].append(event)                
     return JsonCumRets
+
+def reformat_date(date_string):
+  return datetime.datetime.strptime(date_string, '%d-%b-%y').strftime('%d/%m/%y')
