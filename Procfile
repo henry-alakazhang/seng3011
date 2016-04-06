@@ -1,1 +1,1 @@
-web: gunicorn seng3project.wsgi.py
+web: gunicorn seng3project.wsgi
