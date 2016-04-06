@@ -46,7 +46,7 @@ def event_study_api_view(request, **kwargs):
             # TODO: Code to return an error to the user here
             
     # Process query
-    total_cum_rets = requestProcessor.processData('seng3project/media/' + str(request.FILES.get('stock_price_data_file')), 'seng3project/media/' + str(request.FILES.get('stock_characteristic_file')), valid_params_dict)
+    total_cum_rets = requestProcessor.processData('media/' + str(request.FILES.get('stock_price_data_file')), 'media/' + str(request.FILES.get('stock_characteristic_file')), valid_params_dict)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     # serializers = ResultSerializer()
     #return HttpResponse("Hello world, you are at the Event Study API index.")
