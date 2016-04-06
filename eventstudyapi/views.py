@@ -4,7 +4,8 @@ from django.http import HttpResponse, JsonResponse
 from eventstudyapi.upload_handler import handle_uploaded_file
 from rest_framework.decorators import api_view
 from . import requestProcessor
-
+import timeit
+import datetime
 
 def index(request):
     return HttpResponse("Hello world, you are at the Event Study API index.")
@@ -13,8 +14,14 @@ def index(request):
 @api_view(['POST'])
 def event_study_api_view(request, **kwargs):
 
+    processing_time_start = timeit.default_timer()
+    start_date_time = datetime.datetime.now()
+
     # Debug output statements
     # print(request.data)
+    print("Team Cool")
+    print("Event Study API v1.0")
+    print("Input files:")
     print(request.FILES.get('stock_characteristic_file'))
     print(request.FILES.get('stock_price_data_file'))
 
@@ -45,11 +52,23 @@ def event_study_api_view(request, **kwargs):
             print('ERROR The following required parameter was not correctly provided:' + param)
             # TODO: Code to return an error to the user here
             
+    print("Parameters passed:")
+    print(valid_params_dict)
+    
     # Process query
     total_cum_rets = requestProcessor.processData('media/' + str(request.FILES.get('stock_price_data_file')), 'media/' + str(request.FILES.get('stock_characteristic_file')), valid_params_dict)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     # serializers = ResultSerializer()
     #return HttpResponse("Hello world, you are at the Event Study API index.")
+
+    processing_time_end = timeit.default_timer()
+    Elapsed_time = processing_time_end - processing_time_start
+    print (str(Elapsed_time) + ' s')
+ 
+    start_date_time = datetime.datetime.now()
+    end_date_time = datetime.datetime.now()
+    print('start_date_time: ' + str(start_date_time) + ' end_date_time: ' + str(end_date_time))
+ 
     return JsonResponse(requestResponse)
 
 def convertToJson(cumRets,params,lowerWindow,upperWindow):
