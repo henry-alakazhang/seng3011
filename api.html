@@ -32,15 +32,17 @@
           <a id="team-cool" class="anchor" href="#team-cool" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Event Study API v1.0</h2>
           Our API can be accessed at:
           <a href="http://seng3011-eventstudy.herokuapp.com/eventapi/">http://seng3011-eventstudy.herokuapp.com/eventapi/</a><p>
-          Send a HTTP POST request to the above address containing the files, with parameters in the body. Convert parameters to lower case and replace spaces with underscores (eg. for the lower bound of a 'earthquake in china' parameter, use "lower_earthquake_in_china=0.5"). Separate parameters with '&'.
+          Send a HTTP POST request of type 'multipart/form-data' to the above URL, containing the files and any parameters as POST parameters. Convert parameters to lower case and replace spaces with underscores (eg. for the lower bound of a 'earthquake in china' parameter, use "lower_earthquake_in_china").
           <p>
-          Alternatively, you can submit a request using this form:
-          <form method="post" type="multipart/form-data" action="http://seng3011-eventstudy.herokuapp.com/eventapi/">
+          Alternatively, you can submit a basic request using this form:
+          <form method="post" enctype="multipart/form-data" action="http://seng3011-eventstudy.herokuapp.com/eventapi/">
           Price file: <input type="file" name="stock_price_data_file"><p>
           Event file: <input type="file" name="stock_characteristic_file"><p>
-          Parameters: <p><input type="text" name="params" placeholder="Enter parameters"></input>
-          <p><button type="submit">Submit</button>
+          Parameters: <br><input type="number" name="upper_window" size="10" placeholder="Upper window">
+          <input type="number" name="lower_window" size="10" placeholder="Lower window">
+          <p><input type="submit" value="Submit">
           </form>
+          Note that the form is not extensive. If you desire full functionality (custom parameters), please generate a custom POST request.
         </section>
 
         <footer>
