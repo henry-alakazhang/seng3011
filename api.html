@@ -30,13 +30,14 @@
         <section id="main_content">
           <h2>
           <a id="team-cool" class="anchor" href="#team-cool" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Event Study API v1.0</h2>
-          Our API can be accessed at <em>wherever</em>.<p>
-          Send a HTTP POST request to <em>wherever</em> containing the files, and parameters in the body. Convert parameters to lower case and replace spaces with underscores (eg. for the lower bound of a 'earthquake in china' parameter, use "lower_earthquake_in_china=0.5"). Separate parameters with '&'.
+          Our API can be accessed at:
+          <a href="http://seng3011-eventstudy.herokuapp.com/eventapi/">http://seng3011-eventstudy.herokuapp.com/eventapi/</a><p>
+          Send a HTTP POST request to the above address containing the files, with parameters in the body. Convert parameters to lower case and replace spaces with underscores (eg. for the lower bound of a 'earthquake in china' parameter, use "lower_earthquake_in_china=0.5"). Separate parameters with '&'.
           <p>
           Alternatively, you can submit a request using this form:
-          <form method="post" type="multipart/form-data">
-          Price file: <input type="file" name="price_file"></input><p>
-          Event file: <input type="file" name="event_file"></input><p>
+          <form method="post" type="multipart/form-data" action="http://seng3011-eventstudy.herokuapp.com/eventapi/">
+          Price file: <input type="file" name="stock_price_data_file"><p>
+          Event file: <input type="file" name="stock_characteristic_file"><p>
           Parameters: <p><input type="text" name="params" placeholder="Enter parameters"></input>
           <p><button type="submit">Submit</button>
           </form>
