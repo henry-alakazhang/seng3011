@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'seng3project.eventstudyapi',
+    'eventstudyapi',
     'rest_framework',
 ]
 

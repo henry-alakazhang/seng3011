@@ -3,9 +3,14 @@ Created on 5 Apr 2016
 
 @author: Damon
 '''
-import sys, re, datetime, csv
-from seng3project.eventstudyapi.parser import Parser
+import csv
+import datetime
+import re
+import sys
+
 from seng3project.eventstudyapi.request import Request, Data
+
+from eventstudyapi.parser import Parser
 
 
 #Process request
