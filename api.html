@@ -29,7 +29,11 @@
 
         <section id="main_content">
           <h2>
-          <a id="team-cool" class="anchor" href="#team-cool" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Event Study API v1.0</h2>
+          <a id="team-cool" class="anchor" href="#api-v1" aria-hidden="true"></a>Event Study API v1.0</h2>
+          <h3>The API</h3>
+          This is the first release of our event study API. It currently has all functionality required in the spec - it takes two uploaded files, along with some parameters, and calculates cumulative returns, returning the results as a JSON file. An example output can be found <a href="example.json">here</a>.<p>
+          Currently, files are only used for a single request - further requests require reuploading files. In future, the API will be able to maintain files so you can send multiple queries with one set of files. In addition, it will also support multiple output formats (.csv as well as alternate JSON implementations)
+          <h3>Accessing the API</h3>
           Our API can be accessed at:
           <a href="http://seng3011-eventstudy.herokuapp.com/eventapi/">http://seng3011-eventstudy.herokuapp.com/eventapi/</a><p>
           Send a HTTP POST request of type 'multipart/form-data' to the above URL, containing the files and any parameters as POST parameters. Convert parameters to lower case and replace spaces with underscores (eg. for the lower bound of a 'earthquake in china' parameter, use "lower_earthquake_in_china").
