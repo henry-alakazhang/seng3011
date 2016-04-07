@@ -10,7 +10,6 @@ import datetime
 def index(request):
     return HttpResponse("Hello world, you are at the Event Study API index.")
 
-
 @api_view(['POST'])
 def event_study_api_view(request, **kwargs):
 
@@ -19,12 +18,6 @@ def event_study_api_view(request, **kwargs):
 
     # Debug output statements
     # print(request.data)
-    log = "Team Cool\n"
-    log += "Event Study API v1.0\n"
-    log += "Input files:\n"
-    log += request.FILES.get('stock_characteristic_file')
-    log += request.FILES.get('stock_price_data_file')
-
     handle_uploaded_file(request.FILES['stock_characteristic_file'])
     handle_uploaded_file(request.FILES['stock_price_data_file'])
 
@@ -52,31 +45,37 @@ def event_study_api_view(request, **kwargs):
             print('ERROR The following required parameter was not correctly provided:' + param)
             # TODO: Code to return an error to the user here
             
-    log += "Parameters passed:\n"
-    log += valid_params_dict
+    # build log file            
+    log = "Team Cool\n"
+    log += "Event Study API v1.0\n"
+    log += "Input files:\n"
+    log += str(request.FILES.get('stock_characteristic_file')) + "and" + str(request.FILES.get('stock_price_data_file'))
+    log += "\nParameters passed:\n"
+    log += str(valid_params_dict)
     
-
     processing_time_end = timeit.default_timer()
     Elapsed_time = processing_time_end - processing_time_start
-    log += str(Elapsed_time) + ' s\n'
+    log += 'Elapsed time:' + str(Elapsed_time) + 's\n'
  
     start_date_time = datetime.datetime.now()
     end_date_time = datetime.datetime.now()
     log += 'start_date_time: ' + str(start_date_time) + ' end_date_time: ' + str(end_date_time) + '\n'
 
+    with open('media/log.txt', 'w') as file:
+        file.write(log)
+
     # Process query
     total_cum_rets = requestProcessor.processData('media/' + str(request.FILES.get('stock_price_data_file')), 'media/' + str(request.FILES.get('stock_characteristic_file')), valid_params_dict)
-    requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow, log)
+    requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     # serializers = ResultSerializer()
     #return HttpResponse("Hello world, you are at the Event Study API index.")
  
     return JsonResponse(requestResponse)
 
-def convertToJson(cumRets,params,lowerWindow,upperWindow,log):
+def convertToJson(cumRets,params,lowerWindow,upperWindow):
     JsonCumRets = dict()
     JsonCumRets["parameters"] = params
     JsonCumRets["events"] = list()
-    JsonCumRets["log"] = log
     cumRets = sorted(cumRets, key=lambda k: k[0]['Event Date'])   
     for chars in cumRets:
         dateFound = False
@@ -98,4 +97,9 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow,log):
     return JsonCumRets
 
 def reformat_date(date_string):
-  return datetime.datetime.strptime(date_string, '%d-%b-%y').strftime('%d/%m/%y')
+    return datetime.datetime.strptime(date_string, '%d-%b-%y').strftime('%d/%m/%y')
+
+def log_view(request):
+    response = HttpResponse(open('media/log.txt'), content_type='application/txt')
+    response['Content-Disposition'] = 'attachment; filename=log.txt'
+    return response
