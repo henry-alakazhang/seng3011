@@ -18,13 +18,22 @@ def event_study_api_view(request, **kwargs):
 
     # Debug output statements
     # print(request.data)
-    handle_uploaded_file(request.FILES['stock_characteristic_file'])
-    handle_uploaded_file(request.FILES['stock_price_data_file'])
+    
+    error = ""
+    fatal = False
 
+    files_required = ['stock_characteristic_file', 'stock_price_data_file']
+    for reqfile in files_required:
+        if reqfile not in request.FILES:
+            error += 'ERROR: File ' + reqfile + ' not proided\n'
+            fatal = True
+        else:
+            handle_uploaded_file(request.FILES[reqfile])
+    
     # Standard dict methods do not work on the QueryDict, thus convert to a std dict
     request_dict = dict(request.data)
     valid_params_dict = dict()
-    
+
     # Iterate over the request dict, looking for valid params or files
     for key, value in request_dict.items():
         if key.endswith('window'):
@@ -36,16 +45,21 @@ def event_study_api_view(request, **kwargs):
             print(key, value)
             valid_params_dict[key] = value[0]
         elif not (key.startswith('stock_price_data_file') or key.startswith('stock_characteristic_file')):
-            print('The following parameter is invalid: ' + str(key) + str(value))
+            error += 'Warning: The following parameter is invalid: ' + str(key) + str(value) + '\n'
 
     # Check the 2 necessary params were specified otherwise return an error
     required_params = ['upper_window', 'lower_window']
     for param in required_params:
         if param not in valid_params_dict:
-            print('ERROR The following required parameter was not correctly provided:' + param)
+            error += 'ERROR: The following required parameter was not correctly provided:' + param + '\n'
+            fatal = True
             # TODO: Code to return an error to the user here
-            
-    # build log file            
+                   
+    # die on fatal errors so we don't try to process
+    if fatal:
+        return(HttpResponse("FATAL ERROR\n" + error))
+
+    # build log file     
     log = "Team Cool\n"
     log += "Event Study API v1.0\n"
     log += "Input files:\n"
@@ -61,6 +75,9 @@ def event_study_api_view(request, **kwargs):
     end_date_time = datetime.datetime.now()
     log += 'start_date_time: ' + str(start_date_time) + ' end_date_time: ' + str(end_date_time) + '\n'
 
+    log += 'Errors generated:\n'
+    log += error
+    
     with open('media/log.txt', 'w') as file:
         file.write(log)
 
