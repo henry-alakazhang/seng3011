@@ -88,6 +88,7 @@ def event_study_api_view(request, **kwargs):
     # Process query
     total_cum_rets = requestProcessor.processData('media/' + str(file_key) + '_' + str(request.FILES.get('stock_price_data_file')), 'media/' + str(file_key) + '_' + str(request.FILES.get('stock_characteristic_file')), valid_params_dict)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
+    requestResponse['file_key'] = file_key
     # serializers = ResultSerializer()
     #return HttpResponse("Hello world, you are at the Event Study API index.")
  
