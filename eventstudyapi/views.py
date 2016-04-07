@@ -122,19 +122,21 @@ def reformat_date(date_string):
 
 @api_view (['GET'])
 def log_view(request):
-    print ('File key from url is: ' + '\'' + request.GET['file_key'] + '\'')
     request_GET_dict = dict(request.GET)
 
+    error = ""
     if 'file_key' not in request_GET_dict:
-        print("ERROR There was no file_key supplied")
+        error = "ERROR There was no file_key supplied"
     elif request.GET['file_key'] is '':
-        print('ERROR File key was none')
+        error = 'ERROR File key was none'
     else:
-        file_key = request.GET['file_key']
+        file_key = request.GET['file_key']              
 
     # for myFile in 'media/':
     #     if myFile.startswith('file_key')
 
-    response = HttpResponse(open('media/' + file_key + '_' + 'log.txt'), content_type='application/txt')
-    # response['Content-Disposition'] = 'attachment; filename=log.txt'
+    if (error == ""):
+        response = HttpResponse(open('media/' + file_key + '_' + 'log.txt'), content_type='application/txt')
+    else:
+        response = HttpResponse(error)
     return response
