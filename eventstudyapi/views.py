@@ -60,10 +60,6 @@ def event_study_api_view(request, **kwargs):
             fatal = True
             # TODO: Code to return an error to the user here
                    
-    # die on fatal errors so we don't try to process
-    if fatal:
-        return(HttpResponse("FATAL ERROR\n" + error))
-
     # build log file     
     log = "Team Cool\n"
     log += "Event Study API v1.0\n"
@@ -74,14 +70,17 @@ def event_study_api_view(request, **kwargs):
     
     processing_time_end = timeit.default_timer()
     Elapsed_time = processing_time_end - processing_time_start
-    log += 'Elapsed time:' + str(Elapsed_time) + 's\n'
+    log += '\nElapsed time:' + str(Elapsed_time) + 's\n'
  
     start_date_time = datetime.datetime.now()
     end_date_time = datetime.datetime.now()
-    log += 'start_date_time: ' + str(start_date_time) + ' end_date_time: ' + str(end_date_time) + '\n'
+    log += 'Start time: ' + str(start_date_time) + '\nEnd time: ' + str(end_date_time) + '\n'
 
-    log += 'Errors generated:\n'
+    log += 'Errors/warnings generated:\n'
     log += error
+
+    if fatal:
+        return(HttpResponse("FATAL ERROR\n" + log))
     
     with open('media/' + str(file_key) + '_' + 'log.txt', 'w') as file:
         file.write(log)
