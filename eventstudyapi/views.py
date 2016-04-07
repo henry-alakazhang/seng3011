@@ -1,4 +1,6 @@
 import datetime
+from random import choice
+from string import ascii_uppercase
 
 from django.http import HttpResponse, JsonResponse
 from eventstudyapi.upload_handler import handle_uploaded_file
@@ -18,7 +20,10 @@ def event_study_api_view(request, **kwargs):
 
     # Debug output statements
     # print(request.data)
-    
+    file_key = ''.join(choice(ascii_uppercase) for i in range(12))
+    print (file_key)
+
+
     error = ""
     fatal = False
 
@@ -28,7 +33,7 @@ def event_study_api_view(request, **kwargs):
             error += 'ERROR: File ' + reqfile + ' not proided\n'
             fatal = True
         else:
-            handle_uploaded_file(request.FILES[reqfile])
+            handle_uploaded_file(request.FILES[reqfile], file_key)
     
     # Standard dict methods do not work on the QueryDict, thus convert to a std dict
     request_dict = dict(request.data)
@@ -78,11 +83,11 @@ def event_study_api_view(request, **kwargs):
     log += 'Errors generated:\n'
     log += error
     
-    with open('media/log.txt', 'w') as file:
+    with open('media/' + str(file_key) + '_' + 'log.txt', 'w') as file:
         file.write(log)
 
     # Process query
-    total_cum_rets = requestProcessor.processData('media/' + str(request.FILES.get('stock_price_data_file')), 'media/' + str(request.FILES.get('stock_characteristic_file')), valid_params_dict)
+    total_cum_rets = requestProcessor.processData('media/' + str(file_key) + '_' + str(request.FILES.get('stock_price_data_file')), 'media/' + str(file_key) + '_' + str(request.FILES.get('stock_characteristic_file')), valid_params_dict)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     # serializers = ResultSerializer()
     #return HttpResponse("Hello world, you are at the Event Study API index.")
@@ -116,7 +121,21 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
 def reformat_date(date_string):
     return datetime.datetime.strptime(date_string, '%d-%b-%y').strftime('%d/%m/%y')
 
+@api_view (['GET'])
 def log_view(request):
-    response = HttpResponse(open('media/log.txt'), content_type='application/txt')
-    response['Content-Disposition'] = 'attachment; filename=log.txt'
+    print ('File key from url is: ' + '\'' + request.GET['file_key'] + '\'')
+    request_GET_dict = dict(request.GET)
+
+    if 'file_key' not in request_GET_dict:
+        print("ERROR There was no file_key supplied")
+    elif request.GET['file_key'] is '':
+        print('ERROR File key was none')
+    else:
+        file_key = request.GET['file_key']
+
+    # for myFile in 'media/':
+    #     if myFile.startswith('file_key')
+
+    response = HttpResponse(open('media/' + file_key + '_' + 'log.txt'), content_type='application/txt')
+    # response['Content-Disposition'] = 'attachment; filename=log.txt'
     return response
