@@ -2,13 +2,13 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 
 def index(request):
-    return HttpResponse("Welcome to the Team Cool home page!");
+    return render(request, 'home/home.html', {'home':True});
 
 def about(request):
-    return HttpResponse("We are Team Cool!");
+    return render(request, 'home/about.html', {'about':True});
 
 def api_home(request):
-    return HttpResponse("This is our event study API!");
+    return render(request, 'home/api.html', {'api':True});
 
 def analytics_home(request):
-    return HttpResponse("This is our Analytics Platform!");
+    return render(request, 'home/analytics.html', {'analytics':True});
