@@ -8,11 +8,7 @@ from rest_framework.decorators import api_view
 from . import requestProcessor
 import timeit
 import datetime
-<<<<<<< HEAD
 import os
-
-=======
->>>>>>> master
 
 def index(request):
     return HttpResponse("Hello world, you are at the Event Study API index.")
@@ -32,7 +28,6 @@ def event_study_api_view(request, **kwargs):
 
     # Debug output statements
     # print(request.data)
-<<<<<<< HEAD
     file_key = ''.join(choice(ascii_uppercase) for i in range(12))
     print (file_key)
 
@@ -62,13 +57,6 @@ def event_study_api_view(request, **kwargs):
         else:
             error += 'No file found with key: ' + request_POST_dict['file_key'][0] + '\n'
             fatal = True
-=======
-    print("Team Cool")
-    print("Event Study API v1.0")
-    print("Input files:")
-    print(request.FILES.get('stock_characteristic_file'))
-    print(request.FILES.get('stock_price_data_file'))
->>>>>>> master
 
         # file_key = request.GET['file_key']
 
@@ -106,7 +94,6 @@ def event_study_api_view(request, **kwargs):
             error += 'ERROR: The following required parameter was not correctly provided:' + param + '\n'
             fatal = True
             # TODO: Code to return an error to the user here
-<<<<<<< HEAD
                    
     # build log file     
     log = "Team Cool\n"
@@ -137,12 +124,6 @@ def event_study_api_view(request, **kwargs):
         with open('media/' + str(fileFoundKey) + '_' + 'log.txt', 'w') as file:
             file.write(log)
 
-=======
-            
-    print("Parameters passed:")
-    print(valid_params_dict)
-    
->>>>>>> master
     # Process query
     if fileFound:
         total_cum_rets = requestProcessor.processData('media/' + str(fileFoundKey) + '_' + str('stock_price_data_file.csv'), 'media/' + str(fileFoundKey) + '_' + str('stock_characteristic_file.csv'), valid_params_dict)
@@ -155,21 +136,7 @@ def event_study_api_view(request, **kwargs):
         requestResponse['file_key'] = file_key
     else:
         requestResponse['file_key'] = fileFoundKey
-
-    # serializers = ResultSerializer()
-    #return HttpResponse("Hello world, you are at the Event Study API index.")
-<<<<<<< HEAD
-=======
-
-    processing_time_end = timeit.default_timer()
-    Elapsed_time = processing_time_end - processing_time_start
-    print (str(Elapsed_time) + ' s')
- 
-    start_date_time = datetime.datetime.now()
-    end_date_time = datetime.datetime.now()
-    print('start_date_time: ' + str(start_date_time) + ' end_date_time: ' + str(end_date_time))
->>>>>>> master
- 
+        
     return JsonResponse(requestResponse)
 
 def convertToJson(cumRets,params,lowerWindow,upperWindow):
