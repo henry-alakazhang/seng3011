@@ -5,4 +5,128 @@
 {% block content %}
   <h2>Event Study API</h2>
   <&#33;-- bronte put things here -->
+  <h3>How to Use Our API</h3><br>
+  <h4>HTTP Method:</h4> 
+  POST<br><br>
+  <h4>Parameters:</h4>
+  <b>stock_characteristic_file</b> - CSV file for stock characteristics<br>
+  <b>stock_price_data_file</b> - CSV file for stock price data<br>
+  <b>file_key</b> - 12 character value that represents the files that have been uploaded previously. 
+  This means you do not have to uplaod the same files multiple times. Example: YVLRBOEFEBPA<br>
+  <b>lower_window</b> - integer value that is a lower bound of the results to be shown. Example: -10<br>
+  <b>pper_window</b> - integer value that is an upper bound of the results to be shown. Example: 10<br><br>
+
+  All of these parameters are added to the end of the webpage's URL. Without the two files or a 
+  file key, no results will be produced.<br><br>
+
+  <h4>Example Input:</h4>
+  https://seng3011-eventstudy.herokuapp.com/eventapi/?file_key=YVLRBOEFEBPA&upper_window=10&lower_window=-10<br><br>
+
+  <h4>Example Output<h4>
+  <code>
+  {
+  "parameters": {
+    "lower_window": "-10",
+    "upper_window": "10"
+  },
+  "events": [
+    {
+      "date": "02/11/11",
+      "returns": {
+        "CBA.AX": [
+          0.9420464681355807,
+          0.9679139760220161,
+          0.966683963721893,
+          0.9746888898302675,
+          0.9926078472727436,
+          0.9920077272487389,
+          0.9920077272487389,
+          0.9920077272487389,
+          0.9781966784096676,
+          0.9666277723816586,
+          0.956771509547983,
+          0.9524164701452454,
+          0.9736620439840291,
+          0.9736620439840291,
+          0.9736620439840291,
+          0.9795767900578615,
+          0.9868760601308542,
+          0.9925121309843163,
+          0.9698940365087358,
+          0.9854582388433663
+        ],
+        "ANZ.AX": [
+          1.0975614396844593,
+          1.1211352256344829,
+          1.1137653500011342,
+          1.1156214984930135,
+          1.1346117717676778,
+          1.1382481354040415,
+          1.1382481354040415,
+          1.1382481354040415,
+          1.120132193375056,
+          1.10537204577358,
+          1.0838364652492354,
+          1.0642192403688526,
+          1.0900855166011612,
+          1.0900855166011612,
+          1.0900855166011612,
+          1.0981730522814657,
+          1.1165779602569257,
+          1.1249190167907535,
+          1.0679337226731063,
+          1.0767056524976677
+        ],
+        "NAB.AX": [
+          0.5166281194133391,
+          0.5421215404659707,
+          0.5312955581083123,
+          0.5426453757005295,
+          0.5795191231955196,
+          0.5841577006984185,
+          0.5841577006984185,
+          0.5841577006984185,
+          0.5729995629531319,
+          0.5496532594511865,
+          0.5420835383356486,
+          0.5324488534701328,
+          0.5535270861413935,
+          0.5535270861413935,
+          0.5535270861413935,
+          0.5531301032116593,
+          0.5630586179058611,
+          0.5760354169620939,
+          0.528286969757125,
+          0.5303252901810955
+        ],
+        "WBC.AX": [
+          1.1062535873485815,
+          1.1369512617671862,
+          1.129731045160688,
+          1.1433674087970516,
+          1.1639952114876346,
+          1.1604802729990582,
+          1.1604802729990582,
+          1.1604802729990582,
+          1.1446072571260424,
+          1.1275821675203077,
+          1.108439049926871,
+          1.1079743659120012,
+          1.1344736685619312,
+          1.1344736685619312,
+          1.1344736685619312,
+          1.0905425091416414,
+          1.0985955645656111,
+          1.1117534593024532,
+          1.0792859268349206,
+          1.0879148817726003
+        ]
+      }
+    }
+  ],
+  "file_key": "LDPUEOSUUOCV"
+  }
+  </code>
+
+
 {% endblock %}
