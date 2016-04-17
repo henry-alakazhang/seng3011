@@ -3,27 +3,57 @@
 {% block title %}Team Cool - Event Study API{% endblock %}
 
 {% block content %}
-  <h2>Event Study API</h2>
-  <&#33;-- bronte put things here -->
-  <h3>How to Use Our API</h3><br>
-  <h4>HTTP Method:</h4> 
-  POST<br><br>
-  <h4>Parameters:</h4>
-  <b>stock_characteristic_file</b> - CSV file for stock characteristics<br>
-  <b>stock_price_data_file</b> - CSV file for stock price data<br>
-  <b>file_key</b> - 12 character value that represents the files that have been uploaded previously. 
-  This means you do not have to uplaod the same files multiple times. Example: YVLRBOEFEBPA<br>
-  <b>lower_window</b> - integer value that is a lower bound of the results to be shown. Example: -10<br>
-  <b>pper_window</b> - integer value that is an upper bound of the results to be shown. Example: 10<br><br>
+  <h1>Event Study API</h1>
+  Our Event Study API has two components to it. File uploads and data retrievals are separated to reduce upload overheads.
+  <hr>
+  <h2>Uploads</h2>
+  <pre>https://seng3011-eventstudy.herokuapp.com/eventapi/</pre>
+  
+  <h3>HTTP Method:</h3> 
+  POST
 
-  All of these parameters are added to the end of the webpage's URL. Without the two files or a 
-  file key, no results will be produced.<br><br>
+  <h3>Parameters:</h3>
+  The following parameters are all required and must be sent in the body of the POST request (ie. as a multipart form). Parameters marked with a <a style='color:red'>*</a> are required.<br><br>
 
-  <h4>Example Input:</h4>
-  https://seng3011-eventstudy.herokuapp.com/eventapi/?file_key=YVLRBOEFEBPA&upper_window=10&lower_window=-10<br><br>
+  <b>stock_characteristic_file<a style='color:red'>*</a></b> - CSV file for stock/event characteristics<br>
+  <b>stock_price_data_file<a style='color:red'>*</a></b> - CSV file for stock price data<br>
+  <b>file_key</b> - 12 character value that represents the files that have been uploaded previously. Used for replacing existing data. Eg. YVLRBOEFEBPA<br>
 
-  <h4>Example Output<h4>
-  <code>
+  <h3>Returns:</h3>
+  The file upload API returns a JSON file with a single (relevant) entry: "file_key". This will be used to access event study computations for the uploaded files.
+
+  <h3>Example request/response</h3>
+  <h4>Request:</h4>
+  <pre> curl -F "stock_characteristic_file=@scf.csv" -F "stock_price_data_file=@spdf.csv"  https://seng30 ... app.com/eventapi/</pre>
+  <h4>Response:</h4>
+  <pre>  {
+    "file_key": GXSIELXICPNV
+  }</pre>
+  <hr>
+
+  <h2>Cumulative Returns</h2>
+  <pre>https://seng3011-eventstudy.herokuapp.com/eventapi/</pre>
+
+  <h3>HTTP Method:</h3> 
+  GET
+
+  <h3>Parameters:</h3>
+  The following parameters modify the output of the cumulative returns calculations. These must be placed in the query string of the URL. Parameters marked with <a style='color:red'>*</a> are required. <br><br>
+
+  <b>file_key</b> - 12 character value that represents the files that have been uploaded previously. Eg. YVLRBOEFEBPA <br>
+  <b>lower_window<a style='color:red'>*</a></b> - integer value that is a lower bound of the results to be shown. Example: -10<br>
+  <b>upper_window<a style='color:red'>*</a></b> - integer value that is an upper bound of the results to be shown. Example: 10<br><br>
+
+  You can supply additional parameters as ranges for variables within the <code>stock_characteristic_file</code>. You must provide both upper and lower bounds for these variables - eg. <code>upper_ceo_health=0.5&lower_ceo_health=-0.5</code>
+
+  <h3>Example request/response</h3>
+  <h4>Request:</h4>
+  <pre> curl https://seng3011-eventstudy.herokuapp.com/eventapi/?file_key=GXSIELXICPNV&upper_window=10&lower_window=-10</pre>
+  or<br>
+  <pre>  GET /eventapi/?file_key=GXSIELXICPNV&amp;upper_window=10&amp;lower_window=-10 HTTP/1.1
+  Host: https://seng3011-eventstudy.herokuapp.com</pre>
+  <h4>Response:</h4>
+  <pre>
   {
   "parameters": {
     "lower_window": "-10",
@@ -37,96 +67,36 @@
           0.9420464681355807,
           0.9679139760220161,
           0.966683963721893,
-          0.9746888898302675,
-          0.9926078472727436,
-          0.9920077272487389,
-          0.9920077272487389,
-          0.9920077272487389,
-          0.9781966784096676,
-          0.9666277723816586,
-          0.956771509547983,
-          0.9524164701452454,
-          0.9736620439840291,
-          0.9736620439840291,
-          0.9736620439840291,
-          0.9795767900578615,
-          0.9868760601308542,
-          0.9925121309843163,
-          0.9698940365087358,
-          0.9854582388433663
+          ...
         ],
         "ANZ.AX": [
           1.0975614396844593,
           1.1211352256344829,
           1.1137653500011342,
-          1.1156214984930135,
-          1.1346117717676778,
-          1.1382481354040415,
-          1.1382481354040415,
-          1.1382481354040415,
-          1.120132193375056,
-          1.10537204577358,
-          1.0838364652492354,
-          1.0642192403688526,
-          1.0900855166011612,
-          1.0900855166011612,
-          1.0900855166011612,
-          1.0981730522814657,
-          1.1165779602569257,
-          1.1249190167907535,
-          1.0679337226731063,
-          1.0767056524976677
+          ...
         ],
-        "NAB.AX": [
-          0.5166281194133391,
-          0.5421215404659707,
-          0.5312955581083123,
-          0.5426453757005295,
-          0.5795191231955196,
-          0.5841577006984185,
-          0.5841577006984185,
-          0.5841577006984185,
-          0.5729995629531319,
-          0.5496532594511865,
-          0.5420835383356486,
-          0.5324488534701328,
-          0.5535270861413935,
-          0.5535270861413935,
-          0.5535270861413935,
-          0.5531301032116593,
-          0.5630586179058611,
-          0.5760354169620939,
-          0.528286969757125,
-          0.5303252901810955
-        ],
-        "WBC.AX": [
-          1.1062535873485815,
-          1.1369512617671862,
-          1.129731045160688,
-          1.1433674087970516,
-          1.1639952114876346,
-          1.1604802729990582,
-          1.1604802729990582,
-          1.1604802729990582,
-          1.1446072571260424,
-          1.1275821675203077,
-          1.108439049926871,
-          1.1079743659120012,
-          1.1344736685619312,
-          1.1344736685619312,
-          1.1344736685619312,
-          1.0905425091416414,
-          1.0985955645656111,
-          1.1117534593024532,
-          1.0792859268349206,
-          1.0879148817726003
-        ]
+        ...
       }
     }
-  ],
-  "file_key": "LDPUEOSUUOCV"
-  }
-  </code>
-
-
+      "date": "17/11/11",
+      "returns": {
+        "CBA.AX": [
+          ...
+        ],
+        ...
+      }
+  ]}</pre>
+  <hr>
+  <h2>Log Files</h2>
+  All outputs also return a log file as part of the JSON response (<code>response['log']</code>). The format of the log is as such:
+  <pre>
+  "log": {
+    "Team": "Team Cool", 
+    "API ver.": "Event Study API v1.0", 
+    "Input Files": "events.csv and prices.csv",
+    "Start time": "2016-04-17T15:56:34.190", 
+    "End time": "2016-04-17T15:56:34.408", 
+    "Elapsed Time": 0.21778830921402914, 
+    "Errors/Warnings": ""
+  }</pre>
 {% endblock %}

@@ -29,20 +29,23 @@ def event_study_api_view(request, **kwargs):
         return HttpResponse("FATAL " + error)
 
     # build log into json response
-    response['Team'] = "Team Cool"
-    response['API ver.'] = "Event Study API v1.0"
+    log = dict();
+    log['Team'] = "Team Cool"
+    log['API ver.'] = "Event Study API v1.0"
     if request.POST:
-        response['Input Files'] = str(request.FILES.get('stock_characteristic_file')) + " and " + str(request.FILES.get('stock_price_data_file'))
+        log['Input Files'] = str(request.FILES.get('stock_characteristic_file')) + " and " + str(request.FILES.get('stock_price_data_file'))
     else:
-       response['Input Files'] = request.GET['file_key'] + "stock_characteristic_file.csv and " + request.GET['file_key'] + "stock_price_data_file.csv"
+       log['Input Files'] = request.GET['file_key'] + "stock_characteristic_file.csv and " + request.GET['file_key'] + "stock_price_data_file.csv"
 
     processing_time_end = timeit.default_timer()
     Elapsed_time = processing_time_end - processing_time_start
     end_date_time = datetime.datetime.now()
-    response['Elapsed Time'] = Elapsed_time
-    response['Start time'] = start_date_time
-    response['End time'] = end_date_time
-    response['Errors/Warnings'] = error
+    log['Elapsed Time'] = Elapsed_time
+    log['Start time'] = start_date_time
+    log['End time'] = end_date_time
+    log['Errors/Warnings'] = error
+    
+    response['log'] = log
     return JsonResponse(response)
 
 
