@@ -13,64 +13,93 @@ import os
 def index(request):
     return HttpResponse("Hello world, you are at the Event Study API index.")
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 def event_study_api_view(request, **kwargs):
+
+    processing_time_start = timeit.default_timer()
+    start_date_time = datetime.datetime.now()
+
+    if request.POST:
+        (response, error, fatal) = upload_files(request)
+    else:
+        (response, error, fatal) = process_files(request)
+
+#    response['logfile'] = log;
+    if (fatal):
+        return HttpResponse("FATAL " + error)
+
+    # build log into json response
+    response['Team'] = "Team Cool"
+    response['API ver.'] = "Event Study API v1.0"
+    if request.POST:
+        response['Input Files'] = str(request.FILES.get('stock_characteristic_file')) + " and " + str(request.FILES.get('stock_price_data_file'))
+    else:
+       response['Input Files'] = request.GET['file_key'] + "stock_characteristic_file.csv and " + request.GET['file_key'] + "stock_price_data_file.csv"
+
+    processing_time_end = timeit.default_timer()
+    Elapsed_time = processing_time_end - processing_time_start
+    end_date_time = datetime.datetime.now()
+    response['Elapsed Time'] = Elapsed_time
+    response['Start time'] = start_date_time
+    response['End time'] = end_date_time
+    response['Errors/Warnings'] = error
+    return JsonResponse(response)
+
+
+def upload_files(request):
+    request_POST_dict = dict(request.POST)
     error = ""
     fatal = False
 
-    request_POST_dict = dict(request.POST)
+    if 'file_key' in request_POST_dict:
+        file_key = request.POST['file_key']
+    else:
+        file_key = ''.join(choice(ascii_uppercase) for i in range(12))
 
-    processing_time_start = timeit.default_timer()
-    start_date_time = datetime.datetime.now()
+    files_required = ['stock_characteristic_file', 'stock_price_data_file']
+    for reqfile in files_required:
+        if reqfile not in request.FILES:
+            error += 'ERROR: File ' + reqfile + ' not proided\n'
+            fatal = True
+        else:
+            handle_uploaded_file(request.FILES[reqfile], file_key)
 
-    processing_time_start = timeit.default_timer()
-    start_date_time = datetime.datetime.now()
+    if fatal:
+        return(0, error, True)
+    
+    requestResponse = dict()
+    requestResponse['file_key'] = file_key
+    return (requestResponse, error, False)
 
-    # Debug output statements
-    # print(request.data)
-    file_key = ''.join(choice(ascii_uppercase) for i in range(12))
-    print (file_key)
+def process_files(request):
+    request_GET_dict = dict(request.GET)
+    error = ""
+    fatal = False
 
+    # find the file supplied
     fileFoundKey = ""
     fileFound = False
-    if 'file_key' not in request_POST_dict:
+    if 'file_key' not in request_GET_dict:
         error += 'ERROR There was no file_key supplied \n'
         fatal = False
-    elif request.POST['file_key'] is '':
+    elif request.GET['file_key'] is '':
         error += 'ERROR File key was none \n'
         fatal = True
     else:
         # Check against existing files in media folder
-        print('In Else')
         files_dict = list()
         for fn in os.listdir('media/'):
-            print (str(fn))
             files_dict.append(str(fn))
-            if fn .startswith(str(request.POST['file_key'])):
+            if fn .startswith(str(request.GET['file_key'])):
                 fileFound = True
-                fileFoundKey = str(request.POST['file_key'])
-            else:
-                print('No file match')
+                fileFoundKey = str(request.GET['file_key'])
 
-        if fileFound is True:
-            print('Found ' + fileFoundKey)
-        else:
-            error += 'No file found with key: ' + request_POST_dict['file_key'][0] + '\n'
+        if fileFound is False:
+            error += 'No file found with key: ' + request_GET_dict['file_key'][0] + '\n'
             fatal = True
-
-        # file_key = request.GET['file_key']
-
-    if not fileFound:
-        files_required = ['stock_characteristic_file', 'stock_price_data_file']
-        for reqfile in files_required:
-            if reqfile not in request.FILES:
-                error += 'ERROR: File ' + reqfile + ' not proided\n'
-                fatal = True
-            else:
-                handle_uploaded_file(request.FILES[reqfile], file_key)
     
     # Standard dict methods do not work on the QueryDict, thus convert to a std dict
-    request_dict = dict(request.data)
+    request_dict = dict(request.GET)
     valid_params_dict = dict()
 
     # Iterate over the request dict, looking for valid params or files
@@ -91,53 +120,17 @@ def event_study_api_view(request, **kwargs):
     required_params = ['upper_window', 'lower_window']
     for param in required_params:
         if param not in valid_params_dict:
-            error += 'ERROR: The following required parameter was not correctly provided:' + param + '\n'
+            error += 'ERROR: The following required parameter was not correctly provided: ' + param + '\n'
             fatal = True
             # TODO: Code to return an error to the user here
-                   
-    # build log file     
-    log = "Team Cool\n"
-    log += "Event Study API v1.0\n"
-    log += "Input files:\n"
-    log += str(request.FILES.get('stock_characteristic_file')) + "and" + str(request.FILES.get('stock_price_data_file'))
-    log += "\nParameters passed:\n"
-    log += str(valid_params_dict)
-    
-    processing_time_end = timeit.default_timer()
-    Elapsed_time = processing_time_end - processing_time_start
-    log += '\nElapsed time:' + str(Elapsed_time) + 's\n'
- 
-    start_date_time = datetime.datetime.now()
-    end_date_time = datetime.datetime.now()
-    log += 'Start time: ' + str(start_date_time) + '\nEnd time: ' + str(end_date_time) + '\n'
-
-    log += 'Errors/warnings generated:\n'
-    log += error
 
     if fatal:
-        return(HttpResponse("FATAL ERROR\n" + log))
-
-    if not fileFound:
-        with open('media/' + str(file_key) + '_' + 'log.txt', 'w') as file:
-            file.write(log)
-    else:
-        with open('media/' + str(fileFoundKey) + '_' + 'log.txt', 'w') as file:
-            file.write(log)
+        return(0, error, fatal)
 
     # Process query
-    if fileFound:
-        total_cum_rets = requestProcessor.processData('media/' + str(fileFoundKey) + '_' + str('stock_price_data_file.csv'), 'media/' + str(fileFoundKey) + '_' + str('stock_characteristic_file.csv'), valid_params_dict)
-    else:
-        total_cum_rets = requestProcessor.processData('media/' + str(file_key) + '_' + str(request.FILES.get('stock_price_data_file')), 'media/' + str(file_key) + '_' + str(request.FILES.get('stock_characteristic_file')), valid_params_dict)
-
+    total_cum_rets = requestProcessor.processData('media/' + str(fileFoundKey) + '_' + str('stock_price_data_file.csv'), 'media/' + str(fileFoundKey) + '_' + str('stock_characteristic_file.csv'), valid_params_dict)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
-
-    if not fileFound:
-        requestResponse['file_key'] = file_key
-    else:
-        requestResponse['file_key'] = fileFoundKey
-        
-    return JsonResponse(requestResponse)
+    return (requestResponse, error, False)
 
 def convertToJson(cumRets,params,lowerWindow,upperWindow):
     JsonCumRets = dict()
