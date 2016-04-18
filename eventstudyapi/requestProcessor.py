@@ -23,7 +23,7 @@ def process(request):
                 if (request.matchesReq(stockChar)):
                     charsToProcess.append(stockChar)
         else:
-            errors.append("No Price Data found for #RIC: %s").format(RIC)
+            errors.append("No Data found for #RIC: %s").format(RIC)
     upperWindow = int(request.upperWindow)
     lowerWindow = int(request.lowerWindow)
     data = request.Data

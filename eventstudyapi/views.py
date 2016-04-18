@@ -157,7 +157,16 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
             event["date"] = reformat_date(chars[0]["Event Date"])
             event["returns"] = dict()
             event["returns"][chars[0]["#RIC"]] = indivCumRets   
-            JsonCumRets["events"].append(event)                
+            JsonCumRets["events"].append(event)
+    for date in JsonCumRets["events"]:
+        average_cum_ret = list()
+        for i in range(int(lowerWindow),int(upperWindow)+1):
+            sum_cum_ret = 0             
+            for event in date:
+                sum_cum_ret = sum_cum_ret + event[i]
+            average_cum_ret.append(sum_cum_ret/len(date))
+        date["average"] = average_cum_ret                
+                 
     return JsonCumRets
 
 def reformat_date(date_string):
