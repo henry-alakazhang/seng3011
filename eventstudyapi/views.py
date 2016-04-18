@@ -76,17 +76,17 @@ def upload_files(request):
 
 def process_files(request):
     request_GET_dict = dict(request.GET)
-    error = ""
+    error = list()
     fatal = False
 
     # find the file supplied
     fileFoundKey = ""
     fileFound = False
     if 'file_key' not in request_GET_dict:
-        error += 'ERROR There was no file_key supplied \n'
+        error.append('ERROR There was no file_key supplied')
         fatal = False
     elif request.GET['file_key'] is '':
-        error += 'ERROR File key was none \n'
+        error.append('ERROR File key was none')
         fatal = True
     else:
         # Check against existing files in media folder
@@ -98,7 +98,7 @@ def process_files(request):
                 fileFoundKey = str(request.GET['file_key'])
 
         if fileFound is False:
-            error += 'No file found with key: ' + request_GET_dict['file_key'][0] + '\n'
+            error.append('No file found with key: ' + request_GET_dict['file_key'][0])
             fatal = True
     
     # Standard dict methods do not work on the QueryDict, thus convert to a std dict
@@ -117,13 +117,13 @@ def process_files(request):
             valid_params_dict[key] = value[0]
         elif not (key.startswith('stock_price_data_file') or key.startswith('stock_characteristic_file')):
             if not fileFound:
-                error += 'Warning: The following parameter is invalid: ' + str(key) + str(value) + '\n'
+                error.append('Warning: The following parameter is invalid: ' + str(key) + str(value))
 
     # Check the 2 necessary params were specified otherwise return an error
     required_params = ['upper_window', 'lower_window']
     for param in required_params:
         if param not in valid_params_dict:
-            error += 'ERROR: The following required parameter was not correctly provided: ' + param + '\n'
+            error.append('ERROR: The following required parameter was not correctly provided: ' + param)
             fatal = True
             # TODO: Code to return an error to the user here
 
@@ -131,7 +131,8 @@ def process_files(request):
         return(0, error, fatal)
 
     # Process query
-    total_cum_rets = requestProcessor.processData('media/' + str(fileFoundKey) + '_' + str('stock_price_data_file.csv'), 'media/' + str(fileFoundKey) + '_' + str('stock_characteristic_file.csv'), valid_params_dict)
+    (total_cum_rets,calcError) = requestProcessor.processData('media/' + str(fileFoundKey) + '_' + str('stock_price_data_file.csv'), 'media/' + str(fileFoundKey) + '_' + str('stock_characteristic_file.csv'), valid_params_dict)
+    error.append(calcError)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     return (requestResponse, error, False)
 
