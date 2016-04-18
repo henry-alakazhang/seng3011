@@ -163,7 +163,7 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
         for i in range(int(lowerWindow),int(upperWindow)+1):
             sum_cum_ret = 0             
             for event in date:
-                sum_cum_ret = sum_cum_ret + event[i]
+                sum_cum_ret = sum_cum_ret + event[i-int(lowerWindow)]
             average_cum_ret.append(sum_cum_ret/len(date))
         date["average"] = average_cum_ret                
                  
