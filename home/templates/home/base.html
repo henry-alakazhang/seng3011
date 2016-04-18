@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    {% load staticfiles %}
     <!-- Bootstrap and theme -->
     <link rel="stylesheet" href="https://bootswatch.com/slate/bootstrap.min.css"></script>
-    <link rel="stylesheet" href="static/home.css">
+    <link rel="stylesheet" href="{% static 'home.css' %}">
     <title>{% block title %}TEAM COOL{% endblock %}</title>      
   </head>
 
@@ -23,7 +23,15 @@
             <!-- each list item is activated based on a context var -->
             <li {%if home%}class="active"{%endif%}><a href="{% url 'home_index' %}">Home</a></li>
             <li {%if about%}class="active"{%endif%}><a href="{% url 'about_us' %}">About</a></li>
-            <li {%if api%}class="active"{%endif%}><a href="{% url 'api_home' %}">Event Study API</a></li>
+            <li class="dropdown {%if api%}active{%endif%}">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+<!--                  <li><a href="{% url 'api_home' %}">Event Study API</a></li> -->
+                <li><a href="{% url 'api_versions' %}">Version History</a></li>
+                <li><a href="{% url 'api_docs' %}">Documentation</a></li>
+                <li><a href="{% url 'api_bugs' %}">Bugs and Issues</a></li>
+              </ul>
+            </li>
             <li {%if analytics%}class="active"{%endif%}><a href="{% url 'analytics_home' %}">Analytics Platform</a></li>
           </ul>
         </div>
