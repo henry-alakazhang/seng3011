@@ -63,9 +63,6 @@ class EventsParser:
         result = {}
         for date in self.fileData.keys():
             newDate = datetime.datetime.strptime(date, "%d-%b-%y").date()
-            print(newDate)
-            print(early)
-            print(late)
             if newDate > early and newDate < late:
                 result[date] = self.fileData[date]
         return result
