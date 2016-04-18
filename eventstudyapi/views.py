@@ -132,7 +132,7 @@ def process_files(request):
 
     # Process query
     (total_cum_rets,calcError) = requestProcessor.processData('media/' + str(fileFoundKey) + '_' + str('stock_price_data_file.csv'), 'media/' + str(fileFoundKey) + '_' + str('stock_characteristic_file.csv'), valid_params_dict)
-    error.append(calcError)
+    error.extend(calcError)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     return (requestResponse, error, False)
 
