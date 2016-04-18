@@ -149,7 +149,7 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
         for event in JsonCumRets["events"]:
             date = reformat_date(chars[0]["Event Date"])
             if event["date"] == date:
-                event["returns"][chars[0]["#RIC"]] = indivCumRets       
+                event["returns"][chars[0]["#RIC"]] = float(indivCumRets)       
                 dateFound = True      
                 break
         if not dateFound:
