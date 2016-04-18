@@ -51,7 +51,7 @@ def event_study_api_view(request, **kwargs):
 
 def upload_files(request):
     request_POST_dict = dict(request.POST)
-    error = ""
+    error = list()
     fatal = False
 
     if 'file_key' in request_POST_dict:
@@ -62,7 +62,7 @@ def upload_files(request):
     files_required = ['stock_characteristic_file', 'stock_price_data_file']
     for reqfile in files_required:
         if reqfile not in request.FILES:
-            error += 'ERROR: File ' + reqfile + ' not proided\n'
+            error.append('ERROR: File ' + reqfile + ' not provided')
             fatal = True
         else:
             handle_uploaded_file(request.FILES[reqfile], file_key)
