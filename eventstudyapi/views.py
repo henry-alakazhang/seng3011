@@ -26,7 +26,7 @@ def event_study_api_view(request, **kwargs):
 
 #    response['logfile'] = log;
     if (fatal):
-        return HttpResponse("FATAL " + error)
+        return HttpResponse("FATAL " + '\n'.join(map(str,error)))
     
     # build log into json response
     log = dict();
