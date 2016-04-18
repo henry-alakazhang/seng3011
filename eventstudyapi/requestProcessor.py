@@ -13,28 +13,39 @@ import re, datetime
 from eventstudyapi.parser import Parser
 from eventstudyapi.request import Request, Data
 
-
 #Process request
 def process(request):
+    errors = list()
     charsToProcess = list()
     for RIC in request.Data.RIC:
-        for stockChar in request.Data.CharInfo.fileData[RIC]:
-            if (request.matchesReq(stockChar)):
-                charsToProcess.append(stockChar)
+        if RIC in request.Data.CharInfo.fileData:
+            for stockChar in request.Data.CharInfo.fileData[RIC]:
+                if (request.matchesReq(stockChar)):
+                    charsToProcess.append(stockChar)
+        else:
+            errors.append("No Price Data found for #RIC: %s").format(RIC)
     upperWindow = int(request.upperWindow)
     lowerWindow = int(request.lowerWindow)
     data = request.Data
     result = list()
     for stockChar in charsToProcess:
-        result.append((stockChar,calcCumRet(stockChar,upperWindow,lowerWindow,data)))
-    return result
+        cumRet = calcCumRet(stockChar,upperWindow,lowerWindow,data)
+        if (cumRet != None):
+            result.append((stockChar,cumRet))
+        else:
+            errors.append("Invalid Date Range for %s: %s with window %d to %d").format(stockChar["RIC"], stockChar["Event Date"], lowerWindow, upperWindow)
+    return (result, errors)
 
 #Process each individual stock characteristic
 def calcCumRet(stockChar,upperWindow,lowerWindow,data):
     cumRet = dict()
     for i in range(lowerWindow,upperWindow+1):
-        date = datetime.datetime.strptime(stockChar['Event Date'],"%d-%b-%y") + datetime.timedelta(days=i)        
-        cumRet[i] = data.getCumRet(stockChar,date.strftime("%d-%b-%y").lstrip('0'))
+        date = datetime.datetime.strptime(stockChar['Event Date'],"%d-%b-%y") + datetime.timedelta(days=i)
+        indivRet = data.getCumRet(stockChar,date.strftime("%d-%b-%y").lstrip('0'))
+        if (indivRet != None):       
+            cumRet[i] = indivRet
+        else:
+            return None        
     return cumRet
 
 def processData(priceFile,charFile,params):
