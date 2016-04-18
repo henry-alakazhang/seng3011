@@ -79,7 +79,7 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
     for chars in cumRets:
         dateFound = False
         indivCumRets = list()
-        for i in range(int(lowerWindow),int(upperWindow)):            
+        for i in range(int(lowerWindow),int(upperWindow)+1):            
             indivCumRets.append(chars[1][i])
         for event in JsonCumRets["events"]:
             date = reformat_date(chars[0]["Event Date"])
