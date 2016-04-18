@@ -1,9 +1,9 @@
 {% extends "home/base.html" %}
 
-{% block title %}Team Cool - Event Study API{% endblock %}
+{% block title %}Team Cool - API Documentation{% endblock %}
 
 {% block content %}
-  <h1>Event Study API</h1>
+  <h1>API Documentation</h1>
   Our Event Study API has two components to it. File uploads and data retrievals are separated to reduce upload overheads.
   <hr>
   <h2>Uploads</h2>
@@ -24,7 +24,7 @@
 
   <h3>Example request/response</h3>
   <h4>Request:</h4>
-  <pre> curl -F "stock_characteristic_file=@scf.csv" -F "stock_price_data_file=@spdf.csv"  https://seng30 ... app.com/eventapi/</pre>
+  <pre> curl -F "stock_characteristic_file=@scf.csv" -F "stock_price_data_file=@spdf.csv"  https://seng3011-eventstudy.herokuapp.com/eventapi</pre>
   <h4>Response:</h4>
   <pre>  {
     "file_key": GXSIELXICPNV

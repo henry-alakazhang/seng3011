@@ -4,6 +4,7 @@ from string import ascii_uppercase
 
 from django.http import HttpResponse, JsonResponse
 from eventstudyapi.upload_handler import handle_uploaded_file
+from eventstudyapi.parser import EventsParser
 from rest_framework.decorators import api_view
 from . import requestProcessor
 import timeit
@@ -162,8 +163,9 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
 def reformat_date(date_string):
     return datetime.datetime.strptime(date_string, '%d-%b-%y').strftime('%d/%m/%y')
 
+# atm this is just a private API call that we do for ease of processing in our analytics platform
 @api_view (['GET'])
-def log_view(request):
+def events_view(request):
     request_GET_dict = dict(request.GET)
 
     error = ""
@@ -174,11 +176,16 @@ def log_view(request):
     else:
         file_key = request.GET['file_key']              
 
-    # for myFile in 'media/':
-    #     if myFile.startswith('file_key')
-
-    if (error == ""):
-        response = HttpResponse(open('media/' + file_key + '_' + 'log.txt'), content_type='application/txt')
+    fileParsed = EventsParser('media/' + request.GET['file_key'] + '_stock_characteristic_file.csv')
+    
+    # if requested, filter dates
+    if ('earliest' in request_GET_dict):
+        earliest_date = datetime.datetime.strptime(request.GET['earliest'], "%d-%b-%y").date() # assumes "dd-Mon-yy" format
     else:
-        response = HttpResponse(error)
-    return response
+        earliest_date = datetime.date(datetime.MINYEAR,1,1)
+    if ('latest' in request_GET_dict):
+        latest_date = datetime.datetime.strptime(request.GET['latest'], "%d-%b-%y").date()
+    else:
+        latest_date = datetime.date(datetime.MAXYEAR,12,31)
+    
+    return JsonResponse(fileParsed.getEventsBetween(earliest_date, latest_date))

@@ -1,10 +1,23 @@
 {% extends "home/base.html" %}
 
-{% block title %}Team Cool - Event Study API{% endblock %}
+{% block title %}Team Cool - API Releases{% endblock %}
 
 {% block content %}
-<h1>Version History</h1>
-Our current API version is 2.0.<br>
+<h1>Latest Version</h1>
+Our current API version is 2.0. View the documentation on how to use the API <a href="{% url 'api_docs' %}">here</a>.<br><br>
 
-PUT THINGS HERE
+2.0 Changelog:
+<ul>
+  <li>File upload and retrieval are now separated into their own POST and GET requests respectively.</li>
+  <li>Fixed a number of bugs relating to input, processing and output (see the <a href="{% url 'api_bugs' %}">bugs page</a> for a history of squashed bugs).
+</ul>
+<hr>
+<h1>Previous Releases</h1>
+Note: none of these previous releases can be accessed in any form. These release notes and changelogs are just here for posterity.
+<br><br>
+1.0 Changelog:
+<ul>
+  <li>Initial release of event study API</li>
+  <li>One request action - POST files and request parameters and receive a response.</li>
+</ul>
 {% endblock %}

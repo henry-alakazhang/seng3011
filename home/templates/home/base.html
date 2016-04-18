@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% load staticfiles %}
     <!-- Bootstrap and theme -->
-    <link rel="stylesheet" href="https://bootswatch.com/slate/bootstrap.min.css"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/flatly/bootstrap.min.css"></script>
     <link rel="stylesheet" href="{% static 'home.css' %}">
     <title>{% block title %}TEAM COOL{% endblock %}</title>      
   </head>
@@ -27,7 +27,7 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API<span class="caret"></span></a>
               <ul class="dropdown-menu">
 <!--                  <li><a href="{% url 'api_home' %}">Event Study API</a></li> -->
-                <li><a href="{% url 'api_versions' %}">Version History</a></li>
+                <li><a href="{% url 'api_versions' %}">Releases</a></li>
                 <li><a href="{% url 'api_docs' %}">Documentation</a></li>
                 <li><a href="{% url 'api_bugs' %}">Bugs and Issues</a></li>
               </ul>
