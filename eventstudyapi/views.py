@@ -27,8 +27,8 @@ def event_study_api_view(request, **kwargs):
 
 #    response['logfile'] = log;
     if (fatal):
-        return HttpResponse("FATAL " + error)
-
+        return HttpResponse("FATAL " + '\n'.join(map(str,error)))
+    
     # build log into json response
     log = dict();
     log['Team'] = "Team Cool"
@@ -52,7 +52,7 @@ def event_study_api_view(request, **kwargs):
 
 def upload_files(request):
     request_POST_dict = dict(request.POST)
-    error = ""
+    error = list()
     fatal = False
 
     if 'file_key' in request_POST_dict:
@@ -63,7 +63,7 @@ def upload_files(request):
     files_required = ['stock_characteristic_file', 'stock_price_data_file']
     for reqfile in files_required:
         if reqfile not in request.FILES:
-            error += 'ERROR: File ' + reqfile + ' not proided\n'
+            error.append('ERROR: File ' + reqfile + ' not provided')
             fatal = True
         else:
             handle_uploaded_file(request.FILES[reqfile], file_key)
@@ -77,17 +77,17 @@ def upload_files(request):
 
 def process_files(request):
     request_GET_dict = dict(request.GET)
-    error = ""
+    error = list()
     fatal = False
 
     # find the file supplied
     fileFoundKey = ""
     fileFound = False
     if 'file_key' not in request_GET_dict:
-        error += 'ERROR There was no file_key supplied \n'
+        error.append('ERROR There was no file_key supplied')
         fatal = False
     elif request.GET['file_key'] is '':
-        error += 'ERROR File key was none \n'
+        error.append('ERROR File key was none')
         fatal = True
     else:
         # Check against existing files in media folder
@@ -99,7 +99,7 @@ def process_files(request):
                 fileFoundKey = str(request.GET['file_key'])
 
         if fileFound is False:
-            error += 'No file found with key: ' + request_GET_dict['file_key'][0] + '\n'
+            error.append('No file found with key: ' + request_GET_dict['file_key'][0])
             fatal = True
     
     # Standard dict methods do not work on the QueryDict, thus convert to a std dict
@@ -118,13 +118,13 @@ def process_files(request):
             valid_params_dict[key] = value[0]
         elif not (key.startswith('stock_price_data_file') or key.startswith('stock_characteristic_file')):
             if not fileFound:
-                error += 'Warning: The following parameter is invalid: ' + str(key) + str(value) + '\n'
+                error.append('Warning: The following parameter is invalid: ' + str(key) + str(value))
 
     # Check the 2 necessary params were specified otherwise return an error
     required_params = ['upper_window', 'lower_window']
     for param in required_params:
         if param not in valid_params_dict:
-            error += 'ERROR: The following required parameter was not correctly provided: ' + param + '\n'
+            error.append('ERROR: The following required parameter was not correctly provided: ' + param)
             fatal = True
             # TODO: Code to return an error to the user here
 
@@ -132,7 +132,8 @@ def process_files(request):
         return(0, error, fatal)
 
     # Process query
-    total_cum_rets = requestProcessor.processData('media/' + str(fileFoundKey) + '_' + str('stock_price_data_file.csv'), 'media/' + str(fileFoundKey) + '_' + str('stock_characteristic_file.csv'), valid_params_dict)
+    (total_cum_rets,calcError) = requestProcessor.processData('media/' + str(fileFoundKey) + '_' + str('stock_price_data_file.csv'), 'media/' + str(fileFoundKey) + '_' + str('stock_characteristic_file.csv'), valid_params_dict)
+    error.extend(calcError)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     return (requestResponse, error, False)
 
@@ -144,12 +145,12 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
     for chars in cumRets:
         dateFound = False
         indivCumRets = list()
-        for i in range(int(lowerWindow),int(upperWindow)):            
-            indivCumRets.append(chars[1][i])
+        for i in range(int(lowerWindow),int(upperWindow)+1):            
+            indivCumRets.append(float(chars[1][i]))
         for event in JsonCumRets["events"]:
             date = reformat_date(chars[0]["Event Date"])
             if event["date"] == date:
-                event["returns"][chars[0]["#RIC"]] = indivCumRets       
+                event["returns"][chars[0]["#RIC"]] = indivCumRets
                 dateFound = True      
                 break
         if not dateFound:
@@ -157,7 +158,16 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
             event["date"] = reformat_date(chars[0]["Event Date"])
             event["returns"] = dict()
             event["returns"][chars[0]["#RIC"]] = indivCumRets   
-            JsonCumRets["events"].append(event)                
+            JsonCumRets["events"].append(event)
+#    for event in JsonCumRets["events"]:
+#        average_cum_ret = list()
+#        for i in range(int(lowerWindow),int(upperWindow)+1):
+#            sum_cum_ret = 0             
+#            for indiv_cum_ret in event["returns"]:
+#                sum_cum_ret = sum_cum_ret + indiv_cum_ret[i-int(lowerWindow)]
+#            average_cum_ret.append(sum_cum_ret/len(date))
+#        date["average"] = average_cum_ret                
+                 
     return JsonCumRets
 
 def reformat_date(date_string):
