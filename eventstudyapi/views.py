@@ -145,11 +145,11 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
         dateFound = False
         indivCumRets = list()
         for i in range(int(lowerWindow),int(upperWindow)+1):            
-            indivCumRets.append(chars[1][i])
+            indivCumRets.append(float(chars[1][i]))
         for event in JsonCumRets["events"]:
             date = reformat_date(chars[0]["Event Date"])
             if event["date"] == date:
-                event["returns"][chars[0]["#RIC"]] = float(indivCumRets)       
+                event["returns"][chars[0]["#RIC"]] = indivCumRets
                 dateFound = True      
                 break
         if not dateFound:
@@ -158,12 +158,12 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
             event["returns"] = dict()
             event["returns"][chars[0]["#RIC"]] = indivCumRets   
             JsonCumRets["events"].append(event)
-    for date in JsonCumRets["events"]:
+    for event in JsonCumRets["events"]:
         average_cum_ret = list()
         for i in range(int(lowerWindow),int(upperWindow)+1):
             sum_cum_ret = 0             
-            for event in date:
-                sum_cum_ret = sum_cum_ret + event[i-int(lowerWindow)]
+            for indiv_cum_ret in event["returns"]:
+                sum_cum_ret = sum_cum_ret + indiv_cum_ret[i-int(lowerWindow)]
             average_cum_ret.append(sum_cum_ret/len(date))
         date["average"] = average_cum_ret                
                  
