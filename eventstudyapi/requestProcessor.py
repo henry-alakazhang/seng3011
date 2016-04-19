@@ -32,7 +32,7 @@ def process(request):
 #Process each individual stock characteristic
 def calcCumRet(stockChar,upperWindow,lowerWindow,data):
     cumRet = dict()
-    for i in range(lowerWindow,upperWindow):
+    for i in range(lowerWindow,upperWindow+1):
         date = datetime.datetime.strptime(stockChar['Event Date'],"%d-%b-%y") + datetime.timedelta(days=i)        
         cumRet[i] = data.getCumRet(stockChar,date.strftime("%d-%b-%y").lstrip('0'))
     return cumRet
