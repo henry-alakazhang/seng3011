@@ -4,7 +4,7 @@ var getEvents = function() {
 	if (start != '' && end != '') {
 		$.get(
 		    "eventapi/events",
-		    {earliest : start, latest : end, file_key : "BFGDGQUHWFBO"},
+		    {earliest : start, latest : end, file_key : "0"},
 		    function(data) {
 		    	var keys = [];
 		    	var rics = [];
