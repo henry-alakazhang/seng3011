@@ -91,16 +91,22 @@ def process_files(request):
         fatal = True
     else:
         # Check against existing files in media folder
-        files_dict = list()
-        for fn in os.listdir('media/'):
-            files_dict.append(str(fn))
-            if fn .startswith(str(request.GET['file_key'])):
-                fileFound = True
-                fileFoundKey = str(request.GET['file_key'])
-
-        if fileFound is False:
-            error += 'No file found with key: ' + request_GET_dict['file_key'][0] + '\n'
-            fatal = True
+        
+        if (request.get['file_key'] == '0'):
+            fileLoc = 'static/' 
+        else:           
+            files_dict = list()
+            for fn in os.listdir('media/'):
+                files_dict.append(str(fn))
+                if fn .startswith(str(request.GET['file_key'])):
+                    fileFound = True
+                    fileFoundKey = str(request.GET['file_key'])
+    
+            if fileFound is False:
+                error += 'No file found with key: ' + request_GET_dict['file_key'][0] + '\n'
+                fatal = True
+                        
+            fileLoc = 'media/' + request.GET['file_key'] +'_'
     
     # Standard dict methods do not work on the QueryDict, thus convert to a std dict
     request_dict = dict(request.GET)
@@ -132,7 +138,7 @@ def process_files(request):
         return(0, error, fatal)
 
     # Process query
-    total_cum_rets = requestProcessor.processData('media/' + str(fileFoundKey) + '_' + str('stock_price_data_file.csv'), 'media/' + str(fileFoundKey) + '_' + str('stock_characteristic_file.csv'), valid_params_dict)
+    total_cum_rets = requestProcessor.processData(fileLoc + str('stock_price_data_file.csv'), fileLoc + str('stock_characteristic_file.csv'), valid_params_dict)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     return (requestResponse, error, False)
 
@@ -174,9 +180,12 @@ def events_view(request):
     elif request.GET['file_key'] is '':
         error = 'ERROR File key was none'
     else:
-        file_key = request.GET['file_key']    
+        if (request.get['file_key'] != '0'):
+            fileLoc = 'media/' + request.GET['file_key'] +'_'
+        else:           
+            fileLoc = 'static/'    
 
-    fileParsed = EventsParser('media/' + request.GET['file_key'] + '_stock_characteristic_file.csv')
+    fileParsed = EventsParser(fileLoc + 'stock_characteristic_file.csv')
     
     # if requested, filter dates
     if ('earliest' in request_GET_dict):
