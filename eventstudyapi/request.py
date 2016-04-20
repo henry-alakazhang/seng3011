@@ -83,4 +83,7 @@ class Data:
         
     #Gets the cumulative return for a stock at a given date
     def getCumRet(self,stockChar,eventDate):
-        return self.CumRet[stockChar["#RIC"]][eventDate]
+        if (eventDate in self.CumRet[stockChar["#RIC"]]):
+            return self.CumRet[stockChar["#RIC"]][eventDate]
+        else:
+            return None

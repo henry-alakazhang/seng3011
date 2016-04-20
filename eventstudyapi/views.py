@@ -85,7 +85,7 @@ def process_files(request):
     fileFound = False
     if 'file_key' not in request_GET_dict:
         error += 'ERROR There was no file_key supplied \n'
-        fatal = False
+        fatal = True
     elif request.GET['file_key'] is '':
         error += 'ERROR File key was none \n'
         fatal = True
@@ -138,7 +138,7 @@ def process_files(request):
         return(0, error, fatal)
 
     # Process query
-    total_cum_rets = requestProcessor.processData(fileLoc + str('stock_price_data_file.csv'), fileLoc + str('stock_characteristic_file.csv'), valid_params_dict)
+    (total_cum_rets, error) = requestProcessor.processData(fileLoc + str('stock_price_data_file.csv'), fileLoc + str('stock_characteristic_file.csv'), valid_params_dict, error)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     return (requestResponse, error, False)
 
@@ -151,19 +151,29 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
         dateFound = False
         indivCumRets = list()
         for i in range(int(lowerWindow),int(upperWindow)+1):            
-            indivCumRets.append(chars[1][i])
+            indivCumRets.append(float(chars[1][i]))
         for event in JsonCumRets["events"]:
             date = reformat_date(chars[0]["Event Date"])
             if event["date"] == date:
-                event["returns"][chars[0]["#RIC"]] = indivCumRets       
+                event["returns"][chars[0]["#RIC"]] = indivCumRets
                 dateFound = True      
                 break
         if not dateFound:
             event = dict()
+            print (chars)
             event["date"] = reformat_date(chars[0]["Event Date"])
             event["returns"] = dict()
             event["returns"][chars[0]["#RIC"]] = indivCumRets   
-            JsonCumRets["events"].append(event)                
+            JsonCumRets["events"].append(event)
+    for event in JsonCumRets["events"]:
+        average_cum_ret = list()
+        for i in range(int(lowerWindow),int(upperWindow)+1):
+            sum_cum_ret = 0             
+            for indiv_cum_ret in event["returns"]:
+                sum_cum_ret = sum_cum_ret + event["returns"][indiv_cum_ret][i-int(lowerWindow)]
+            average_cum_ret.append(sum_cum_ret/len(event["returns"]))
+        event["average"] = average_cum_ret                
+                 
     return JsonCumRets
 
 def reformat_date(date_string):
