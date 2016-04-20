@@ -92,7 +92,7 @@ def process_files(request):
     else:
         # Check against existing files in media folder
         
-        if (request.get['file_key'] == '0'):
+        if (request.GET['file_key'] == '0'):
             fileLoc = 'static/' 
         else:           
             files_dict = list()
@@ -180,7 +180,7 @@ def events_view(request):
     elif request.GET['file_key'] is '':
         error = 'ERROR File key was none'
     else:
-        if (request.get['file_key'] != '0'):
+        if (request.GET['file_key'] != '0'):
             fileLoc = 'media/' + request.GET['file_key'] +'_'
         else:           
             fileLoc = 'static/'    
