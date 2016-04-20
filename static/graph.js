@@ -37,7 +37,8 @@ var getEvents = function() {
 			    	}
 		    	}
 		    	rics.sort();
-		    	vars.sort().append("None");
+		    	vars.sort();
+		    	vars.append("None");
 		    	var items = [];
 	    	   $.each(vars, function(i,val) {
 	    	          items.push('<li><a href="#" data-value="' + val + '">' + val + '</a></li>');
