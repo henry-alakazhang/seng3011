@@ -1,13 +1,24 @@
 {% extends "home/base.html" %}
-
+{% load staticfiles %}
+{% block scripts %}
+<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.css">
+<link rel="stylesheet" type="text/css" href="{% static "analytics.css" %}">
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js'></script>
+{% endblock %}   
 {% block title %}Team Cool - SENG 3011{% endblock %}
-
+(% block 
 {% block content %}
 
     <body>
     <br>
     <!-- Graph Here-->
-    <img class="img-responsive" alt="Bootstrap Image Preview" src="https://lh5.ggpht.com/lAn1uCH5NdH9Nzk5SM6hW6-m3aqPhIDO6dMGqEWKBTTfLc0dufmaIjI7pYRmLLIT0A=h900">
+    <div id="chart">
+    	<svg></svg>
+	</div>
 
             <br>
             <div class="panel panel-primary">
@@ -30,45 +41,40 @@
                         <div class="col-md-4">
                             Start Date
                             <div class="row">
-                                <div class='col-sm-6'>
+                                <div class='col-sm-8'>
                                     <div class="form-group">
-                                        <div class='input-group date' id='datetimepicker1'>
-                                            <input type='text' class="form-control" />
-                    <span class="input-group-addon">
+                                        <div class='input-group date' id='start'>
+                                            <input type='text' id='startValue' class="form-control" />
+                    <span class="input-group-addon" id="startPicker">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
                                         </div>
                                     </div>
                                 </div>
-                                <script type="text/javascript">
-                                    $(function () {
-                                        $('#datetimepicker1').datetimepicker();
-                                    });
-                                </script>
 
                             </div>
+                            <div class="row">                            
+    				<div id="startDate" style="display: inline-block"></div></div>
                         </div>
                         <div class="col-md-2">
                         </div>
                         <div class="col-md-4">
                             End Date
                             <div class="row">
-                                <div class='col-sm-6'>
+                                <div class='col-sm-8'>
                                     <div class="form-group">
-                                        <div class='input-group date' id='datetimepicker1'>
-                                            <input type='text' class="form-control" />
-                    <span class="input-group-addon">
+                                        <div class='input-group date' id='end'>
+                                            <input type='text' id='endValue' class="form-control" />
+                    <span class="input-group-addon" id="endPicker">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
                                         </div>
                                     </div>
                                 </div>
-                                <script type="text/javascript">
-                                    $(function () {
-                                        $('#datetimepicker1').datetimepicker();
-                                    });
-                                </script>
                             </div>
+                            <div class="row">                            
+    				<div id="endDate" style="display: inline-block"></div></div>
+                        </div>
                         </div>
                         <div class="col-md-1">
                         </div>
@@ -87,12 +93,9 @@
                         <div class="col-md-11">
                             Choose an Event:
                             <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Dropdown Example
+                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">No Event Chosen
                                     <span class="caret"></span></button>
-                                <ul class="dropdown-menu">
-                                    <li><a href="#">HTML</a></li>
-                                    <li><a href="#">CSS</a></li>
-                                    <li><a href="#">JavaScript</a></li>
+                                <ul class="dropdown-menu" id="eventdropdown">
                                 </ul>
                             </div>						</div>
                     </div>
@@ -117,7 +120,7 @@
                                         <th>RIC</th>
                                     </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="ricTable">
                                     <tr>
                                         <td><div class="checkbox">
                                             <label><input type="checkbox" value=""></label>
@@ -153,6 +156,7 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/scripts.js"></script>
-    </body>
+    <script src='{% static "graph.js" %}'></script>
+     </body>
 
 {% endblock %}

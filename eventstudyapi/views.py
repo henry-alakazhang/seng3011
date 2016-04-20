@@ -174,7 +174,7 @@ def events_view(request):
     elif request.GET['file_key'] is '':
         error = 'ERROR File key was none'
     else:
-        file_key = request.GET['file_key']              
+        file_key = request.GET['file_key']    
 
     fileParsed = EventsParser('media/' + request.GET['file_key'] + '_stock_characteristic_file.csv')
     
