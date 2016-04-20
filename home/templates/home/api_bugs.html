@@ -4,7 +4,220 @@
 
 {% block content %}
 <h1>Bugs and Issues</h1>
-None! <br><br>
-If you find any bugs or have issues with our API, send us a message at <code>REDACTED</code>
+If you find any bugs or have issues with our API, send us a message at <code>REDACTED</code><br>
+<br>
+<h2>List of Known Bugs</h2>
+
+<h3>Bug number: input1-example1-Bug#1</h3>
+
+Title:<br>
+Incorrect relative date range<br><br>
+
+Brief Description:<br>	 	
+upper/lower window range of -N to N returns result for -N to N-1 instead.<br><br>
+
+Severity of bug(0-5):<br>
+3<br><br>
+
+Date Found:<br>
+15/4/2016<br><br>
+
+Date Fixed:<br>
+18/4/16<br><br>
+
+Remarks:<br>
+N/A<br><br>
+
+In_depth Description (How the bug was generated):<br><br>
+
+<h3>Bug number: input1-example1-Bug#2</h3>
+
+Title:<br>
+Inclusive relative date range error<br><br>
+
+Brief Description:<br>
+upper lower window range of N t0 N gives empty results and only for for ANZ, CBA, NAB and WBC.
+<br><br>
+Severity of bug(0-5):<br>
+5<br><br>
+
+Date Found:<br>
+13/4/2016<br><br>
+
+Date Fixed:<br>
+18/4/16<br><br>
+
+Remarks:<br>
+The price data file used only has data for the 4 RICs so only they get evaluated<br><br>
+
+In_depth Description (How the bug was generated):<br><br>
+
+
+<h3>Bug number: input1-example1-Bug#3</h3>
+
+Title:<br>
+Upper/Lower window error<br><br>
+
+Brief Description:<br>
+upper lower window 10 to -10
+must return a general result, if no other vars specified.
+But returns result for 02/11/11 date for ANZ, CBA, NAB and WBC.<br><br>
+
+
+Severity of bug(0-5):<br>
+5<br><br>
+
+Date Found:<br>
+14/4/2016<br><br>
+
+Date Fixed:<br> 
+18/4/16<br><br>
+
+Remarks:<br>
+Not a bug. The price data file used only has data for the 4 RICs so only they get evaluated.
+<br><br>
+In_depth Description (How the bug was generated):<br><br>
+
+<h3>Bug number: input1-example1-Bug#4</h3>
+
+Title:<br>
+Invalid Syntax Error<br><br>
+
+Brief Description:<br>
+upper/lower_cash_rate 1.5 to 1 gives invalid syntax error<br><br>
+
+Severity of bug(0-5):<br>
+5<br><br>
+
+Date Found:<br>
+14/4/2016<br><br>
+
+Date Fixed:<br>
+-<br><br>
+
+In_depth Description (How the bug was generated):<br><br>
+
+<h3>Bug number: input1-example1-Bug#5</h3>
+
+Title:<br>
+CEO health issue parameter error<br><br>
+
+Brief Description:<br>
+upper/lower ceo_health_issue 1 to 0 gives result for CBA, ANZ, NAB, WBC. Not all RICs in file2 as expected.<br><br>
+
+Severity of bug(0-5):<br>
+5<br><br>
+
+Date Found:<br>
+14/4/2016<br><br>
+
+Date Fixed:<br>
+18/4/16<br><br>
+
+Remarks: Not a bug. The price data file used only has data for the 4 RICs so only they get evaluated.<br><br>
+
+In_depth Description (How the bug was generated):<br><br>
+
+
+<h3>Bug number: input1-example1-Bug#6</h3>
+
+Title:<br>
+China_growth_rate_change parameter error<br><br>
+
+Brief Description:<br>
+upper/lower china_growth_rate_change 1 to 0 gives result for only CBA, ANZ, NAB and WBC Not all RICs in file2 as expected.<br><br>
+
+Severity of bug(0-5):<br>
+5<br><br>
+
+Date Found:<br>
+14/4/2016<br><br>
+
+Date Fixed:<br>
+-<br><br>
+
+In_depth Description (How the bug was generated):<br><br>
+
+
+<h3>Bug number: input1-example1-Bug#7</h3>
+
+Title:<br>
+earning announcements parameter error<br><br>
+
+Brief Description:<br>
+upper/lower earning announcements 1 to 0 gives results for CBA, ANZ, NAB and WBC. Not all RICs in file2 as expected<br><br>
+
+Severity of bug(0-5):<br>
+5<br><br>
+
+Date Found:<br>
+15/4/2016<br><br>
+
+Date Fixed:<br>
+-<br><br>
+
+In_depth Description (How the bug was generated):<br><br>
+
+<h3>Bug number: input1-example1-Bug#8</h3>
+
+Title:<br>
+Macroevent parameter error<br><br>
+
+Brief Description:<br>
+upper/lower macroevent 1 to 0 gives result for CBA, ANZ, NAB and WBC. Not all RICs in file2 as expected<br><br>
+
+Severity of bug(0-5):<br>
+5<br><br>
+
+Date Found:<br>
+14/4/2016<br><br>
+
+Date Fixed:<br>
+-<br><br>
+
+In_depth Description (How the bug was generated):<br><br>
+
+
+<h3>Bug number: input1-example1-Bug#9</h3>
+
+Title:<br>
+government policy changes parameter error<br><br>
+
+Brief Description:<br>
+upper/lower government policy changes 1 to 0 gives result for  CBA, ANZ, NAB and WBC. Not all RICs in file2 as expected<br><br>
+
+Severity of bug(0-5):<br>
+5<br><br>
+
+Date Found:<br>
+14/4/2016<br><br>
+
+Date Fixed:<br>
+-<br><br>
+
+In_depth Description (How the bug was generated):<br><br>
+
+
+<h3>Bug number: input1-example2-Bug#1</h3>
+
+Title:<br>
+KeyError<br><br>
+
+Brief Description:<br>
+Key error at location 	 	 	 	
+/app/eventstudyapi/requestProcessor.py in process, line 21<br><br>
+
+Severity of bug(0-5):<br>
+5<br>
+
+Date Found:<br>
+14/4/2016<br><br>
+
+Date Fixed:<br>
+-<br><br>
+
+In_depth Description (How the bug was generated):<br>
+Running tests on input 1 example 2. For every parameter passed, it gives KeyError!
+<br><br><br>
 
 {% endblock %}
