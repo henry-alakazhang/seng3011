@@ -10,5 +10,6 @@ urlpatterns = [
     url(r'^api/releases$', views.api_versions, name="api_versions"),
     url(r'^api/docs$', views.api_docs, name="api_docs"),
     url(r'^api/bugs$', views.api_bugs, name="api_bugs"),
-    url(r'^analytics$', views.analytics_home, name="analytics_home")
+    url(r'^analytics$', views.analytics_home, name="analytics_home"),
+    url(r'^analytics/howtouse$', views.analytics_howtouse, name="analytics_howtouse")
 ]
