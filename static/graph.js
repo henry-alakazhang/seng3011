@@ -213,11 +213,11 @@ $('#startDate').datepicker({
 
 $("#startPicker").mousedown(function() {
 	dp = $('#startDate');
-    if (dp.is(":visible")) {
-    	dp.hide();
-    } else {
-    	dp.show();
-    }    	
+	if (dp.is(":visible")) {
+		dp.hide();
+	} else {
+		dp.show();
+	}
 });
 
 $('#endDate').datepicker({
@@ -238,34 +238,34 @@ if ($('#endValue').val() != '') {
 
 $("#endPicker").mousedown(function() {
 	dp = $('#endDate');
-    if (dp.is(":visible")) {
-    	dp.hide();
-    } else {
-    	dp.show();
-    }    	
+	if (dp.is(":visible")) {
+		dp.hide();
+	} else {
+		dp.show();
+	}
 });
 
 nv.addGraph(function() {
-  chart = nv.models.cumulativeLineChart()
-  	.x(function(d) {return d["x"]})
-  	.y(function(d) {return d["y"]/100})
-    .useInteractiveGuideline(true)
-    ;
+	chart = nv.models.cumulativeLineChart()
+		.x(function(d) {return d["x"]})
+		.y(function(d) {return d["y"]/100})
+		.useInteractiveGuideline(true)
+	;
 
-  chart.xAxis
-    .tickFormat(function(d) {
-      return moment($('#datedropdown').parents(".dropdown").find('.btn-primary').text(),"DD-MMM-YY").add(d,'days').format("DD-MMM-YY");
-    });
+	chart.xAxis
+		.tickFormat(function(d) {
+			return moment($('#datedropdown').parents(".dropdown").find('.btn-primary').text(),"DD-MMM-YY").add(d,'days').format("DD-MMM-YY");
+		});
 
-  chart.yAxis.tickFormat(d3.format('.2%')).showMaxMin(false);;
-            
+	chart.yAxis.tickFormat(d3.format('.2%')).showMaxMin(false);;
 
-  chartData = d3.select('#chart svg')
-    .datum([]);
-    chartData.transition().duration(500)
-    .call(chart);
 
-  nv.utils.windowResize(chart.update);
+	chartData = d3.select('#chart svg')
+		.datum([]);
+	chartData.transition().duration(500)
+		.call(chart);
 
-  return chart;
+	nv.utils.windowResize(chart.update);
+
+	return chart;
 });

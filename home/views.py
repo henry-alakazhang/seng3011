@@ -21,3 +21,6 @@ def api_bugs(request):
 
 def analytics_home(request):
     return render(request, 'home/analytics.html', {'analytics':True});
+
+def analytics_howtouse(request):
+    return render(request, 'home/analytics_howtouse.html', {'analytics':True});
