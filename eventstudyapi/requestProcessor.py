@@ -14,8 +14,7 @@ from eventstudyapi.parser import Parser
 from eventstudyapi.request import Request, Data
 
 #Process request
-def process(request):
-    errors = list()
+def process(request,error):    
     charsToProcess = list()
     for RIC in request.Data.RIC:
         if RIC in request.Data.CharInfo.fileData:
@@ -23,7 +22,7 @@ def process(request):
                 if (request.matchesReq(stockChar)):
                     charsToProcess.append(stockChar)
         else:
-            errors.append("No Data found for #RIC: %s").format(RIC)
+            error += ("No Data found for #RIC: {}\n".format(RIC))
     upperWindow = int(request.upperWindow)
     lowerWindow = int(request.lowerWindow)
     data = request.Data
@@ -32,9 +31,9 @@ def process(request):
         cumRet = calcCumRet(stockChar,upperWindow,lowerWindow,data)
         if (cumRet != None):
             result.append((stockChar,cumRet))
-        else:
-            errors.append("Invalid Date Range for %s: %s with window %d to %d").format(stockChar["RIC"], stockChar["Event Date"], lowerWindow, upperWindow)
-    return (result, errors)
+        else:            
+            error += ("Invalid Date Range for {}: {} with window {} to {}\n".format(stockChar["#RIC"], stockChar["Event Date"], lowerWindow, upperWindow))
+    return (result, error)
 
 #Process each individual stock characteristic
 def calcCumRet(stockChar,upperWindow,lowerWindow,data):
@@ -48,7 +47,7 @@ def calcCumRet(stockChar,upperWindow,lowerWindow,data):
             return None        
     return cumRet
 
-def processData(priceFile,charFile,params):
+def processData(priceFile,charFile,params,error):
     #parse Files
     priceData = Parser(priceFile)
     charData = Parser(charFile)
@@ -77,5 +76,5 @@ def processData(priceFile,charFile,params):
                 raise Exception('Invalid Variable ' + param)
     
     request = Request(upperWindow,lowerWindow,optVar,stockData)
-    return process(request)
+    return process(request,error)
     

@@ -84,23 +84,28 @@ def process_files(request):
     fileFoundKey = ""
     fileFound = False
     if 'file_key' not in request_GET_dict:
-        error.append('ERROR There was no file_key supplied')
-        fatal = False
+        error += 'ERROR There was no file_key supplied \n'
+        fatal = True
     elif request.GET['file_key'] is '':
         error.append('ERROR File key was none')
         fatal = True
     else:
         # Check against existing files in media folder
-        files_dict = list()
-        for fn in os.listdir('media/'):
-            files_dict.append(str(fn))
-            if fn .startswith(str(request.GET['file_key'])):
-                fileFound = True
-                fileFoundKey = str(request.GET['file_key'])
-
-        if fileFound is False:
-            error.append('No file found with key: ' + request_GET_dict['file_key'][0])
-            fatal = True
+        if (request.GET['file_key'] == '0'):
+            fileLoc = 'static/' 
+        else:           
+            files_dict = list()
+            for fn in os.listdir('media/'):
+                files_dict.append(str(fn))
+                if fn .startswith(str(request.GET['file_key'])):
+                    fileFound = True
+                    fileFoundKey = str(request.GET['file_key'])
+    
+            if fileFound is False:
+                error += 'No file found with key: ' + request_GET_dict['file_key'][0] + '\n'
+                fatal = True
+                        
+            fileLoc = 'media/' + request.GET['file_key'] +'_'
     
     # Standard dict methods do not work on the QueryDict, thus convert to a std dict
     request_dict = dict(request.GET)
@@ -132,8 +137,7 @@ def process_files(request):
         return(0, error, fatal)
 
     # Process query
-    (total_cum_rets,calcError) = requestProcessor.processData('media/' + str(fileFoundKey) + '_' + str('stock_price_data_file.csv'), 'media/' + str(fileFoundKey) + '_' + str('stock_characteristic_file.csv'), valid_params_dict)
-    error.extend(calcError)
+    (total_cum_rets, error) = requestProcessor.processData(fileLoc + str('stock_price_data_file.csv'), fileLoc + str('stock_characteristic_file.csv'), valid_params_dict, error)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     return (requestResponse, error, False)
 
@@ -155,19 +159,19 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
                 break
         if not dateFound:
             event = dict()
+            print (chars)
             event["date"] = reformat_date(chars[0]["Event Date"])
             event["returns"] = dict()
             event["returns"][chars[0]["#RIC"]] = indivCumRets   
             JsonCumRets["events"].append(event)
-#    for event in JsonCumRets["events"]:
-#        average_cum_ret = list()
-#        for i in range(int(lowerWindow),int(upperWindow)+1):
-#            sum_cum_ret = 0             
-#            for indiv_cum_ret in event["returns"]:
-#                sum_cum_ret = sum_cum_ret + indiv_cum_ret[i-int(lowerWindow)]
-#            average_cum_ret.append(sum_cum_ret/len(date))
-#        date["average"] = average_cum_ret                
-                 
+    for event in JsonCumRets["events"]:
+        average_cum_ret = list()
+        for i in range(int(lowerWindow),int(upperWindow)+1):
+            sum_cum_ret = 0             
+            for indiv_cum_ret in event["returns"]:
+                sum_cum_ret = sum_cum_ret + event["returns"][indiv_cum_ret][i-int(lowerWindow)]
+            average_cum_ret.append(sum_cum_ret/len(event["returns"]))
+        event["average"] = average_cum_ret                
     return JsonCumRets
 
 def reformat_date(date_string):
@@ -184,9 +188,12 @@ def events_view(request):
     elif request.GET['file_key'] is '':
         error = 'ERROR File key was none'
     else:
-        file_key = request.GET['file_key']              
+        if (request.GET['file_key'] != '0'):
+            fileLoc = 'media/' + request.GET['file_key'] +'_'
+        else:           
+            fileLoc = 'static/'    
 
-    fileParsed = EventsParser('media/' + request.GET['file_key'] + '_stock_characteristic_file.csv')
+    fileParsed = EventsParser(fileLoc + 'stock_characteristic_file.csv')
     
     # if requested, filter dates
     if ('earliest' in request_GET_dict):
