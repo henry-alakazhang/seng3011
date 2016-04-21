@@ -26,6 +26,7 @@ var getEvents = function() {
 		    	   $("#datedropdown li a").click(function(){
 	    		   		$('#eventdropdown').empty();
 		    			  $('#ricTable').empty();
+			    	   	    chartData.datum([]).transition().duration(500).call(chart);
 		    			  $(this).parents(".dropdown").find('.btn-primary').text($(this).text());
 		    			  $(this).parents(".dropdown").find('.btn-primary').val($(this).text());	
 		  		    		var vars = [];	    
@@ -57,6 +58,7 @@ var getEvents = function() {
 					    	   $("#eventdropdown li a").click(function(){
 					    			  $(this).parents(".dropdown").find('.btn-primary').text($(this).text());
 					    			  $(this).parents(".dropdown").find('.btn-primary').val($(this).text());
+  					    	   	    chartData.datum([]).transition().duration(500).call(chart);
 					    			  $('#ricTable').empty();
 					    			  // call api
 					    			  var startTime = moment(start,"DD-MMM-YY");
