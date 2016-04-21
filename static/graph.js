@@ -66,8 +66,8 @@ var getEvents = function() {
 					    			  var startTime = moment(start,"DD-MMM-YY");
 					    			  var endTime = moment(end,"DD-MMM-YY");
                                       var eventTime = moment(date,"DD-MMM-YY")
-                                      var upperWindow = -eventTime.diff(endTime,'days');
-                                      var lowerWindow = -eventTime.diff(startTime,'days');
+                                      var upperWindow = -eventTime.diff(endTime,'days')-1;
+                                      var lowerWindow = -eventTime.diff(startTime,'days')+1;
 					    			  if ($(this).text() == "None") {
 				    					  var params = {upper_window : upperWindow,lower_window : lowerWindow, file_key : 0};
 					    			  } else {

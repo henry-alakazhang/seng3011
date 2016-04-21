@@ -54,7 +54,7 @@ class Data:
         self.Variables = F2.getVars()
         self.CharInfo = F2
         self.calcCumRet()
-        
+
     #Calculate the cumulative return for all data
     def calcCumRet(self):
         self.CumRet = dict()
@@ -87,4 +87,4 @@ class Data:
         if (eventDate in self.CumRet[stockChar["#RIC"]]):
             return self.CumRet[stockChar["#RIC"]][eventDate]
         else:
-            return None
+            return 0
