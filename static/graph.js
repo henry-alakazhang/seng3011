@@ -247,7 +247,7 @@ nv.addGraph(function() {
 
   chart.xAxis
     .tickFormat(function(d) {
-      return moment($('#startValue').val(),"DD-MMM-YY").add(d,'days').format("DD-MMM-YY");
+      return moment($('#datedropdown').parents(".dropdown").find('.btn-primary').text(),"DD-MMM-YY").add(d,'days').format("DD-MMM-YY");
     });
 
   chart.yAxis.tickFormat(d3.format('.2%')).showMaxMin(false);;
