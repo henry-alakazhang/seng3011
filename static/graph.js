@@ -11,6 +11,8 @@ var getEvents = function() {
 		    "eventapi/events",
 		    {earliest : start, latest : end, file_key : "0"},
 		    function(data) {
+				$('#eventSection').show();
+				window.scrollTo(0,document.body.scrollHeight);
 		    	var keys = [];
 		    	for (var key in data) {
 		    	  if (data.hasOwnProperty(key)) {
@@ -75,6 +77,7 @@ var getEvents = function() {
 				    					  params["upper_"+$(this).text().toLowerCase().replace(/ /g,"_")] = 1.5;
 				    					  params["lower_"+$(this).text().toLowerCase().replace(/ /g,"_")] = 0.5;
 					    			  }
+    					    	   	  $('#ricSection').show();
 					    			  $.get(
 				    					  "eventapi",
 				    					  params,
@@ -99,9 +102,12 @@ var getEvents = function() {
 			    					    		   items.push('<tr><td><div class="RICcheckbox"><label><input type="checkbox" value="'+ val +'"></label></div></td><td>'+ val +'</td></tr>');
 			    				    	   		});
 			    					    	   	$('#ricTable').empty().append( items.join('') );
+	    					    	   	    	window.scrollTo(0,document.body.scrollHeight);
 			    					    	   	$('.RICcheckbox input:checkbox').on('change', function() { 
 			    					    	   	    // From the other examples
 			    					    	   	    if (this.checked) {
+			    					    	   	    	$('#returnButton').show();
+			    					    	   	    	window.scrollTo(0,document.body.scrollHeight);
 			    					    	   	    	var newData = {"key":$(this).val(),"values":[]};
 			    					    	   	    	var cumRets;
 			    					    	   	    	var Date = $('#datedropdown').parents(".dropdown").find('.btn-primary').text();

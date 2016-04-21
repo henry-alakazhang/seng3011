@@ -81,67 +81,71 @@
             </div>
         </div>
         <hr>
-        <div class="row">
-            <div class="col-md-1">
-            </div>
-            <div class="col-md-11">
-                <h4>Event Selection</h4>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-1">
-            </div>
-            <div class="col-md-4">
-                Choose a Date:
-                <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Please Choose Date Range First
-                        <span class="caret"></span></button>
-                    <ul class="dropdown-menu" id="datedropdown">
-                    </ul>
+        <div hidden id="eventSection">
+            <div class="row">
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-11">
+                    <h4>Event Selection</h4>
                 </div>
             </div>
-            <div class="col-md-2">
-            </div>
-            <div class="col-md-4">
-                Choose an Event:
-                <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Please Choose Date Range First
-                        <span class="caret"></span></button>
-                    <ul class="dropdown-menu" id="eventdropdown">
-                    </ul>
+            <div class="row">
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-4">
+                    Choose a Date:
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Please Choose Date Range First
+                            <span class="caret"></span></button>
+                        <ul class="dropdown-menu" id="datedropdown">
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                </div>
+                <div class="col-md-4">
+                    Choose an Event:
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Please Choose Date Range First
+                            <span class="caret"></span></button>
+                        <ul class="dropdown-menu" id="eventdropdown">
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
         <hr>
-        <div class="row">
-            <div class="col-md-1">
+        <div hidden id="ricSection">
+            <div class="row">
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-11">
+                    <h4>RIC Selection</h4>
+                </div>
             </div>
-            <div class="col-md-11">
-                <h4>RIC Selection</h4>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-1">
-            </div>
-            <div class="col-md-11">
-                Choose RICs:
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                        <tr>
-                            <th>Select</th>
-                            <th>RIC</th>
-                        </tr>
-                        </thead>
-                        <tbody id="ricTable">
-                        </tbody>
-                    </table>
+            <div class="row">
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-11">
+                    Choose RICs:
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>RIC</th>
+                            </tr>
+                            </thead>
+                            <tbody id="ricTable">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="panel-footer">
+    <div hidden id="returnButton" class="panel-footer">
         <a href="#" class="btn btn-success btn-me">
             <span class="glyphicon glyphicon-stats"></span> Back to Graph
         </a>
