@@ -1,13 +1,13 @@
 {% extends "home/base.html" %}
 {% load staticfiles %}
 {% block scripts %}
-<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-<script src="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.css">
-<link rel="stylesheet" type="text/css" href="{% static "analytics.css" %}">
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css"/>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js'></script>
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.css">
+    <link rel="stylesheet" type="text/css" href="{% static "analytics.css" %}">
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js'></script>
 {% endblock %}
 {% block title %}Team Cool - SENG 3011{% endblock %}
 (% block
@@ -19,143 +19,143 @@
     <a href="/analytics/howtouse" class="btn pull-right btn-me">
         <span class="btn btn-info glyphicon glyphicon-info-sign"></span>
     </a>    <div id="chart">
-    	<svg></svg>
-	</div>
+        <svg></svg>
+    </div>
 
-            <br>
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        Options
-                    </h3>
+    <br>
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                Options
+            </h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-1">
                 </div>
-                <div class="panel-body">
+                <div class="col-md-11">
+                    <h4>Date Range</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-4">
+                    Start Date
                     <div class="row">
-                        <div class="col-md-1">
-                        </div>
-                        <div class="col-md-11">
-                            <h4>Date Range</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-1">
-                        </div>
-                        <div class="col-md-4">
-                            Start Date
-                            <div class="row">
-                                <div class='col-sm-8'>
-                                    <div class="form-group">
-                                        <div class='input-group date' id='start'>
-                                            <input type='text' id='startValue' class="form-control" />
+                        <div class='col-sm-8'>
+                            <div class="form-group">
+                                <div class='input-group date' id='start'>
+                                    <input type='text' id='startValue' class="form-control" />
                     <span class="input-group-addon" id="startPicker">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
-                                        </div>
-                                    </div>
                                 </div>
-
                             </div>
-                            <div class="row">
-    				<div id="startDate" style="display: inline-block"></div></div>
                         </div>
-                        <div class="col-md-2">
-                        </div>
-                        <div class="col-md-4">
-                            End Date
-                            <div class="row">
-                                <div class='col-sm-8'>
-                                    <div class="form-group">
-                                        <div class='input-group date' id='end'>
-                                            <input type='text' id='endValue' class="form-control" />
+
+                    </div>
+                    <div class="row">
+                        <div id="startDate" style="display: inline-block"></div></div>
+                </div>
+                <div class="col-md-2">
+                </div>
+                <div class="col-md-4">
+                    End Date
+                    <div class="row">
+                        <div class='col-sm-8'>
+                            <div class="form-group">
+                                <div class='input-group date' id='end'>
+                                    <input type='text' id='endValue' class="form-control" />
                     <span class="input-group-addon" id="endPicker">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
-                            <div class="row">
-    				<div id="endDate" style="display: inline-block"></div></div>
-                        </div>
-                        </div>
-                        <div class="col-md-1">
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-1">
-                        </div>
-                        <div class="col-md-11">
-                            <h4>Event Selection</h4>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-1">
-                        </div>
-                        <div class="col-md-4">
-                            Choose a Date:
-                            <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Please Choose Date Range First
-                                    <span class="caret"></span></button>
-                                <ul class="dropdown-menu" id="datedropdown">
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                        </div>
-                        <div class="col-md-4">
-                            Choose an Event:
-                            <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Please Choose Date Range First
-                                    <span class="caret"></span></button>
-                                <ul class="dropdown-menu" id="eventdropdown">
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-1">
-                        </div>
-                        <div class="col-md-11">
-                            <h4>RIC Selection</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-1">
-                        </div>
-                        <div class="col-md-11">
-                            Choose RICs:
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                    <tr>
-                                        <th>Select</th>
-                                        <th>RIC</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="ricTable">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel-footer">
-                            <a href="#" class="btn btn-success btn-me">
-                                 <span class="glyphicon glyphicon-stats"></span> Back to Graph
-                            </a>
+                        <div id="endDate" style="display: inline-block"></div></div>
                 </div>
             </div>
-
-        <div class="col-md-2">
+            <div class="col-md-1">
+            </div>
         </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-11">
+                <h4>Event Selection</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-4">
+                Choose a Date:
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Please Choose Date Range First
+                        <span class="caret"></span></button>
+                    <ul class="dropdown-menu" id="datedropdown">
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-2">
+            </div>
+            <div class="col-md-4">
+                Choose an Event:
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Please Choose Date Range First
+                        <span class="caret"></span></button>
+                    <ul class="dropdown-menu" id="eventdropdown">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-11">
+                <h4>RIC Selection</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-11">
+                Choose RICs:
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>RIC</th>
+                        </tr>
+                        </thead>
+                        <tbody id="ricTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-footer">
+        <a href="#" class="btn btn-success btn-me">
+            <span class="glyphicon glyphicon-stats"></span> Back to Graph
+        </a>
+    </div>
+    </div>
+
+    <div class="col-md-2">
+    </div>
 
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/scripts.js"></script>
     <script src='{% static "graph.js" %}'></script>
-     </body>
+    </body>
 
 {% endblock %}
