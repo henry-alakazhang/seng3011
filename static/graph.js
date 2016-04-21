@@ -15,12 +15,17 @@ var getEvents = function() {
 		    	    keys.push(key);
 		    	  }
 		    	}
+		    	keys.sort(function (a,b) {		    		
+		    		return moment(a,"DD-MMM-YY").diff(moment(b,"DD-MMM-YY"))
+		    	})
 		    	var items = [];
 		    	$.each(keys, function(i,val) {
 		    		items.push('<li><a>' + val + '</a></li>');
 		    	});
 		    	$('#datedropdown').empty().append( items.join('') ).parents(".dropdown").find('.btn-primary').text("No Date Chosen");
 		    	   $("#datedropdown li a").click(function(){
+	    		   		$('#eventdropdown').empty();
+		    			  $('#ricTable').empty();
 		    			  $(this).parents(".dropdown").find('.btn-primary').text($(this).text());
 		    			  $(this).parents(".dropdown").find('.btn-primary').val($(this).text());	
 		  		    		var vars = [];	    
@@ -52,10 +57,12 @@ var getEvents = function() {
 					    	   $("#eventdropdown li a").click(function(){
 					    			  $(this).parents(".dropdown").find('.btn-primary').text($(this).text());
 					    			  $(this).parents(".dropdown").find('.btn-primary').val($(this).text());
+					    			  $('#ricTable').empty();
 					    			  // call api
 					    			  var startTime = moment(start,"DD-MMM-YY");
 					    			  var endTime = moment(end,"DD-MMM-YY");
-					    			  var timeWindow = endTime.diff(startTime,'days');
+					    			  //var timeWindow = endTime.diff(startTime,'days');
+					    			  var timeWindow = 30;
 					    			  if ($(this).text() == "None") {
 				    					  var params = {upper_window : timeWindow,lower_window : -timeWindow, file_key : 0};
 					    			  } else {
@@ -112,10 +119,30 @@ var getEvents = function() {
 			    					    	   	    		}			    					    	   	    			
 			    					    	   	    	}
 			    					    	   	    	for (var i = -timeWindow ; i <= timeWindow; i++) {
-			    					    	   	    		newData["values"].push({"x":i,"y":cumRets[i+timeWindow]});
+			    					    	   	    		newData["values"].splice(i+timeWindow,0,{"x":i,"y":cumRets[i+timeWindow]});
 			    					    	   	    	}		
 			    					    	   	    	var oldData = chartData.datum();
-			    					    	   	    	oldData.push(newData);			    					    	   	    	
+			    					    	   	    	oldData.push(newData);
+			    					    	   	    	if (oldData.length > 1) {
+			    					    	   	    		for (var i = 0; i < oldData.length; i++) {
+			    					    	   	    			if (oldData[i]["key"] == "average") {
+			    					    	   	    				oldData.splice(i,1);
+			    					    	   	    			}
+			    					    	   	    		}
+			    					    	   	    		var average = [];
+		    					    	   	    			for (var j = -timeWindow; j <= timeWindow; j++) {
+			    					    	   	    			average.splice(j+timeWindow,0,0.0);
+			    					    	   	    			for (var i = 0; i < oldData.length; i++) {
+			    					    	   	    				average[j+timeWindow] += oldData[i]["values"][j+timeWindow]["y"];
+			    					    	   	    			}
+			    					    	   	    			average[j+timeWindow] /= oldData.length;
+			    					    	   	    		}
+		    					    	   	    			var aveData = {"key":"average","color":"red","values":[]};
+		    					    	   	    			for (var i = -timeWindow; i <= timeWindow; i++) {
+		    					    	   	    				aveData["values"].splice(i+timeWindow,0,{"x":i,"y":average[i+timeWindow]});
+		    					    	   	    			}
+		    					    	   	    			oldData.push(aveData);
+			    					    	   	    	}			    					    	   	    	
 				    					    	   	    chartData.datum(oldData).transition().duration(500).call(chart);
 				    					    	   	    nv.utils.windowResize(chart.update);
 			    					    	   	    } else {
@@ -125,6 +152,35 @@ var getEvents = function() {
 			    					    	   	    			oldData.splice(i,1);
 			    					    	   	    		}
 			    					    	   	    	}
+			    					    	   	    	console.log(oldData.length);
+			    					    	   	    	if (oldData.length > 2) {
+			    					    	   	    		for (var i = 0; i < oldData.length; i++) {
+			    					    	   	    			if (oldData[i]["key"] == "average") {
+			    					    	   	    				oldData.splice(i,1);
+			    					    	   	    			}
+			    					    	   	    		}
+			    					    	   	    		var average = [];
+		    					    	   	    			for (var j = -timeWindow; j <= timeWindow; j++) {
+			    					    	   	    			average.splice(j+timeWindow,0,0.0);
+			    					    	   	    			for (var i = 0; i < oldData.length; i++) {
+			    					    	   	    				average[j+timeWindow] += oldData[i]["values"][j+timeWindow]["y"];
+			    					    	   	    			}
+			    					    	   	    			average[j+timeWindow] /= oldData.length;
+			    					    	   	    		}
+		    					    	   	    			var aveData = {"key":"average","color":"red","values":[]};
+		    					    	   	    			for (var i = -timeWindow; i <= timeWindow; i++) {
+		    					    	   	    				aveData["values"].splice(i+timeWindow,0,{"x":i,"y":average[i+timeWindow]});
+		    					    	   	    			}
+		    					    	   	    			oldData.push(aveData);
+			    					    	   	    	} else if (oldData.length > 1) {
+			    					    	   	    		console.log("trying to rem average");
+			    					    	   	    		for (var i = 0; i < oldData.length; i++) {
+			    					    	   	    			if (oldData[i]["key"] == "average") {
+			    					    	   	    				console.log(oldData[i]["key"]);
+			    					    	   	    				oldData.splice(i,1);
+			    					    	   	    			}
+			    					    	   	    		}
+			    					    	   	    	}			    		
 				    					    	   	    chartData.datum(oldData).transition().duration(500).call(chart);
 			    					    	   	    	console.log(chartData.datum());
 				    					    	   	    nv.utils.windowResize(chart.update);
@@ -183,7 +239,7 @@ $("#endPicker").mousedown(function() {
 nv.addGraph(function() {
   chart = nv.models.cumulativeLineChart()
   	.x(function(d) {return d["x"]})
-  	.y(function(d) {return d["y"]})
+  	.y(function(d) {return d["y"]/100})
     .useInteractiveGuideline(true)
     ;
 
@@ -192,7 +248,7 @@ nv.addGraph(function() {
       return moment($('#startValue').val(),"DD-MMM-YY").add(d,'days').format("DD-MMM-YY");
     });
 
-  chart.yAxis.tickFormat(d3.format('.4')).showMaxMin(false);;
+  chart.yAxis.tickFormat(d3.format('.2%')).showMaxMin(false);;
             
 
   chartData = d3.select('#chart svg')
