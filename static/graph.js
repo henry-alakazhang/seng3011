@@ -1,6 +1,8 @@
 var apiResults;
 var chart;
 var chartData;
+var minDate = new Date(2010,1-1,1)
+var maxDate = new Date(2015,2-1,28)
 var getEvents = function() {
 	start = $('#startValue').val();
 	end = $('#endValue').val();
@@ -63,12 +65,13 @@ var getEvents = function() {
 					    			  // call api
 					    			  var startTime = moment(start,"DD-MMM-YY");
 					    			  var endTime = moment(end,"DD-MMM-YY");
-					    			  //var timeWindow = endTime.diff(startTime,'days');
-					    			  var timeWindow = 30;
+                                      var eventTime = moment(date,"DD-MMM-YY")
+                                      var upperWindow = -eventTime.diff(endTime,'days');
+                                      var lowerWindow = -eventTime.diff(startTime,'days');
 					    			  if ($(this).text() == "None") {
-				    					  var params = {upper_window : timeWindow,lower_window : -timeWindow, file_key : 0};
+				    					  var params = {upper_window : upperWindow,lower_window : lowerWindow, file_key : 0};
 					    			  } else {
-				    					  var params = {upper_window : timeWindow,lower_window : -timeWindow, file_key : 0};
+				    					  var params = {upper_window : upperWindow,lower_window : lowerWindow, file_key : 0};
 				    					  params["upper_"+$(this).text().toLowerCase().replace(/ /g,"_")] = 1.5;
 				    					  params["lower_"+$(this).text().toLowerCase().replace(/ /g,"_")] = 0.5;
 					    			  }
@@ -120,8 +123,8 @@ var getEvents = function() {
 			    										    	}
 			    					    	   	    		}			    					    	   	    			
 			    					    	   	    	}
-			    					    	   	    	for (var i = -timeWindow ; i <= timeWindow; i++) {
-			    					    	   	    		newData["values"].splice(i+timeWindow,0,{"x":i,"y":cumRets[i+timeWindow]});
+			    					    	   	    	for (var i = lowerWindow ; i <= upperWindow; i++) {
+			    					    	   	    		newData["values"].splice(i-lowerWindow,0,{"x":i,"y":cumRets[i-lowerWindow]});
 			    					    	   	    	}		
 			    					    	   	    	var oldData = chartData.datum();
 			    					    	   	    	oldData.push(newData);
@@ -132,16 +135,16 @@ var getEvents = function() {
 			    					    	   	    			}
 			    					    	   	    		}
 			    					    	   	    		var average = [];
-		    					    	   	    			for (var j = -timeWindow; j <= timeWindow; j++) {
-			    					    	   	    			average.splice(j+timeWindow,0,0.0);
+		    					    	   	    			for (var j = lowerWindow; j <= upperWindow; j++) {
+			    					    	   	    			average.splice(j-lowerWindow,0,0.0);
 			    					    	   	    			for (var i = 0; i < oldData.length; i++) {
-			    					    	   	    				average[j+timeWindow] += oldData[i]["values"][j+timeWindow]["y"];
+			    					    	   	    				average[j-lowerWindow] += oldData[i]["values"][j-lowerWindow]["y"];
 			    					    	   	    			}
-			    					    	   	    			average[j+timeWindow] /= oldData.length;
+			    					    	   	    			average[j-lowerWindow] /= oldData.length;
 			    					    	   	    		}
 		    					    	   	    			var aveData = {"key":"average","color":"red","values":[]};
-		    					    	   	    			for (var i = -timeWindow; i <= timeWindow; i++) {
-		    					    	   	    				aveData["values"].splice(i+timeWindow,0,{"x":i,"y":average[i+timeWindow]});
+		    					    	   	    			for (var i = lowerWindow; i <= upperWindow; i++) {
+		    					    	   	    				aveData["values"].splice(i-lowerWindow,0,{"x":i,"y":average[i-lowerWindow]});
 		    					    	   	    			}
 		    					    	   	    			oldData.push(aveData);
 			    					    	   	    	}			    					    	   	    	
@@ -162,16 +165,16 @@ var getEvents = function() {
 			    					    	   	    			}
 			    					    	   	    		}
 			    					    	   	    		var average = [];
-		    					    	   	    			for (var j = -timeWindow; j <= timeWindow; j++) {
-			    					    	   	    			average.splice(j+timeWindow,0,0.0);
+		    					    	   	    			for (var j = lowerWindow; j <= upperWindow; j++) {
+			    					    	   	    			average.splice(j-lowerWindow,0,0.0);
 			    					    	   	    			for (var i = 0; i < oldData.length; i++) {
-			    					    	   	    				average[j+timeWindow] += oldData[i]["values"][j+timeWindow]["y"];
+			    					    	   	    				average[j-lowerWindow] += oldData[i]["values"][j-lowerWindow]["y"];
 			    					    	   	    			}
-			    					    	   	    			average[j+timeWindow] /= oldData.length;
+			    					    	   	    			average[j-lowerWindow] /= oldData.length;
 			    					    	   	    		}
 		    					    	   	    			var aveData = {"key":"average","color":"red","values":[]};
-		    					    	   	    			for (var i = -timeWindow; i <= timeWindow; i++) {
-		    					    	   	    				aveData["values"].splice(i+timeWindow,0,{"x":i,"y":average[i+timeWindow]});
+		    					    	   	    			for (var i = lowerWindow; i <= upperWindow; i++) {
+		    					    	   	    				aveData["values"].splice(i-lowerWindow,0,{"x":i,"y":average[i-lowerWindow]});
 		    					    	   	    			}
 		    					    	   	    			oldData.push(aveData);
 			    					    	   	    	} else if (oldData.length > 1) {
@@ -198,7 +201,9 @@ var getEvents = function() {
 
 $('#startDate').datepicker({
     changeMonth: true,
-    changeYear: true,    
+    changeYear: true, 
+    minDate: minDate,
+    maxDate: maxDate,
     onSelect: function(date,inst) {
         $('#startValue').val(moment(date,"MM/DD/YYYY").format("DD-MMM-YY"));
         $('#endDate').datepicker("option","minDate",date)
@@ -217,7 +222,9 @@ $("#startPicker").mousedown(function() {
 
 $('#endDate').datepicker({
     changeMonth: true,
-    changeYear: true,
+    changeYear: true, 
+    minDate: minDate,
+    maxDate: maxDate,
     onSelect: function(date,inst) {
         $('#endValue').val(moment(date,"MM/DD/YYYY").format("DD-MMM-YY"));  
         $('#startDate').datepicker("option","maxDate",date)

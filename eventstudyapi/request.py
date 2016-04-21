@@ -74,6 +74,7 @@ class Data:
                 else:
                     self.CumRet[RIC][priceData["Date[L]"]] = prevCumRet  
             del prevPrice     
+
     #Check if a given variable was in File2
     def isExistingVariable(self,var):
         if var in map(str.lower,self.Variables):

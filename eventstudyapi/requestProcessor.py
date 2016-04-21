@@ -14,7 +14,7 @@ from eventstudyapi.parser import Parser
 from eventstudyapi.request import Request, Data
 
 #Process request
-def process(request,error):    
+def process(request,error):   
     charsToProcess = list()
     for RIC in request.Data.RIC:
         if RIC in request.Data.CharInfo.fileData:
@@ -22,7 +22,7 @@ def process(request,error):
                 if (request.matchesReq(stockChar)):
                     charsToProcess.append(stockChar)
         else:
-            error += ("No Data found for #RIC: {}\n".format(RIC))
+            error.append("No Data found for #RIC: {}\n".format(RIC))
     upperWindow = int(request.upperWindow)
     lowerWindow = int(request.lowerWindow)
     data = request.Data
@@ -32,7 +32,7 @@ def process(request,error):
         if (cumRet != None):
             result.append((stockChar,cumRet))
         else:            
-            error += ("Invalid Date Range for {}: {} with window {} to {}\n".format(stockChar["#RIC"], stockChar["Event Date"], lowerWindow, upperWindow))
+            error.append("Invalid Date Range for {}: {} with window {} to {}\n".format(stockChar["#RIC"], stockChar["Event Date"], lowerWindow, upperWindow))
     return (result, error)
 
 #Process each individual stock characteristic
