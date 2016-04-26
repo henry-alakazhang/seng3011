@@ -3,13 +3,14 @@ var chart;
 var chartData;
 var minDate = new Date(2010,1-1,1)
 var maxDate = new Date(2015,2-1,28)
+var file_key = 0;
 var getEvents = function() {
 	start = $('#startValue').val();
 	end = $('#endValue').val();
 	if (start != '' && end != '') {
 		$.get(
 		    "eventapi/events",
-		    {earliest : start, latest : end, file_key : "0"},
+		    {earliest : start, latest : end, file_key : file_key},
 		    function(data) {
 				$('#eventSection').show();
 				window.scrollTo(0,document.body.scrollHeight);
@@ -71,12 +72,13 @@ var getEvents = function() {
                                       var upperWindow = -eventTime.diff(endTime,'days')-1;
                                       var lowerWindow = -eventTime.diff(startTime,'days')+1;
 					    			  if ($(this).text() == "None") {
-				    					  var params = {upper_window : upperWindow,lower_window : lowerWindow, file_key : 0};
+				    					  var params = {upper_window : upperWindow,lower_window : lowerWindow, file_key : file_key};
 					    			  } else {
-				    					  var params = {upper_window : upperWindow,lower_window : lowerWindow, file_key : 0};
+				    					  var params = {upper_window : upperWindow,lower_window : lowerWindow, file_key : file_key};
 				    					  params["upper_"+$(this).text().toLowerCase().replace(/ /g,"_")] = 1.5;
 				    					  params["lower_"+$(this).text().toLowerCase().replace(/ /g,"_")] = 0.5;
 					    			  }
+					    			  console.log(params);
     					    	   	  $('#ricSection').show();
 					    			  $.get(
 				    					  "eventapi",
@@ -275,3 +277,9 @@ nv.addGraph(function() {
 
 	return chart;
 });
+
+$('#uploadForm').ajaxForm(function(response) { 
+    file_key = response.file_key;
+    $('#uploadModal').modal('hide');
+    getEvents();
+}); 

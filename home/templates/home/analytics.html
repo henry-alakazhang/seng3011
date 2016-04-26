@@ -8,17 +8,42 @@
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js'></script>
+    <script src="http://malsup.github.com/jquery.form.js"></script> 
 {% endblock %}
 {% block title %}Team Cool - SENG 3011{% endblock %}
 (% block
 {% block content %}
 
     <body>
-    <!-- Graph Here-->
-    <a href="/analytics/howtouse" class="btn pull-right btn-me">
-        <span class="btn btn-info glyphicon glyphicon-info-sign"></span>
-    </a>    <div id="chart">
-        <svg></svg>
+    <div class="row">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#uploadModal">
+          Upload Files
+        </button>
+        <a href="/analytics/howtouse" class="btn pull-right btn-me">
+            <span class="btn btn-info glyphicon glyphicon-info-sign"></span>
+        </a>    
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="uploadLabel">Upload Files</h4>
+          </div>
+          <div class="modal-body">
+              <form id="uploadForm" class="form-inline" action="/eventapi/" method="post" enctype="multipart/form-data">
+                  Price file: <input type="file" name="stock_price_data_file"><p>
+                  Event file: <input type="file" name="stock_characteristic_file"><p>
+              <p><input type="submit" class="form-control" id="uploadButton" value="Upload files">
+              </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <br>
@@ -144,12 +169,17 @@
                 <div class="col-md-1">
                 </div>
             </div>
-        </div>
+        </div>        
+    </div>
+
+    <!-- Graph Here-->
+    <div id="chart">
+        <svg></svg>
     </div>
 
     <div hidden id="returnButton" class="panel-footer">
         <a href="#" class="btn btn-success btn-me">
-            <span class="glyphicon glyphicon-stats"></span> Back to Graph
+            <span class="glyphicon glyphicon-stats"></span> Back to Top
         </a>
     </div>
     </div>
