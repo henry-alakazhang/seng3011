@@ -61,6 +61,7 @@ var getEvents = function() {
 					    	   });
 					    	   $('#eventdropdown').empty().append( items.join('') ).parents(".dropdown").find('.btn-primary').text("No Event Chosen");
 					    	   $("#eventdropdown li a").click(function(){
+					    		   	var t0 = performance.now();
 					    			  $(this).parents(".dropdown").find('.btn-primary').text($(this).text());
 					    			  $(this).parents(".dropdown").find('.btn-primary').val($(this).text());
   					    	   	    chartData.datum([]).transition().duration(500).call(chart);
@@ -80,10 +81,14 @@ var getEvents = function() {
 					    			  }
 					    			  console.log(params);
     					    	   	  $('#ricSection').show();
+    					    	   	  var t1 = performance.now();
+    					    	   	console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
 					    			  $.get(
 				    					  "eventapi",
 				    					  params,
 				    					  function (data) {
+				    						  	var t2 = performance.now();
+				    						  	console.log("Call to doSomething took " + (t2 - t1) + " milliseconds.")
 				    						  	apiResults = data;
 				    					    	var rics = [];
 				    					    	console.log(data);
@@ -103,7 +108,9 @@ var getEvents = function() {
 			    					    	   	$.each(rics, function(i,val) {
 			    					    		   items.push('<tr><td><div class="RICcheckbox"><label><input type="checkbox" value="'+ val +'"></label></div></td><td>'+ val +'</td></tr>');
 			    				    	   		});
-			    					    	   	$('#ricTable').empty().append( items.join('') );
+			    					    	   	$('#ricTable').empty().append( items.join('') ).show();
+			    					    	   	var t3 = performance.now();
+			    					    	   	console.log("Call to doSomething took " + (t3 - t2) + " milliseconds.")
 	    					    	   	    	window.scrollTo(0,document.body.scrollHeight);
 			    					    	   	$('.RICcheckbox input:checkbox').on('change', function() { 
 			    					    	   	    // From the other examples
