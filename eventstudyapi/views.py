@@ -1,4 +1,3 @@
-import datetime
 from random import choice
 from string import ascii_uppercase
 
@@ -10,13 +9,15 @@ from . import requestProcessor
 import timeit
 import datetime
 import os
+import cProfile, pstats, io
 
 def index(request):
     return HttpResponse("Hello world, you are at the Event Study API index.")
 
 @api_view(['POST', 'GET'])
 def event_study_api_view(request, **kwargs):
-
+    #pr = cProfile.Profile()
+    #pr.enable()
     processing_time_start = timeit.default_timer()
     start_date_time = datetime.datetime.now()
 
@@ -47,6 +48,12 @@ def event_study_api_view(request, **kwargs):
     log['Errors/Warnings'] = error
     
     response['log'] = log
+    #pr.disable()    
+    #s = io.StringIO()
+    #sortby = 'cumulative'
+    #ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    #ps.print_stats()
+    #print (s.getvalue())
     return JsonResponse(response)
 
 
@@ -159,7 +166,6 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
                 break
         if not dateFound:
             event = dict()
-            print (chars)
             event["date"] = reformat_date(chars[0]["Event Date"])
             event["returns"] = dict()
             event["returns"][chars[0]["#RIC"]] = indivCumRets   

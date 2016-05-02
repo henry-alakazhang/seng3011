@@ -7,6 +7,7 @@ import csv
 import datetime
 import re
 import sys
+import cProfile
 
 from eventstudyapi.request import Request, Data
 
@@ -44,7 +45,6 @@ def calcCumRet(stockChar,upperWindow,lowerWindow,data):
         else:
             return None        
     return cumRet
-
 
 
 priceFile = str(sys.argv[1])
@@ -98,4 +98,5 @@ for i in range(int(lowerWindow),int(upperWindow)):
     for chars in cumRets:
         row.append(cumRets[cumRets.index(chars)][1][i])
     c.writerow(row)
-    
+
+pr.disable()
