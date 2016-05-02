@@ -66,7 +66,7 @@ def upload_files(request):
             error.append('ERROR: File ' + reqfile + ' not provided')
             fatal = True
         else:
-            handle_uploaded_file(request.FILES[reqfile], file_key)
+            handle_uploaded_file(request.FILES[reqfile], file_key, reqfile)
 
     if fatal:
         return(0, error, True)
