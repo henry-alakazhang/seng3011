@@ -7,7 +7,7 @@ import os
 def handle_uploaded_file(f, key, fname):
     # filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'media/',str(f))
     # print(GDRAT_abs_path)
-    filepath = ('media/' + str(key) + '_' + fname);
+    filepath = ('media/' + str(key) + '_' + fname + '.csv');
     with open(filepath, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
