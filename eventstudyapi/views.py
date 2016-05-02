@@ -16,8 +16,8 @@ def index(request):
 
 @api_view(['POST', 'GET'])
 def event_study_api_view(request, **kwargs):
-    #pr = cProfile.Profile()
-    #pr.enable()
+    pr = cProfile.Profile()
+    pr.enable()
     processing_time_start = timeit.default_timer()
     start_date_time = datetime.datetime.now()
 
@@ -48,12 +48,12 @@ def event_study_api_view(request, **kwargs):
     log['Errors/Warnings'] = error
     
     response['log'] = log
-    #pr.disable()    
-    #s = io.StringIO()
-    #sortby = 'cumulative'
-    #ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    #ps.print_stats()
-    #print (s.getvalue())
+    pr.disable()    
+    s = io.StringIO()
+    sortby = 'cumulative'
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    print (s.getvalue())
     return JsonResponse(response)
 
 
