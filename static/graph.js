@@ -103,7 +103,7 @@ var getEvents = function() {
 			    					    	   	$.each(rics, function(i,val) {
 			    					    		   items.push('<tr><td><div class="RICcheckbox"><label><input type="checkbox" value="'+ val +'"></label></div></td><td>'+ val +'</td></tr>');
 			    				    	   		});
-			    					    	   	$('#ricTable').empty().append( items.join('') );
+			    					    	   	$('#ricTable').empty().append( items.join('') ).show();
 	    					    	   	    	window.scrollTo(0,document.body.scrollHeight);
 			    					    	   	$('.RICcheckbox input:checkbox').on('change', function() { 
 			    					    	   	    // From the other examples
