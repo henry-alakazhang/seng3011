@@ -5,7 +5,7 @@ def printHelp():
     print("\t -h or --help \t \t \t displays help")
     print("\t -u or --url [URL|local|heroku]  changes url")
     print("\t -f or --file KEY \t \t \t set file key")
-    print("\t -k or --key KEYNAME \t \t \t set file key parameter name")
+    print("\t -k or --keyname KEYNAME \t \t \t set file key parameter name")
 
 url = "127.0.0.1:8000"
 endpoint = "/eventapi/"
@@ -30,6 +30,8 @@ if (len(sys.argv) > i):
                 endpoint = '/' + '/'.join(map(str,parts[1:]))
         if sys.argv[i] in ['-f', '--file']:
             filekey = sys.argv[i+1]
+        if sys.argv[i] in ['-k', '--keyname']:
+            keyname = sys.argv[i+1]
         i += 2
 else:
     printHelp()

@@ -278,8 +278,25 @@ nv.addGraph(function() {
 	return chart;
 });
 
-$('#uploadForm').ajaxForm(function(response) { 
-    file_key = response.file_key;
-    $('#uploadModal').modal('hide');
-    getEvents();
-}); 
+$('#uploadForm').ajaxForm({
+	beforeSend : function() {
+		$('#uploadProgress').addClass("progress");
+		$('#uploadBar').attr('aria-valuenow', 0);
+		$('#uploadProgress').show();
+	},
+	uploadProgress: function(e, p, t, c) {
+		$('#uploadBar').attr('aria-valuenow',c);
+		$('#uploadBar').empty().append(c+"%");
+	},
+	complete : function(response) {
+		console.log(response);
+		if (response.responseJSON) {
+			file_key = response.responseJSON.file_key
+			alert("Files uploaded successfully"); 
+			getEvents();
+		} else {
+			alert("File upload error! Please check files and try again.");
+		}
+		$('#uploadProgress').hide();
+	}}
+); 
