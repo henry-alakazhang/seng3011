@@ -282,10 +282,11 @@ $('#uploadForm').ajaxForm({
 	beforeSend : function() {
 		$('#uploadProgress').addClass("progress");
 		$('#uploadBar').attr('aria-valuenow', 0);
+		$('#uploadBar').attr('style', "width:0%");
 		$('#uploadProgress').show();
 	},
 	uploadProgress: function(e, p, t, c) {
-		$('#uploadBar').attr('aria-valuenow',c);
+		$('#uploadBar').attr('style', "width:" + c + "%");
 		$('#uploadBar').empty().append(c+"%");
 	},
 	complete : function(response) {
