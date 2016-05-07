@@ -35,11 +35,16 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'eventstudyapi',
     'rest_framework',
+    'registration',
+    'crispy_forms',
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -127,3 +132,12 @@ STATIC_URL = '/static/'
 # Extra places for collectstatic to find static files.
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+ACCOUNT_ACTIVATION_DAYS = 7
+REGISTRATION_AUTO_LOGIN = True # If True, the user will be automatically logged in.
+LOGIN_REDIRECT_URL = '/'
+# LOGIN_URL = '/accounts/login/'  # The page users are directed to if they are not logged in,
+    # and are trying to access pages requiring authentication
+REGISTRATION_OPEN = True # If True, users can register
+SITE_ID = 1
