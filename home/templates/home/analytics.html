@@ -49,140 +49,187 @@
     <br>
     <div class="panel panel-primary">
         <div class="panel-heading">
-            <h3 class="panel-title">
-                Options
-            </h3>
+        	<ul class="nav nav-tabs">
+	            <li class="active"><a data-toggle="tab" href="#options">Options</a></li>
+	            <li class="disabled"><a data-toggle="tab" href="#graph" id="graphTab">Graph</a></li>
+	            <li><a data-toggle="tab" href="#news" id="newsTab">News</a></li>
+            </ul>
         </div>
-        <div class="panel-body">
-            <div class="row">
-                <div class="col-md-1">
-                </div>
-                <div class="col-md-11">
-                    <h4>Date Range</h4>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-1">
-                </div>
-                <div class="col-md-4">
-                    Start Date
-                    <div class="row">
-                        <div class='col-sm-8'>
-                            <div class="form-group">
-                                <div class='input-group date' id='start'>
-                                    <input type='text' id='startValue' class="form-control" />
-                    <span class="input-group-addon" id="startPicker">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                                </div>
-                            </div>
-                        </div>
+        <div class="tab-content">
+		        <div id="options" class="panel-body panel-group tab-pane fade in active">
+		        	<div class="panel panel-default">
+			            <div class="row panel-heading">
+			                <div class="col-md-1">
+			                </div>
+			                <div class="col-md-11">
+			                    <h4 class="panel-title"><a data-toggle="collapse" href="#date">Date Range</a></h4>
+			                </div>
+			            </div>
+			            <div id="date" class="panel-collapse collapse in">
+				            <div class="row panel-body">
+				                <div class="col-md-1">
+				                </div>
+				                <div class="col-md-4">
+				                    Start Date
+				                    <div class="row">
+				                        <div class='col-sm-8'>
+				                            <div class="form-group">
+				                                <div class='input-group date' id='start'>
+				                                    <input type='text' id='startValue' class="form-control" />
+				                    <span class="input-group-addon" id="startPicker">
+				                        <span class="glyphicon glyphicon-calendar"></span>
+				                    </span>
+				                                </div>
+				                            </div>
+				                        </div>
+				
+				                    </div>
+				                    <div class="row">
+				                        <div id="startDate" style="display: inline-block"></div></div>
+				                </div>
+				                <div class="col-md-2">
+				                </div>
+				                <div class="col-md-4">
+				                    End Date
+				                    <div class="row">
+				                        <div class='col-sm-8'>
+				                            <div class="form-group">
+				                                <div class='input-group date' id='end'>
+				                                    <input type='text' id='endValue' class="form-control" />
+				                    <span class="input-group-addon" id="endPicker">
+				                        <span class="glyphicon glyphicon-calendar"></span>
+				                    </span>
+				                                </div>
+				                            </div>
+				                        </div>
+				                    </div>
+				                    <div class="row">
+				                        <div id="endDate" style="display: inline-block"></div></div>
+				                	</div>
+				            	</div>
+					            <div class="col-md-1">
+					            </div>
+				        	</div>
+			        	</div>
+				        <hr>
+				        <div id="eventSection" class="panel panel-default">
+				            <div class="row panel-heading">
+				                <div class="col-md-1">
+				                </div>
+				                <div class="col-md-11">
+				                    <h4 class="panel-title"><a data-toggle="collapse" href="#event">Event Selection</a></h4>
+				                </div>
+				            </div>
+				            <div class="panel-collapse collapse" id="event">
+					            <div class="row panel-body">
+					                <div class="col-md-1">
+					                </div>
+					                <div class="col-md-4">
+					                    Choose a Date:
+					                    <div class="dropdown">
+					                        <button class="btn btn-primary dropdown-toggle disabled" type="button" data-toggle="dropdown">Please Choose Date Range First
+					                            <span class="caret"></span></button>
+					                        <ul class="dropdown-menu" id="datedropdown">
+					                        </ul>
+					                    </div>
+					                </div>
+					                <div class="col-md-2">
+					                </div>
+					                <div class="col-md-4">
+					                    Choose an Event:
+					                    <div class="dropdown">
+					                        <button class="btn btn-primary dropdown-toggle disabled" type="button" data-toggle="dropdown">Please Choose Date Range First
+					                            <span class="caret"></span></button>
+					                        <ul class="dropdown-menu" id="eventdropdown">
+					                        </ul>
+					                    </div>
+					                </div>
+					            </div>
+					        </div>
+			        	</div>
+				        <hr>
+				        <div id="ricSection" class="panel panel-default">
+				            <div class="row panel-heading">
+				                <div class="col-md-1">
+				                </div>
+				                <div class="col-md-11">
+				                    <h4 class="panel-title"><a data-toggle="collapse" href="#rics">RIC Selection</a></h4>
+				                </div>
+				            </div>
+				            <div class="panel-collapse collapse" id="rics">
+					            <div class="row panel-body">
+					                <div class="col-md-1">
+					                </div>
+					                <div class="col-md-10">
+					                    Choose RICs:
+					                    <div class="table-responsive">
+					                        <table  class="table table-hover table table-striped">
+					                            <thead>
+					                            <tr>
+					                                <th width="100">Select</th>
+					                                <th>RIC</th>
+					                            </tr>
+					                            </thead>
+					                            <tbody id="ricTable">
+					                            </tbody>
+					                        </table>
+					                    </div>
+					                </div>
+					                <div class="col-md-1">
+					                </div>
+					            </div>
+				            </div>
+				        </div> 
+			        </div>
+        	<div id="graph" class="tab-pane fade">
+			    <!-- Graph Here-->
+			    <div id="chart">
+			        <svg></svg>
+			    </div>
+	        </div>
+	        <div id="news" class="tab-pane fade">
+	        	<div class="row">
+	        		<div class="col-md-1"></div>
+	        		<div class="col-md-10">     
+	        			{% if request.user.is_authenticated %}
+	        				<script type="text/javascript">
+	        					updateNews();
+	        				</script>
+	        			{% else %}
+	        				<h1>Please login to view related news</h1>
+	        			{% endif %}
+			        	<div class="list-group" id="newsItems">
+			        	<a href="#" class="list-group-item">
+						    <h4 class="list-group-item-heading">Article name</h4>
+						    <p class="list-group-item-text">Date of article.</p>
+						    <span class="label label-default">RIC1</span>
+						    <span class="label label-default">RIC2</span>
+					  	</a>
+			        	<a href="#" class="list-group-item">
+						    <h4 class="list-group-item-heading">Article name2</h4>
+						    <p class="list-group-item-text">Date of article.</p>
+						    <span class="label label-default">RIC1</span>
+						    <span class="label label-default">RIC2</span>
+					  	</a>
+			        	<a href="#" class="list-group-item">
+						    <h4 class="list-group-item-heading">Article name3</h4>
+						    <p class="list-group-item-text">Abstract</p>
+						    <small>Date of article.</small>
+						    <span class="label label-default">RIC1</span>
+						    <span class="label label-default">RIC2</span>
+					  	</a>
+						</div>
+					</div>
+				</div>
+	        </div>
+        </div>   
+   	</div>
 
-                    </div>
-                    <div class="row">
-                        <div id="startDate" style="display: inline-block"></div></div>
-                </div>
-                <div class="col-md-2">
-                </div>
-                <div class="col-md-4">
-                    End Date
-                    <div class="row">
-                        <div class='col-sm-8'>
-                            <div class="form-group">
-                                <div class='input-group date' id='end'>
-                                    <input type='text' id='endValue' class="form-control" />
-                    <span class="input-group-addon" id="endPicker">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div id="endDate" style="display: inline-block"></div></div>
-                </div>
-            </div>
-            <div class="col-md-1">
-            </div>
-        </div>
-        <hr>
-        <div hidden id="eventSection">
-            <div class="row">
-                <div class="col-md-1">
-                </div>
-                <div class="col-md-11">
-                    <h4>Event Selection</h4>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-1">
-                </div>
-                <div class="col-md-4">
-                    Choose a Date:
-                    <div class="dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Please Choose Date Range First
-                            <span class="caret"></span></button>
-                        <ul class="dropdown-menu" id="datedropdown">
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                </div>
-                <div class="col-md-4">
-                    Choose an Event:
-                    <div class="dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Please Choose Date Range First
-                            <span class="caret"></span></button>
-                        <ul class="dropdown-menu" id="eventdropdown">
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <hr>
-        <div hidden id="ricSection">
-            <div class="row">
-                <div class="col-md-1">
-                </div>
-                <div class="col-md-11">
-                    <h4>RIC Selection</h4>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-1">
-                </div>
-                <div class="col-md-10">
-                    Choose RICs:
-                    <div class="table-responsive">
-                        <table  class="table table-hover table table-striped">
-                            <thead>
-                            <tr>
-                                <th width="100">Select</th>
-                                <th>RIC</th>
-                            </tr>
-                            </thead>
-                            <tbody id="ricTable">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="col-md-1">
-                </div>
-            </div>
-        </div>        
-    </div>
-
-    <!-- Graph Here-->
-    <div id="chart">
-        <svg></svg>
-    </div>
-
-    <div hidden id="returnButton" class="panel-footer">
+    <!-- <div hidden id="returnButton" class="panel-footer">
         <a href="#" class="btn btn-success btn-me">
             <span class="glyphicon glyphicon-stats"></span> Back to Top
         </a>
-    </div>
-    </div>
+    </div>  -->
 
     <div class="col-md-2">
     </div>
