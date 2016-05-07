@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+
+# Lines to comment for SQLite
 import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -84,12 +86,16 @@ WSGI_APPLICATION = 'seng3project.wsgi.application'
 
 DATABASES = {
     'default': {
+
+        # ---- Lines to comment for SQLite ----
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'mydb',
         'USER' : 'postgres',
         'PASSWORD': 'startx',
         'HOST': '',
         'PORT': '',
+        # ---- Lines to comment for SQLite ----
+
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
@@ -149,4 +155,6 @@ LOGIN_REDIRECT_URL = '/'
 REGISTRATION_OPEN = True # If True, users can register
 SITE_ID = 1
 
+
+# Lines to comment for SQLite
 DATABASES['default'] =  dj_database_url.config()
