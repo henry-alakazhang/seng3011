@@ -1,34 +1,131 @@
-{% extends "home/base.html" %}
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  {% load staticfiles %}
 
-{% block title %}Team Cool - SENG 3011{% endblock %}
+  <meta property="og:title" content="">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="">
+  <meta property="og:site_name" content="">
+  <meta property="og:description" content="">
 
-{% block content %}
-  <div class="blog-header">
-    <h1 class="blog-title">Hey there!</h1>
-    <p class="blog-description">Welcome to the SENG3011 team webpage for Team Cool.</p>
+  <!-- Styles -->
+  <link rel="stylesheet" href="{% static 'splash/css/font-awesome.min.css' %}">
+  <link rel="stylesheet" href="{% static 'splash/css/animate.css' %}">
+  <link href='http://fonts.googleapis.com/css?family=Raleway:400,100,200,300,500,600,700,800,900|Montserrat:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="{% static 'splash/css/main.css' %}">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/flatly/bootstrap.min.css"></script>
+  <link rel="stylesheet" href="{% static 'home.css' %}">
+
+
+  <script src="{% static 'splash/js/modernizr-2.7.1.js' %}"></script>
+
+</head>
+
+<body>
+  <div class="navbar navbar-default navbar-fixed-top open">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="{% url 'home_index' %}">Team Cool</a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <!-- each list item is activated based on a context var -->
+          <li {%if home%}class="active"{%endif%}><a href="{% url 'home_index' %}">Home</a></li>
+          <li {%if about%}class="active"{%endif%}><a href="{% url 'about_us' %}">About</a></li>
+          <li class="dropdown {%if api%}active{%endif%}">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">API<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+<!--                  <li><a href="{% url 'api_home' %}">Event Study API</a></li> -->
+              <li><a href="{% url 'api_versions' %}">Releases</a></li>
+              <li><a href="{% url 'api_docs' %}">Documentation</a></li>
+              <li><a href="{% url 'api_bugs' %}">Bugs and Issues</a></li>
+            </ul>
+          </li>
+          <li {%if analytics%}class="active"{%endif%}><a href="{% url 'analytics_home' %}">Analytics Platform</a></li>
+        </ul>
+      </div>
+    </div>
   </div>
-  <hr>
-  <div class="blog-post">
-    <h2 class="blog-post-title">Analytics Platform Released!</h2>
-    <p class="blog-post-meta">April 21, 2016</p>
-    <p>This platform uses our API 2.0, and can be found under our Analytics Platform tab at the top of the page. It is currently hardcoded to our data set.</p>
+  <header>
+    <div class="container">
+      <div class="row header-info">
+        <div class="col-sm-10 col-sm-offset-1 text-center">
+          <h1 class="wow fadeIn" style="color:white">Group Cool SENG3011</h1>
+          <br />
+          <p class="lead wow fadeIn" data-wow-delay="0.5s"> Welcome to the Cool Analytics Platform</p>
+          <br />
+
+          <div class="row">
+            <div class="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
+              <div class="row">
+                <div class="col-xs-6 text-right wow fadeInUp" data-wow-delay="1s">
+                  <a href="{% url 'api_versions' %}" class="btn btn-primary btn-lg">Events</a>
+                </div>
+                <div class="col-xs-6 text-left wow fadeInUp" data-wow-delay="1.4s">
+                  <a href="{% url 'analytics_home' %}" class="btn btn-primary btn-lg">Analytics</a>
+                </div>
+              </div><!--End Button Row-->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="mouse-icon hidden-xs">
+      <div class="scroll"></div>
+    </div>
+
+  <div class="container">
+    <div class="blog-header">
+      <h1 class="blog-title">Hey there!</h1>
+      <p class="blog-description">Welcome to the SENG3011 team webpage for Team Cool.</p>
+    </div>
+    <hr>
+    <div class="blog-post">
+      <h2 class="blog-post-title">Analytics Platform Released!</h2>
+      <p class="blog-post-meta">April 21, 2016</p>
+      <p>This platform uses our API 2.0, and can be found under our Analytics Platform tab at the top of the page. It is currently hardcoded to our data set.</p>
+    </div>
+    <hr>
+    <div class="blog-post">
+      <h2 class="blog-post-title">Event Study API v2.0 Released!</h2>
+      <p class="blog-post-meta">April 17, 2016</p>
+      <p>Changed the way to upload and retrieve files to POST and GET requests, and fixed some bugs. For more information head to our Releases page.</p>
+    </div>
+    <hr>
+    <div class="blog-post">
+      <h2 class="blog-post-title">Site Migration</h2>
+      <p class="blog-post-meta">April 15, 2016</p>
+      <p>We moved our site from a dinky little GitHubPage to a dinky little page on our Heroku deployment, with some shiny new CSS and a Bootstrap theme.</p>
+    </div>
+    <hr>
+    <div class="blog-post">
+      <h2 class="blog-post-title">Event Study API v1.0 Released!</h2>
+      <p class="blog-post-meta">April 7, 2016</p>
+      <p>This is the first release of our API! Go to the API page to see the specs.</p>
+    </div>
   </div>
-  <hr>
-  <div class="blog-post">
-    <h2 class="blog-post-title">Event Study API v2.0 Released!</h2>
-    <p class="blog-post-meta">April 17, 2016</p>
-    <p>Changed the way to upload and retrieve files to POST and GET requests, and fixed some bugs. For more information head to our Releases page.</p>
-  </div>
-  <hr>
-  <div class="blog-post">
-    <h2 class="blog-post-title">Site Migration</h2>
-    <p class="blog-post-meta">April 15, 2016</p>
-    <p>We moved our site from a dinky little GitHubPage to a dinky little page on our Heroku deployment, with some shiny new CSS and a Bootstrap theme.</p>
-  </div>
-  <hr>
-  <div class="blog-post">
-    <h2 class="blog-post-title">Event Study API v1.0 Released!</h2>
-    <p class="blog-post-meta">April 7, 2016</p>
-    <p>This is the first release of our API! Go to the API page to see the specs.</p>
-  </div>
-{% endblock %}
+  <!-- Javascript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="js/jquery-1.11.0.min.js"><\/script>')</script>
+  <script src="{% static 'splash/js/wow.min.js' %}"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+  <script src="{% static 'splash/js/main.js' %}"></script>
+
+
+</body>
+</html>

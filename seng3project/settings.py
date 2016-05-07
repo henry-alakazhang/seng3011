@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import dj_database_url
+# import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)), )
@@ -35,11 +37,16 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'eventstudyapi',
     'rest_framework',
+    'registration',
+    'crispy_forms',
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -78,8 +85,14 @@ WSGI_APPLICATION = 'seng3project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'mydb',
+        'USER' : 'postgres',
+        'PASSWORD': 'startx',
+        'HOST': '',
+        'PORT': '',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
@@ -127,3 +140,14 @@ STATIC_URL = '/static/'
 # Extra places for collectstatic to find static files.
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+ACCOUNT_ACTIVATION_DAYS = 7
+REGISTRATION_AUTO_LOGIN = True # If True, the user will be automatically logged in.
+LOGIN_REDIRECT_URL = '/'
+# LOGIN_URL = '/accounts/login/'  # The page users are directed to if they are not logged in,
+    # and are trying to access pages requiring authentication
+REGISTRATION_OPEN = True # If True, users can register
+SITE_ID = 1
+
+DATABASES['default'] =  dj_database_url.config()

@@ -1,0 +1,12 @@
+{% extends "home/base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <div class='col-sm-6 col-sm-offset-3'>
+        <p class="lead">{% trans "You are now registered. You have been logged in with your account" %}</p>
+        {# TODO: Change ToMyProfile to Point to Portfolio or something... #}
+        <a href="/" class="btn btn-success btn-me">
+            <span class="glyphicon glyphicon-user"></span> To MyProfile
+        </a>
+    </div>
+{% endblock %}
