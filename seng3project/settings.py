@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)), )
@@ -141,3 +142,5 @@ LOGIN_REDIRECT_URL = '/'
     # and are trying to access pages requiring authentication
 REGISTRATION_OPEN = True # If True, users can register
 SITE_ID = 1
+
+DATABASES['default'] =  dj_database_url.config()

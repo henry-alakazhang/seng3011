@@ -1,5 +1,6 @@
 click==5.1
 colorama==0.3.3
+dj-database-url==0.4.1
 Django==1.9.4
 django-appconf==1.0.2
 django-bootstrap-form==3.2.1
