@@ -12,8 +12,12 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 
-# Lines to comment for SQLite
-# import dj_database_url
+if 'DYNO' in os.environ:
+    # print("On Heroku")
+    import dj_database_url
+else:
+    print("Not on Heroku")
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)), )
@@ -84,24 +88,26 @@ WSGI_APPLICATION = 'seng3project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-
-        # ---- Lines to comment for SQLite ----
-        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        #'NAME': 'mydb',
-        #'USER' : 'postgres',
-        #'PASSWORD': 'startx',
-        #'HOST': '',
-        #'PORT': '',
-        # ---- Lines to comment for SQLite ----
-
-        # ---- Lines to UN-comment for SQLite ----
-         'ENGINE': 'django.db.backends.sqlite3',
-         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        # ---- Lines to UN-comment for SQLite ----
+if 'DYNO' in os.environ:
+    # print("On Heroku")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'mydb',
+            'USER' : 'postgres',
+            'PASSWORD': 'startx',
+            'HOST': '',
+            'PORT': '',
+        }
     }
-}
+else:
+    print("Not on Heroku")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation
@@ -158,5 +164,8 @@ REGISTRATION_OPEN = True # If True, users can register
 SITE_ID = 1
 
 
-# Lines to comment for SQLite
-#DATABASES['default'] =  dj_database_url.config()
+if 'DYNO' in os.environ:
+    # print("On Heroku")
+    DATABASES['default'] =  dj_database_url.config()
+else:
+    print("Not on Heroku")
