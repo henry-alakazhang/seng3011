@@ -30,7 +30,7 @@ function updateNews(e) {
     }
     $.ajax({
 	type : "Post",
-	url : "pacificpygmyowl.herokuapp.com/api/query",
+	url : "https://pacificpygmyowl.herokuapp.com/api/query",
 	contentType : 'application/json',
 	data : JSON.stringify(input),
 	success : function(data) {
