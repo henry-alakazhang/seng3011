@@ -25,12 +25,12 @@ function updateNews(e) {
     var input = {
 	"start_date" : start,
 	"end_date" : end,
-	instr_list : [],
+	instr_list : [ric_list],
 	tpc_list : []
     }
     $.ajax({
 	type : "Post",
-	url : "http://pacificpygmyowl.herokuapp.com/api/query",
+	url : "pacificpygmyowl.herokuapp.com/api/query",
 	contentType : 'application/json',
 	data : JSON.stringify(input),
 	success : function(data) {
