@@ -67,12 +67,12 @@ function updateNews(e) {
 		s = s.substring(0, m != -1 ? m : o != -1 ? o : n != -1 ? n+1 : 20);
 		$('#artTab').parent().remove()
 		$("#tabs").append('<li><a data-toggle="tab" href="#art" id = "artTab">' + escapeHtml(s) + '</a></li>');
-		items.push('<h2>' + news[id]["headline"] + '</h2>');
+		items.push('<h2>' + escapeHtml(news[id]["headline"]) + '</h2>');
 		items.push('<small>Date: ' + news[id]["date"] + '</small>');
 		$.each(news[id]["instr_list"], function(i, val) {
 		    items.push(' <span class="label label-default">' + val + '</span>');
 		});
-		items.push('<hr><p>' + news[id]["body"] + '</p>');
+		items.push('<hr><p>' + escapeHtml(news[id]["body"]) + '</p>');
 		$("#artCont").empty().append(items.join(''));
 	    });
 	}
