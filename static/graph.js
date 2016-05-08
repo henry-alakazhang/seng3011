@@ -74,6 +74,7 @@ function updateNews(e) {
 		});
 		items.push('<hr><p>' + escapeHtml(news[id]["body"]) + '</p>');
 		$("#artCont").empty().append(items.join(''));
+		$("#artTab").tab('show');
 	    });
 	}
     });
