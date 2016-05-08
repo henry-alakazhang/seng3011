@@ -4,8 +4,54 @@
 
 {% block content %}
   {% if user %}
-    Welcome, {{ user }}!
+    <h2>Welcome, {{ user }}!</h2>
+    <div class="row">
+      <h3>My Portfolio</h3>
+      {% if notice %}
+        <div style="color:red">{{notice}}</div>
+      {% endif %}
+      {% if portfolio %} 
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>RIC</th>
+              <th>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for ric in portfolio %} 
+            <tr>
+              <th>{{ric.portfolio}}</th>
+              <th>
+                <form class="form-inline" action = "#">
+                  <input hidden name="removeric" value="{{ric.portfolio}}">
+                  <button type="submit" class="btn btn-default" value="submit">Remove</button>
+                </form>
+              </th>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        <form class="form-inline" action = "#">
+          <input hidden name="removeall" value="true">
+          <button type="submit" class="btn btn-default" value="submit">Remove all</button>
+        </form>
+      {% else %}
+        You have no portfolio! Add a RIC to track it between sessions.
+      {% endif %}
+    </div>
+        <hr>
+    <div class="row">
+      <form class="form-inline" action="#">
+        <div class="form-group">
+          <lable for="ric">Add:</lable>
+          <input type="text" class="form-control" name="addric" placeholder="RIC Name">
+        </div>
+        <button type="submit" class="btn btn-default" value="submit">Add to Portfolio</button>
+      </form>
+    </div>
   {% else %}
-    Please log in.
+    Please log in or register an account.
   {% endif %}
 {% endblock %}
