@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 
 # Lines to comment for SQLite
-import dj_database_url
+# import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)), )
@@ -65,7 +65,7 @@ ROOT_URLCONF = 'seng3project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['home/templates'],
+        'DIRS': ['home/templates', 'portfolio/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -88,17 +88,17 @@ DATABASES = {
     'default': {
 
         # ---- Lines to comment for SQLite ----
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'mydb',
-        'USER' : 'postgres',
-        'PASSWORD': 'startx',
-        'HOST': '',
-        'PORT': '',
+        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        #'NAME': 'mydb',
+        #'USER' : 'postgres',
+        #'PASSWORD': 'startx',
+        #'HOST': '',
+        #'PORT': '',
         # ---- Lines to comment for SQLite ----
 
         # ---- Lines to UN-comment for SQLite ----
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+         'ENGINE': 'django.db.backends.sqlite3',
+         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         # ---- Lines to UN-comment for SQLite ----
     }
 }
@@ -159,4 +159,4 @@ SITE_ID = 1
 
 
 # Lines to comment for SQLite
-DATABASES['default'] =  dj_database_url.config()
+#DATABASES['default'] =  dj_database_url.config()
