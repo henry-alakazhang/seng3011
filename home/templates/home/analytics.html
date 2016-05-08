@@ -8,13 +8,12 @@
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js'></script>
-    <script src="{% static "form.js" %}"></script> 
+    <script src='{% static "form.js" %}'></script> 
+    <script src='{% static "graph.js" %}'></script>
 {% endblock %}
 {% block title %}Team Cool - SENG 3011{% endblock %}
-(% block
-{% block content %}
 
-    <body>
+{% block content %}
     <div class="row">
         <!-- Button trigger modal -->
         <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#uploadModal">
@@ -54,9 +53,9 @@
     <br>
     <div class="panel panel-primary">
         <div class="panel-heading">
-        	<ul class="nav nav-tabs">
+        	<ul class="nav nav-tabs" id="tabs">
 	            <li class="active"><a data-toggle="tab" href="#options">Options</a></li>
-	            <li class="disabled"><a data-toggle="tab" href="#graph" id="graphTab">Graph</a></li>
+	            <li><a data-toggle="tab" href="#graph" id="graphTab">Graph</a></li>
 	            <li><a data-toggle="tab" href="#news" id="newsTab">News</a></li>
             </ul>
         </div>
@@ -198,34 +197,27 @@
 	        		<div class="col-md-10">     
 	        			{% if request.user.is_authenticated %}
 	        				<script type="text/javascript">
-	        					updateNews();
+	        				$('#newsTab').on('shown.bs.tab', function(e) {
+	        					var portfolio = "{{ portfolio|escapejs }}";
+	        					updateNews(portfolio);
+	        				});
 	        				</script>
 	        			{% else %}
 	        				<h1>Please login to view related news</h1>
 	        			{% endif %}
 			        	<div class="list-group" id="newsItems">
-			        	<a href="#" class="list-group-item">
-						    <h4 class="list-group-item-heading">Article name</h4>
-						    <p class="list-group-item-text">Date of article.</p>
-						    <span class="label label-default">RIC1</span>
-						    <span class="label label-default">RIC2</span>
-					  	</a>
-			        	<a href="#" class="list-group-item">
-						    <h4 class="list-group-item-heading">Article name2</h4>
-						    <p class="list-group-item-text">Date of article.</p>
-						    <span class="label label-default">RIC1</span>
-						    <span class="label label-default">RIC2</span>
-					  	</a>
-			        	<a href="#" class="list-group-item">
-						    <h4 class="list-group-item-heading">Article name3</h4>
-						    <p class="list-group-item-text">Abstract</p>
-						    <small>Date of article.</small>
-						    <span class="label label-default">RIC1</span>
-						    <span class="label label-default">RIC2</span>
-					  	</a>
 						</div>
 					</div>
 				</div>
+	        </div>
+	        <div id="art" class="tab-pane fade">
+	        	<div class="row">
+	        		<div class="col-md-1"></div>
+	        		<div class="col-md-10">
+	        			<div id="artCont">
+	        			</div>
+	        		</div>
+        		</div>
 	        </div>
         </div>   
    	</div>
@@ -242,7 +234,5 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/scripts.js"></script>
-    <script src='{% static "graph.js" %}'></script>
-    </body>
 
 {% endblock %}

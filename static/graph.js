@@ -1,10 +1,84 @@
 var apiResults;
+var news;
 var chart;
 var chartObjData;
 var chartData = [];
 var minDate = new Date(2010, 1 - 1, 1)
 var maxDate = new Date(2015, 2 - 1, 28)
 var file_key = 0;
+
+function escapeHtml(unsafe) {
+    return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function updateNews(e) {
+    console.log(e);
+    var ric = jQuery.parseJSON(e);
+    var ric_list = [];
+    $.each(ric, function(i, val) {
+	if (val != '') {
+	    ric_list.push(val["portfolio"]);
+	}
+    });
+    var start = moment("2015-10-01").utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+    var end = moment("2015-10-02").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+    var input = {
+	"start_date" : start,
+	"end_date" : end,
+	instr_list : [],
+	tpc_list : []
+    }
+    $.ajax({
+	type : "Post",
+	url : "http://pacificpygmyowl.herokuapp.com/api/query",
+	contentType : 'application/json',
+	data : JSON.stringify(input),
+	success : function(data) {
+	    data.sort(function(a, b) {
+		return moment(b.date, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.date, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
+	    })
+	    var news = data;
+	    var items = [];
+	    $.each(data, function(i, val) {
+		items.push('<a href="#" id="article' + i + '" class="list-group-item"> <h4 class="list-group-item-heading">' + escapeHtml(val["headline"]) + '</h4>');
+		if (val["body"] != '') {
+		    var s = val["body"]
+		    var n = s.indexOf('.', 200);
+		    var m = s.indexOf('。', 200);
+		    s = s.substring(0, n != -1 ? n < 300 ? n + 1 : 250 : m != -1 ? m + 1 : 250);
+		    items.push('<p class="list-group-item-text">' + escapeHtml(s) + '</p>');
+		} else {
+		    items.push('<p class="list-group-item-text">No Body Available</p>');
+		}
+		items.push('<small>' + val['date'] + '</small>')
+		$.each(val["instr_list"], function(i, val) {
+		    items.push(' <span class="label label-default">' + val + '</span>');
+		});
+	    });
+	    $('#newsItems').empty().append(items.join(''));
+	    $("#newsItems a").click(function() {
+		var id = $(this).attr('id').substring(7);
+		console.log(id);
+		items = [];
+		var s = news[id]["headline"];
+		var n = s.indexOf(' ', 15);
+		var m = s.indexOf('，');
+		var o = s.indexOf('、');
+		s = s.substring(0, m != -1 ? m : o != -1 ? o : n != -1 ? n+1 : 20);
+		$('#artTab').parent().remove()
+		$("#tabs").append('<li><a data-toggle="tab" href="#art" id = "artTab">' + escapeHtml(s) + '</a></li>');
+		items.push('<h2>' + news[id]["headline"] + '</h2>');
+		items.push('<small>Date: ' + news[id]["date"] + '</small>');
+		$.each(news[id]["instr_list"], function(i, val) {
+		    items.push(' <span class="label label-default">' + val + '</span>');
+		});
+		items.push('<hr><p>' + news[id]["body"] + '</p>');
+		$("#artCont").empty().append(items.join(''));
+	    });
+	}
+    });
+}
+
 var getEvents = function() {
     start = $('#startValue').val();
     end = $('#endValue').val();
@@ -113,7 +187,6 @@ var getEvents = function() {
 			    $('.RICcheckbox input:checkbox').on('change', function() {
 				// From the other examples
 				if (this.checked) {
-				    $('#graphTab').parent().removeClass("disabled");
 				    var newData = {
 					"key" : $(this).val(),
 					"values" : []
@@ -211,8 +284,6 @@ var getEvents = function() {
 						chartData.splice(i, 1);
 					    }
 					}
-				    } else {
-					$('#graphTab').parent().addClass("disabled");
 				    }
 				    d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
 				}
@@ -275,7 +346,6 @@ $("#endPicker").mousedown(function() {
     }
 });
 
-
 nv.addGraph(function() {
     chart = nv.models.cumulativeLineChart().x(function(d) {
 	return d["x"]
@@ -297,33 +367,30 @@ nv.addGraph(function() {
 });
 
 $('#graphTab').on('shown.bs.tab', function(e) {
+    console.log("resizing");
     window.dispatchEvent(new Event('resize'));
 });
 
-$('#newsTab').on('shown.bs.tab', function(e) {
-    
-});
-
 $('#uploadForm').ajaxForm({
-	beforeSend : function() {
-		$('#uploadProgress').addClass("progress");
-		$('#uploadBar').attr('aria-valuenow', 0);
-		$('#uploadBar').attr('style', "width:0%");
-		$('#uploadProgress').show();
-	},
-	uploadProgress: function(e, p, t, c) {
-		$('#uploadBar').attr('style', "width:" + c + "%");
-		$('#uploadBar').empty().append(c+"%");
-	},
-	complete : function(response) {
-		console.log(response);
-		if (response.responseJSON) {
-			file_key = response.responseJSON.file_key
-			alert("Files uploaded successfully"); 
-			getEvents();
-		} else {
-			alert("File upload error! Please check files and try again.");
-		}
-		$('#uploadProgress').hide();
-	}}
-); 
+    beforeSend : function() {
+	$('#uploadProgress').addClass("progress");
+	$('#uploadBar').attr('aria-valuenow', 0);
+	$('#uploadBar').attr('style', "width:0%");
+	$('#uploadProgress').show();
+    },
+    uploadProgress : function(e, p, t, c) {
+	$('#uploadBar').attr('style', "width:" + c + "%");
+	$('#uploadBar').empty().append(c + "%");
+    },
+    complete : function(response) {
+	console.log(response);
+	if (response.responseJSON) {
+	    file_key = response.responseJSON.file_key
+	    alert("Files uploaded successfully");
+	    getEvents();
+	} else {
+	    alert("File upload error! Please check files and try again.");
+	}
+	$('#uploadProgress').hide();
+    }
+});
