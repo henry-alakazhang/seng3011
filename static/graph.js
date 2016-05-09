@@ -89,6 +89,9 @@ var getEvents = function() {
 	    latest : end,
 	    file_key : file_key
 	}, function(data) {
+		$('#ricTable').empty();
+		chartData = [];
+		d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
 	    $('#eventSection').show();
 	    window.scrollTo(0, document.body.scrollHeight);
 	    var keys = [];
@@ -107,7 +110,9 @@ var getEvents = function() {
 		});
 		$('#datedropdown').empty().append(items.join('')).parents(".dropdown").find('.btn-primary').removeClass("disabled").text("No Date Chosen");
 		$("#datedropdown li a").click(function() {
-		    $('#eventdropdown').empty();
+		    chartData = [];
+			d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
+			$('#eventdropdown').empty();
 		    $('#ricTable').empty();
 		    $(this).parents(".dropdown").find('.btn-primary').text($(this).text());
 		    $(this).parents(".dropdown").find('.btn-primary').val($(this).text());
@@ -138,7 +143,8 @@ var getEvents = function() {
 		    });
 		    $('#eventdropdown').empty().append(items.join('')).parents(".dropdown").find('.btn-primary').removeClass("disabled").text("No Event Chosen");
 		    $("#eventdropdown li a").click(function() {
-			$(this).parents(".dropdown").find('.btn-primary').text($(this).text());
+
+				$(this).parents(".dropdown").find('.btn-primary').text($(this).text());
 			$(this).parents(".dropdown").find('.btn-primary').val($(this).text());
 			$('#ricTable').empty();
 			// call api
@@ -354,11 +360,12 @@ nv.addGraph(function() {
 	return d["y"] / 100
     }).useInteractiveGuideline(true).noData("Please choose input in Options tab");
 
-    chart.xAxis.tickFormat(function(d) {
+    chart.xAxis.axisLabel('Date')
+		.tickFormat(function(d) {
 	return moment($('#datedropdown').parents(".dropdown").find('.btn-primary').text(), "DD-MMM-YY").add(d, 'days').format("DD-MMM-YY");
     });
 
-    chart.yAxis.tickFormat(d3.format('.2%')).showMaxMin(false);
+    chart.yAxis.axisLabel('Cumulative Returns').tickFormat(d3.format('.2%')).showMaxMin(false);
 
     d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
 
