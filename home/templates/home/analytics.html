@@ -22,7 +22,7 @@
         {#        <a href="/analytics/howtouse" class="btn pull-right btn-me">#}
         {#            <span class="btn btn-info glyphicon glyphicon-info-sign"></span>#}
         {#        </a>#}
-        <button type="button" class="btn btn-info glyphicon glyphicon-info-sign btn-xs pull-right" data-toggle="tooltip" data-placement="right" title="Upload data files or use ours!">
+        <button type="button" class="btn btn-info glyphicon glyphicon-info-sign btn-xs pull-right" data-toggle="tooltip" data-placement="right" title="Upload data files or use ours! Use tabs to navigate the Analytics Platform">
         </button>
     </div>
     <!-- Modal -->
@@ -202,11 +202,18 @@
             </div>
             <div id="graph" class="tab-pane fade">
                 <!-- Graph Here-->
+                <button type="button" class="btn btn-info glyphicon glyphicon-info-sign btn-xs pull-right" data-toggle="tooltip" data-placement="right" title="Hover the mouse over the graph to show the exact cumulative returns for a particular date.
+                                        Click on the graph to rescale the RICs to 0% on that date, and show the data relative to that date. ">
+                </button>
+
                 <div id="chart">
                     <svg></svg>
                 </div>
             </div>
             <div id="news" class="tab-pane fade">
+                <button type="button" class="btn btn-info glyphicon glyphicon-info-sign btn-xs pull-right" data-toggle="tooltip" data-placement="right" title="Displays News for RICs in Potfolio.">
+                </button>
+
                 <div class="row">
                     <div class="col-md-1"></div>
                     <div class="col-md-10">
