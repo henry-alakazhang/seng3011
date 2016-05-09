@@ -17,6 +17,7 @@
         <!-- Button trigger modal -->
         <button type="button" class="btn btn-primary btn-me" data-toggle="modal" data-target="#uploadModal">
             Upload Files
+            <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true">
         </button>
         {#        <a href="/analytics/howtouse" class="btn pull-right btn-me">#}
         {#            <span class="btn btn-info glyphicon glyphicon-info-sign"></span>#}
@@ -55,9 +56,13 @@
     <div class="panel panel-primary">
         <div class="panel-heading">
             <ul class="nav nav-tabs" id="tabs">
-                <li class="active"><a data-toggle="tab" href="#options">Options</a></li>
-                <li><a data-toggle="tab" href="#graph" id="graphTab">Graph</a></li>
-                <li><a data-toggle="tab" href="#news" id="newsTab">News</a></li>
+                <li class="active"><a data-toggle="tab" href="#options">Options <span class="glyphicon glyphicon-tasks" aria-hidden="true"></a></li>
+
+                <li><a data-toggle="tab" href="#graph" id="graphTab">Graph <span class="glyphicon glyphicon-stats
+" aria-hidden="true">
+                </a></li>
+                <li><a data-toggle="tab" href="#news" id="newsTab">News
+                    <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></a></li>
             </ul>
         </div>
         <div class="tab-content">
