@@ -395,7 +395,6 @@ $('#uploadForm').ajaxForm({
 	if (response.responseJSON) {
 	    file_key = response.responseJSON.file_key
 	    alert("Files uploaded successfully");
-	    getEvents();
 	} else {
 	    alert("File upload error! Please check files and try again.");
 	}

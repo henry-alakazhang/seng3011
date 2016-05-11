@@ -197,8 +197,10 @@ def events_view(request):
         if (request.GET['file_key'] != '0'):
             fileLoc = 'media/' + request.GET['file_key'] +'_'
         else:           
-            fileLoc = 'static/'    
-    print (fileLoc)
+            fileLoc = 'static/'
+    if (error):
+        return HttpResponse(error);
+
     fileParsed = EventsParser(fileLoc + 'stock_characteristic_file.csv')
     
     # if requested, filter dates

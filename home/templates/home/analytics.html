@@ -35,6 +35,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="uploadForm" class="form-inline" action="/eventapi/" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
                         Price file: <input type="file" name="stock_price_data_file"><p>
                         Event file: <input type="file" name="stock_characteristic_file"><p>
                         <p><input type="submit" class="form-control" id="uploadButton" value="Upload files">
