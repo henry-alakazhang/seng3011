@@ -1,0 +1,52 @@
+{% extends "home/base.html" %}
+{% load staticfiles %}
+{% block scripts %}
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.css">
+    <link rel="stylesheet" type="text/css" href="{% static "analytics.css" %}">
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js'></script>
+{% endblock %}
+{% block title %}Team Cool - SENG 3011{% endblock %}
+(% block
+{% block content %}
+
+    <body>
+    <h1>How to Use the Analytics Platform</h1>
+    <h3> How to Generate the Graph</h3>
+    <p><ol>
+        <li>In 'Date Range', add your start and end date. For example: 1st of November 2011 to 1st of December 2011.
+            Note that there is no data beyond May 2015.</li>
+        <li>In 'Event Selection' select a date from the 'Choose a Date' drop down menu. If drop down menu is blank,
+            that means there is no available data in between the dates you have chosen.</li>
+        <li>Choose an event listed in the 'Choose an Event' drop down menu.
+            Only after all of this data (Steps 2,3) has been
+            specified will the 'RIC Selection' section appear.
+            <br>
+            An example of an event involving multiple RICs is the <i> 5th of December 2012 </i>
+            <br>
+            <code>Please note, there is some delay involved in loading a large number of RICs and thier respective data.</code>
+            <br>
+        </li>
+        <li>In 'RIC Selection', choose the RICs you wish to appear on the graph. After this, the graph will appear
+            at the top of the page.</li>
+    </ol></p>
+    <h3> How to Use the Graph</h3>
+    <p>
+        The graph will display the data of the RICs chosen over the date range chosen, as well as the average of all
+        of the RICs that are currently being displayed on the graph. Hover the mouse over the graph to show the exact
+        cumulative returns for a particular date for all the RICs and the 'average' is also displayed. Clicking on the
+        graph at a particular point will rescale the RICs to 0% on that date, and show the data relative to that date.
+        <br>
+        Please note that if only one RIC is chosen no average will be shown. Also, some of the dates in the data have
+        no data associated with them. For these dates, there will be unexpected results (such as sudden dips in the graph).
+        <br>
+    </p>
+    <a href="/analytics" class="btn btn-success btn-me">
+        <span class="glyphicon glyphicon-stats"></span> Back to Analytics
+    </a>
+    </body>
+
+{% endblock %}

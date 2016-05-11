@@ -1,0 +1,11 @@
+{% extends "home/base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <div class='col-sm-6 col-sm-offset-3'>
+        <p class="lead">{% trans "You are now registered. <br> You have been logged in with your account" %}</p>
+        <a href="/portfolio/profile" class="btn btn-success btn-me">
+            <span class="glyphicon glyphicon-user"></span> To My Portfolio
+        </a>
+    </div>
+{% endblock %}

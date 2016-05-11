@@ -5,7 +5,7 @@
  */
 
 body {
-  font-family: Georgia, "Times New Roman", Times, serif;
+  font-family: Helvetica, "Trebuchet MS", sans-serif;
 }
 
 
@@ -42,4 +42,12 @@ body {
 .blog-post-meta {
   margin-bottom: 20px;
   color: #999;
+}
+
+.navbar.open {
+  background-color: transparent;
+}
+
+.navbar {
+  transition: background-color .3s;
 }

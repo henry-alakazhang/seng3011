@@ -1,4 +1,3 @@
-import datetime
 from random import choice
 from string import ascii_uppercase
 
@@ -10,13 +9,15 @@ from . import requestProcessor
 import timeit
 import datetime
 import os
+import cProfile, pstats, io
 
 def index(request):
     return HttpResponse("Hello world, you are at the Event Study API index.")
 
 @api_view(['POST', 'GET'])
 def event_study_api_view(request, **kwargs):
-
+    #pr = cProfile.Profile()
+    #pr.enable()
     processing_time_start = timeit.default_timer()
     start_date_time = datetime.datetime.now()
 
@@ -27,8 +28,8 @@ def event_study_api_view(request, **kwargs):
 
 #    response['logfile'] = log;
     if (fatal):
-        return HttpResponse("FATAL " + error)
-
+        return HttpResponse("FATAL " + '\n'.join(map(str,error)))
+    
     # build log into json response
     log = dict();
     log['Team'] = "Team Cool"
@@ -47,12 +48,18 @@ def event_study_api_view(request, **kwargs):
     log['Errors/Warnings'] = error
     
     response['log'] = log
+    #pr.disable()    
+    #s = io.StringIO()
+    #sortby = 'cumulative'
+    #ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    #ps.print_stats()
+    #print (s.getvalue())
     return JsonResponse(response)
 
 
 def upload_files(request):
     request_POST_dict = dict(request.POST)
-    error = ""
+    error = list()
     fatal = False
 
     if 'file_key' in request_POST_dict:
@@ -63,10 +70,10 @@ def upload_files(request):
     files_required = ['stock_characteristic_file', 'stock_price_data_file']
     for reqfile in files_required:
         if reqfile not in request.FILES:
-            error += 'ERROR: File ' + reqfile + ' not proided\n'
+            error.append('ERROR: File ' + reqfile + ' not provided')
             fatal = True
         else:
-            handle_uploaded_file(request.FILES[reqfile], file_key)
+            handle_uploaded_file(request.FILES[reqfile], file_key, reqfile)
 
     if fatal:
         return(0, error, True)
@@ -77,7 +84,7 @@ def upload_files(request):
 
 def process_files(request):
     request_GET_dict = dict(request.GET)
-    error = ""
+    error = list()
     fatal = False
 
     # find the file supplied
@@ -85,22 +92,27 @@ def process_files(request):
     fileFound = False
     if 'file_key' not in request_GET_dict:
         error += 'ERROR There was no file_key supplied \n'
-        fatal = False
+        fatal = True
     elif request.GET['file_key'] is '':
-        error += 'ERROR File key was none \n'
+        error.append('ERROR File key was none')
         fatal = True
     else:
         # Check against existing files in media folder
-        files_dict = list()
-        for fn in os.listdir('media/'):
-            files_dict.append(str(fn))
-            if fn .startswith(str(request.GET['file_key'])):
-                fileFound = True
-                fileFoundKey = str(request.GET['file_key'])
-
-        if fileFound is False:
-            error += 'No file found with key: ' + request_GET_dict['file_key'][0] + '\n'
-            fatal = True
+        if (request.GET['file_key'] == '0'):
+            fileLoc = 'static/' 
+        else:           
+            files_dict = list()
+            for fn in os.listdir('media/'):
+                files_dict.append(str(fn))
+                if fn .startswith(str(request.GET['file_key'])):
+                    fileFound = True
+                    fileFoundKey = str(request.GET['file_key'])
+    
+            if fileFound is False:
+                error += 'No file found with key: ' + request_GET_dict['file_key'][0] + '\n'
+                fatal = True
+                        
+            fileLoc = 'media/' + request.GET['file_key'] +'_'
     
     # Standard dict methods do not work on the QueryDict, thus convert to a std dict
     request_dict = dict(request.GET)
@@ -118,13 +130,13 @@ def process_files(request):
             valid_params_dict[key] = value[0]
         elif not (key.startswith('stock_price_data_file') or key.startswith('stock_characteristic_file')):
             if not fileFound:
-                error += 'Warning: The following parameter is invalid: ' + str(key) + str(value) + '\n'
+                error.append('Warning: The following parameter is invalid: ' + str(key) + str(value))
 
     # Check the 2 necessary params were specified otherwise return an error
     required_params = ['upper_window', 'lower_window']
     for param in required_params:
         if param not in valid_params_dict:
-            error += 'ERROR: The following required parameter was not correctly provided: ' + param + '\n'
+            error.append('ERROR: The following required parameter was not correctly provided: ' + param)
             fatal = True
             # TODO: Code to return an error to the user here
 
@@ -132,7 +144,7 @@ def process_files(request):
         return(0, error, fatal)
 
     # Process query
-    total_cum_rets = requestProcessor.processData('media/' + str(fileFoundKey) + '_' + str('stock_price_data_file.csv'), 'media/' + str(fileFoundKey) + '_' + str('stock_characteristic_file.csv'), valid_params_dict)
+    (total_cum_rets, error) = requestProcessor.processData(fileLoc + str('stock_price_data_file.csv'), fileLoc + str('stock_characteristic_file.csv'), valid_params_dict, error)
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     return (requestResponse, error, False)
 
@@ -145,11 +157,11 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
         dateFound = False
         indivCumRets = list()
         for i in range(int(lowerWindow),int(upperWindow)+1):            
-            indivCumRets.append(chars[1][i])
+            indivCumRets.append(float(chars[1][i]))
         for event in JsonCumRets["events"]:
             date = reformat_date(chars[0]["Event Date"])
             if event["date"] == date:
-                event["returns"][chars[0]["#RIC"]] = indivCumRets       
+                event["returns"][chars[0]["#RIC"]] = indivCumRets
                 dateFound = True      
                 break
         if not dateFound:
@@ -157,7 +169,15 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
             event["date"] = reformat_date(chars[0]["Event Date"])
             event["returns"] = dict()
             event["returns"][chars[0]["#RIC"]] = indivCumRets   
-            JsonCumRets["events"].append(event)                
+            JsonCumRets["events"].append(event)
+    for event in JsonCumRets["events"]:
+        average_cum_ret = list()
+        for i in range(int(lowerWindow),int(upperWindow)+1):
+            sum_cum_ret = 0             
+            for indiv_cum_ret in event["returns"]:
+                sum_cum_ret = sum_cum_ret + event["returns"][indiv_cum_ret][i-int(lowerWindow)]
+            average_cum_ret.append(sum_cum_ret/len(event["returns"]))
+        event["average"] = average_cum_ret                
     return JsonCumRets
 
 def reformat_date(date_string):
@@ -174,9 +194,14 @@ def events_view(request):
     elif request.GET['file_key'] is '':
         error = 'ERROR File key was none'
     else:
-        file_key = request.GET['file_key']              
+        if (request.GET['file_key'] != '0'):
+            fileLoc = 'media/' + request.GET['file_key'] +'_'
+        else:           
+            fileLoc = 'static/'
+    if (error):
+        return HttpResponse(error);
 
-    fileParsed = EventsParser('media/' + request.GET['file_key'] + '_stock_characteristic_file.csv')
+    fileParsed = EventsParser(fileLoc + 'stock_characteristic_file.csv')
     
     # if requested, filter dates
     if ('earliest' in request_GET_dict):

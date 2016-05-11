@@ -54,7 +54,7 @@ class Data:
         self.Variables = F2.getVars()
         self.CharInfo = F2
         self.calcCumRet()
-        
+
     #Calculate the cumulative return for all data
     def calcCumRet(self):
         self.CumRet = dict()
@@ -74,6 +74,7 @@ class Data:
                 else:
                     self.CumRet[RIC][priceData["Date[L]"]] = prevCumRet  
             del prevPrice     
+
     #Check if a given variable was in File2
     def isExistingVariable(self,var):
         if var in map(str.lower,self.Variables):
@@ -83,4 +84,7 @@ class Data:
         
     #Gets the cumulative return for a stock at a given date
     def getCumRet(self,stockChar,eventDate):
-        return self.CumRet[stockChar["#RIC"]][eventDate]
+        if (eventDate in self.CumRet[stockChar["#RIC"]]):
+            return self.CumRet[stockChar["#RIC"]][eventDate]
+        else:
+            return 0

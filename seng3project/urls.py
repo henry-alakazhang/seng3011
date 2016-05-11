@@ -15,12 +15,34 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from registration.backends.simple.views import RegistrationView
+
+    # # Create a new class that redirects the user to the index page, if successful at logging
+    # class MyRegistrationView(RegistrationView):
+    #     def get_success_url(self,request, user):
+    #         return '/'
 
 urlpatterns = [
     # Pointing root URLconf to the eventstudyapi URLs
     url(r'^eventapi/', include('eventstudyapi.urls')),
 
+    # Account urls
+    url(r'^accounts/', include('registration.backends.simple.urls')),
+
+    url(r'^portfolio/', include('portfolio.urls')),
+
     url(r'^admin/', admin.site.urls),
 
     url(r'', include('home.urls'))
 ]
+
+# Account urls
+"""
+registration -> /accounts/register/
+registration complete -> /accounts/register/complete
+login -> /accounts/login/
+logout -> /accounts/logout/
+password change -> /password/change/
+password reset -> /password/reset/
+"""
+

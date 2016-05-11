@@ -1,0 +1,81 @@
+{% extends "home/base.html" %}
+
+{% block title %}Team Cool - {{ user }}'s Profile{% endblock %}
+
+{% block content %}
+    {% if user %}
+        <h2>Welcome, {{ user }}!</h2>
+        <div class="row">
+            <h3>My Portfolio</h3>
+            {% if notice %}
+                <div style="color:red">{{notice}}</div>
+            {% endif %}
+            {% if portfolio %}
+                <table class="table table-striped table-responsive">
+                    <thead>
+                    <tr>
+                        <th>RIC</th>
+                        <th> Remove
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ric in portfolio %}
+                        <tr>
+                            <th>{{ric.portfolio}}</th>
+                            <th>
+                                <form class="form-inline" action = "#">
+                                    <input hidden name="removeric" value="{{ric.portfolio}}">
+                                    <button type="submit" class="btn btn-default btn-warning btn-sm" value="submit">Remove</button>
+                                </form>
+                            </th>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <form class="form-inline" action = "#">
+                    <input hidden name="removeall" value="true">
+                    <button type="submit" class="btn btn-default btn-danger" value="submit">Remove all</button>
+                </form>
+            {% else %}
+                You have no Stocks in your Portfolio! Add a Stocks you are interested in.
+            {% endif %}
+        </div>
+        <hr>
+        <div class="row">
+            <form class="form-inline" action="#">
+                <div class="form-group">
+                    <lable for="ric">Add:</lable>
+                    <input list="browsers" type="text" class="form-control" name="addric" placeholder="RIC Name">
+                    <datalist id="browsers">
+                        <option value="AAC.AX">
+                        <option value="ANZ.AX">
+                        <option value="BGA.AX">
+                        <option value="CBA.AX">
+                        <option value="CCL.AX">
+                        <option value="CGC.AX">
+                        <option value="ELD.AX">
+                        <option value="FGL.AX">
+                        <option value="GFF.AX">
+                        <option value="GNC.AX">
+                        <option value="NAB.AX">
+                        <option value="RIC.AX">
+                        <option value="SHV.AX">
+                        <option value="TGR.AX">
+                        <option value="TWE.AX">
+                        <option value="WBA.AX">
+                        <option value="WBC.AX">
+                        <option value="SIV.AX">
+                        <option value="STL.AX">
+                        <option value="EGH.AX">
+                    </datalist>
+{#                                        <lable for="ric">Add:</lable>#}
+{#                                        <input type="text" class="form-control" name="addric" placeholder="RIC Name">#}
+                </div>
+                <button type="submit" class="btn btn-default btn-info" value="submit">Add to Portfolio</button>
+            </form>
+        </div>
+    {% else %}
+        Please log in or register an account.
+    {% endif %}
+{% endblock %}

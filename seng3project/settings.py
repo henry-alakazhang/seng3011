@@ -12,6 +12,13 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 
+if 'DYNO' in os.environ:
+    # print("On Heroku")
+    import dj_database_url
+else:
+    print("Not on Heroku")
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)), )
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
@@ -35,11 +42,16 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'eventstudyapi',
     'rest_framework',
+    'registration',
+    'crispy_forms',
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -57,7 +69,7 @@ ROOT_URLCONF = 'seng3project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['home/templates'],
+        'DIRS': ['home/templates', 'portfolio/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,12 +88,26 @@ WSGI_APPLICATION = 'seng3project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if 'DYNO' in os.environ:
+    # print("On Heroku")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'mydb',
+            'USER' : 'postgres',
+            'PASSWORD': 'startx',
+            'HOST': '',
+            'PORT': '',
+        }
     }
-}
+else:
+    print("Not on Heroku")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation
@@ -127,3 +153,19 @@ STATIC_URL = '/static/'
 # Extra places for collectstatic to find static files.
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+ACCOUNT_ACTIVATION_DAYS = 7
+REGISTRATION_AUTO_LOGIN = True # If True, the user will be automatically logged in.
+LOGIN_REDIRECT_URL = '/'
+# LOGIN_URL = '/accounts/login/'  # The page users are directed to if they are not logged in,
+    # and are trying to access pages requiring authentication
+REGISTRATION_OPEN = True # If True, users can register
+SITE_ID = 1
+
+
+if 'DYNO' in os.environ:
+    # print("On Heroku")
+    DATABASES['default'] =  dj_database_url.config()
+else:
+    print("Not on Heroku")

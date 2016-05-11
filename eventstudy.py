@@ -7,8 +7,9 @@ import csv
 import datetime
 import re
 import sys
+import cProfile
 
-from seng3project.eventstudyapi.request import Request, Data
+from eventstudyapi.request import Request, Data
 
 from eventstudyapi.parser import Parser
 
@@ -17,23 +18,32 @@ from eventstudyapi.parser import Parser
 def process(request):
     charsToProcess = list()
     for RIC in request.Data.RIC:
-        for stockChar in request.Data.CharInfo.fileData[RIC]:
-            if (request.matchesReq(stockChar)):
-                charsToProcess.append(stockChar)
+        if RIC in request.Data.CharInfo.fileData:
+            for stockChar in request.Data.CharInfo.fileData[RIC]:
+                if (request.matchesReq(stockChar)):
+                    charsToProcess.append(stockChar)
     upperWindow = int(request.upperWindow)
     lowerWindow = int(request.lowerWindow)
     data = request.Data
     result = list()
     for stockChar in charsToProcess:
-        result.append((stockChar,calcCumRet(stockChar,upperWindow,lowerWindow,data)))
+        cumRet = calcCumRet(stockChar,upperWindow,lowerWindow,data)
+        if (cumRet != None):
+            result.append((stockChar,cumRet))
+        else:
+            print ("Invalid Date range")
     return result
 
 #Process each individual stock characteristic
 def calcCumRet(stockChar,upperWindow,lowerWindow,data):
     cumRet = dict()
-    for i in range(lowerWindow,upperWindow):
-        date = datetime.datetime.strptime(stockChar['Event Date'],"%d-%b-%y") + datetime.timedelta(days=i)        
-        cumRet[i] = data.getCumRet(stockChar,date.strftime("%d-%b-%y").lstrip('0'))
+    for i in range(lowerWindow,upperWindow+1):
+        date = datetime.datetime.strptime(stockChar['Event Date'],"%d-%b-%y") + datetime.timedelta(days=i)
+        indivRet = data.getCumRet(stockChar,date.strftime("%d-%b-%y").lstrip('0'))
+        if (indivRet != None):       
+            cumRet[i] = indivRet
+        else:
+            return None        
     return cumRet
 
 
@@ -88,4 +98,5 @@ for i in range(int(lowerWindow),int(upperWindow)):
     for chars in cumRets:
         row.append(cumRets[cumRets.index(chars)][1][i])
     c.writerow(row)
-    
+
+pr.disable()
