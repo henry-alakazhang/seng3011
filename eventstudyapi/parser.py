@@ -66,3 +66,9 @@ class EventsParser:
             if newDate > early and newDate < late:
                 result[date] = self.fileData[date]
         return result
+    
+    def getEvents(self):
+        result = {}
+        for date in self.fileData.keys():
+            result[date] = self.fileData[date]
+        return result

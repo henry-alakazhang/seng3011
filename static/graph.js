@@ -25,9 +25,13 @@ function updateNews(e) {
     var input = {
 	"start_date" : start,
 	"end_date" : end,
-	instr_list : [ric_list],
+	instr_list : [ ric_list ],
 	tpc_list : []
     }
+    var url = "https://bhsl.blue/news_request/start_date=" + start + "/end_date=" + end;
+    if (ric_list.length > 0)
+	url += "instr_list=" + ric_list.toString();
+    url += '/';
     $.ajax({
 	type : "Post",
 	url : "https://pacificpygmyowl.herokuapp.com/api/query",
@@ -64,7 +68,7 @@ function updateNews(e) {
 		var n = s.indexOf(' ', 15);
 		var m = s.indexOf('，');
 		var o = s.indexOf('、');
-		s = s.substring(0, m != -1 ? m : o != -1 ? o : n != -1 ? n+1 : 20);
+		s = s.substring(0, m != -1 ? m : o != -1 ? o : n != -1 ? n + 1 : 20);
 		$('#artTab').parent().remove()
 		$("#tabs").append('<li><a data-toggle="tab" href="#art" id = "artTab">' + escapeHtml(s) + '</a></li>');
 		items.push('<h2>' + escapeHtml(news[id]["headline"]) + '</h2>');
@@ -80,6 +84,165 @@ function updateNews(e) {
     });
 }
 
+var eventData;
+var ricList = [];
+var eventList = [];
+var paramVals = {};
+$.get("eventapi/events", {
+    file_key : file_key
+}, function(data) {
+    eventData = data;
+    var keys = [];
+    for ( var key in data) {
+	if (data.hasOwnProperty(key)) {
+	    keys.push(key);
+	}
+    }
+    for (var j = 0; j < keys.length; j++) {
+	for ( var key in data[keys[j]]) {
+	    if (data[keys[j]].hasOwnProperty(key)) {
+		if ($.inArray(key, ricList) == -1) {
+		    ricList.push(key);
+		}
+		for ( var i in data[keys[j]]) {
+		    if (data[keys[j]].hasOwnProperty(i)) {
+			for ( var ev in data[keys[j]][i]) {
+			    if (data[keys[j]][i].hasOwnProperty(ev)) {
+				if (ev == "Event Date" || ev == "#RIC") {
+				    continue;
+				}
+				if ($.inArray(ev, eventList) == -1) {
+				    eventList.push(ev);
+				}
+				if (!(ev in paramVals)) {
+				    paramVals[ev] = {};
+				}
+				var val = parseFloat(data[keys[j]][i][ev]);
+				if (!("min" in paramVals[ev])) {
+				    paramVals[ev]["min"] = val;
+				} else {
+				    if (val < paramVals[ev]["min"]) {
+					paramVals[ev]["min"] = val;
+				    }
+				}
+				if (!("max" in paramVals[ev])) {
+				    paramVals[ev]["max"] = val;
+				} else {
+				    if (val > paramVals[ev]["max"]) {
+					paramVals[ev]["max"] = val;
+				    }
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+    console.log(eventList);
+    loadEvents();
+    loadRics();
+})
+
+var graphChanged = false;
+var loadEvents = function() {
+    $("#eventSlider").slider({
+	min : 0,
+	max : 1,
+	values : [ 0, 1 ],
+	slide : function(e, ui) {
+	    $(ui.handle).text(ui.value / 10);
+	},
+	disabled : true,
+    });
+    var btnHeight = $('#eventSlider').parent().height(), slideHeight = $('#eventSlider').height(), buffer = ((btnHeight - slideHeight) / 2);
+    $('#eventSlider').css({
+	'margin-top' : buffer
+    }); // set margin accordingly
+    var items = [];
+    $.each(eventList, function(i, val) {
+	items.push('<option value="' + val + '">');
+    });
+    $('#events').empty().append(items.join(''));
+    $('#eventInput').bind("enterKey", function(e) {
+	if ($.inArray($(this).val(), eventList) == -1) {
+	    alert("Invalid Event");
+	} else {
+	    $("#eventSlider").slider("option", "disabled", false).slider("option", "max", Math.floor(paramVals[$(this).val()]["max"] * 10));
+	    $("#addEvent").removeClass("disabled").click(addEvent);
+	}
+    });
+    $('#eventInput').keyup(function(e) {
+	if (e.keyCode == 13) {
+	    $(this).trigger("enterKey");
+	}
+    });
+};
+
+var requests = {};
+var addEvent = function() {
+    var event = $("#eventInput").val();
+    var min = $("#eventSlider").slider("values", 0);
+    var max = $("#eventSlider").slider("values", 1);
+    var temp = min < max ? -1 : max;
+    if (temp != -1) {
+	max = min;
+	min = temp;
+    }
+    min /= 10;
+    max /= 10;
+    if (event in requests) {
+	alert("Already Chosen Event");
+	return;
+    } else {
+	requests[event] = {};
+	requests[event]["min"] = min;
+	requests[event]["max"] = max;
+    }
+	console.log(requests);
+    $('#eventLabels').append('<span class="label label-default">' + event + " " + min + ":" + max + ' <span class="glyphicon glyphicon-remove remEvent" id="'+ event +'lbl" aria-hidden="true" style="cursor:pointer"></span></span>')
+    $('#eventLabels span').click(function() {
+	if ($(this).hasClass("remEvent")) {
+	    var r = confirm("Are you sure you want to remove this event?");
+	    if (r) {
+		var event = $(this).attr("id").slice(0,-3);
+		delete requests[event];
+		$(this).parent().remove();
+		console.log(requests);
+	    }
+	}
+    });
+};
+var loadEventDate;
+var ricsToDisplay = [];
+var loadRics = function() {
+    ricList.sort();
+    var items = [];
+    $.each(ricList, function(i, val) {
+	if (i % 4 == 0) {
+	    items.push('<div class="row">');
+	}
+	items.push('<div class="col-sm-3"><span class="label-block label-default">' + val + '</span></div>');
+	if (i % 4 == 3) {
+	    items.push('</div><hr style="margin-top: 2px; margin-bottom: 2px">');
+	}
+    });
+    if (ricList.length % 4 != 3) {
+	items.push('</div><hr style="margin-top: 2px; margin-bottom: 2px">');
+    }
+    $("#rics").empty().append(items.join(''));
+    $("#rics span").css('cursor', 'pointer').click(function() {
+	if ($(this).hasClass("label-default")) {
+	    $(this).removeClass("label-default").addClass("label-info");
+	    ricsToDisplay.push($(this).text());
+	} else {
+	    $(this).removeClass("label-info").addClass("label-default");
+	    ricsToDisplay.splice(ricsToDisplay.indexOf($(this).text()), 1);
+	}
+    });
+};
+var drawGraph;
+
 var getEvents = function() {
     start = $('#startValue').val();
     end = $('#endValue').val();
@@ -89,9 +252,9 @@ var getEvents = function() {
 	    latest : end,
 	    file_key : file_key
 	}, function(data) {
-		$('#ricTable').empty();
-		chartData = [];
-		d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
+	    $('#ricTable').empty();
+	    chartData = [];
+	    d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
 	    $('#eventSection').show();
 	    window.scrollTo(0, document.body.scrollHeight);
 	    var keys = [];
@@ -111,8 +274,8 @@ var getEvents = function() {
 		$('#datedropdown').empty().append(items.join('')).parents(".dropdown").find('.btn-primary').removeClass("disabled").text("No Date Chosen");
 		$("#datedropdown li a").click(function() {
 		    chartData = [];
-			d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
-			$('#eventdropdown').empty();
+		    d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
+		    $('#eventdropdown').empty();
 		    $('#ricTable').empty();
 		    $(this).parents(".dropdown").find('.btn-primary').text($(this).text());
 		    $(this).parents(".dropdown").find('.btn-primary').val($(this).text());
@@ -144,7 +307,7 @@ var getEvents = function() {
 		    $('#eventdropdown').empty().append(items.join('')).parents(".dropdown").find('.btn-primary').removeClass("disabled").text("No Event Chosen");
 		    $("#eventdropdown li a").click(function() {
 
-				$(this).parents(".dropdown").find('.btn-primary').text($(this).text());
+			$(this).parents(".dropdown").find('.btn-primary').text($(this).text());
 			$(this).parents(".dropdown").find('.btn-primary').val($(this).text());
 			$('#ricTable').empty();
 			// call api
@@ -191,110 +354,7 @@ var getEvents = function() {
 				items.push('<tr><td><div class="RICcheckbox"><label><input type="checkbox" value="' + val + '"></label></div></td><td>' + val + '</td></tr>');
 			    });
 			    $('#ricTable').empty().append(items.join('')).show();
-			    $('.RICcheckbox input:checkbox').on('change', function() {
-				// From the other examples
-				if (this.checked) {
-				    var newData = {
-					"key" : $(this).val(),
-					"values" : []
-				    };
-				    var cumRets;
-				    var Date = $('#datedropdown').parents(".dropdown").find('.btn-primary').text();
-				    Date = moment(Date, "DD-MMM-YY").format("DD/MM/YY");
-				    for (var i = 0; i < apiResults["events"].length; i++) {
-					if (apiResults["events"][i]["date"] == Date) {
-					    var event = apiResults["events"][i]["returns"];
-					    var ric_keys = [];
-					    for ( var key in event) {
-						if (event.hasOwnProperty(key)) {
-						    ric_keys.push(key);
-						}
-					    }
-					    for (var j = 0; j < ric_keys.length; j++) {
-						if (ric_keys[j] == $(this).val()) {
-						    cumRets = apiResults["events"][i]["returns"][ric_keys[j]];
-						    break;
-						}
-					    }
-					}
-				    }
-				    for (var i = lowerWindow; i <= upperWindow; i++) {
-					newData["values"].splice(i - lowerWindow, 0, {
-					    "x" : i,
-					    "y" : cumRets[i - lowerWindow]
-					});
-				    }
-				    chartData.push(newData);
-				    if (chartData.length > 1) {
-					for (var i = 0; i < chartData.length; i++) {
-					    if (chartData[i]["key"] == "average") {
-						chartData.splice(i, 1);
-					    }
-					}
-					var average = [];
-					for (var j = lowerWindow; j <= upperWindow; j++) {
-					    average.splice(j - lowerWindow, 0, 0.0);
-					    for (var i = 0; i < chartData.length; i++) {
-						average[j - lowerWindow] += chartData[i]["values"][j - lowerWindow]["y"];
-					    }
-					    average[j - lowerWindow] /= chartData.length;
-					}
-					var aveData = {
-					    "key" : "average",
-					    "color" : "red",
-					    "values" : []
-					};
-					for (var i = lowerWindow; i <= upperWindow; i++) {
-					    aveData["values"].splice(i - lowerWindow, 0, {
-						"x" : i,
-						"y" : average[i - lowerWindow]
-					    });
-					}
-					chartData.push(aveData);
-				    }
-				    d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
-				} else {
-				    for (var i = 0; i < chartData.length; i++) {
-					if (chartData[i]["key"] == $(this).val()) {
-					    chartData.splice(i, 1);
-					}
-				    }
-				    if (chartData.length > 2) {
-					for (var i = 0; i < chartData.length; i++) {
-					    if (chartData[i]["key"] == "average") {
-						chartData.splice(i, 1);
-					    }
-					}
-					var average = [];
-					for (var j = lowerWindow; j <= upperWindow; j++) {
-					    average.splice(j - lowerWindow, 0, 0.0);
-					    for (var i = 0; i < chartData.length; i++) {
-						average[j - lowerWindow] += chartData[i]["values"][j - lowerWindow]["y"];
-					    }
-					    average[j - lowerWindow] /= chartData.length;
-					}
-					var aveData = {
-					    "key" : "average",
-					    "color" : "red",
-					    "values" : []
-					};
-					for (var i = lowerWindow; i <= upperWindow; i++) {
-					    aveData["values"].splice(i - lowerWindow, 0, {
-						"x" : i,
-						"y" : average[i - lowerWindow]
-					    });
-					}
-					chartData.push(aveData);
-				    } else if (chartData.length > 1) {
-					for (var i = 0; i < chartData.length; i++) {
-					    if (chartData[i]["key"] == "average") {
-						chartData.splice(i, 1);
-					    }
-					}
-				    }
-				    d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
-				}
-			    });
+
 			})
 		    });
 		});
@@ -305,51 +365,108 @@ var getEvents = function() {
     }
 };
 
-$('#startDate').datepicker({
-    changeMonth : true,
-    changeYear : true,
-    minDate : minDate,
-    maxDate : maxDate,
-    onSelect : function(date, inst) {
-	$('#startValue').val(moment(date, "MM/DD/YYYY").format("DD-MMM-YY"));
-	$('#endDate').datepicker("option", "minDate", date);
-	$(this).hide();
-	getEvents();
-    },
-}).datepicker("setDate", moment($('#startValue').val(), "DD-MMM-YY").format("MM/DD/YYYY")).hide();
-
-$("#startPicker").mousedown(function() {
-    dp = $('#startDate');
-    if (dp.is(":visible")) {
-	dp.hide();
+$('.RICcheckbox input:checkbox').on('change', function() {
+    // From the other examples
+    if (this.checked) {
+	var newData = {
+	    "key" : $(this).val(),
+	    "values" : []
+	};
+	var cumRets;
+	var Date = $('#datedropdown').parents(".dropdown").find('.btn-primary').text();
+	Date = moment(Date, "DD-MMM-YY").format("DD/MM/YY");
+	for (var i = 0; i < apiResults["events"].length; i++) {
+	    if (apiResults["events"][i]["date"] == Date) {
+		var event = apiResults["events"][i]["returns"];
+		var ric_keys = [];
+		for ( var key in event) {
+		    if (event.hasOwnProperty(key)) {
+			ric_keys.push(key);
+		    }
+		}
+		for (var j = 0; j < ric_keys.length; j++) {
+		    if (ric_keys[j] == $(this).val()) {
+			cumRets = apiResults["events"][i]["returns"][ric_keys[j]];
+			break;
+		    }
+		}
+	    }
+	}
+	for (var i = lowerWindow; i <= upperWindow; i++) {
+	    newData["values"].splice(i - lowerWindow, 0, {
+		"x" : i,
+		"y" : cumRets[i - lowerWindow]
+	    });
+	}
+	chartData.push(newData);
+	if (chartData.length > 1) {
+	    for (var i = 0; i < chartData.length; i++) {
+		if (chartData[i]["key"] == "average") {
+		    chartData.splice(i, 1);
+		}
+	    }
+	    var average = [];
+	    for (var j = lowerWindow; j <= upperWindow; j++) {
+		average.splice(j - lowerWindow, 0, 0.0);
+		for (var i = 0; i < chartData.length; i++) {
+		    average[j - lowerWindow] += chartData[i]["values"][j - lowerWindow]["y"];
+		}
+		average[j - lowerWindow] /= chartData.length;
+	    }
+	    var aveData = {
+		"key" : "average",
+		"color" : "red",
+		"values" : []
+	    };
+	    for (var i = lowerWindow; i <= upperWindow; i++) {
+		aveData["values"].splice(i - lowerWindow, 0, {
+		    "x" : i,
+		    "y" : average[i - lowerWindow]
+		});
+	    }
+	    chartData.push(aveData);
+	}
+	d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
     } else {
-	dp.show();
-    }
-});
-
-$('#endDate').datepicker({
-    changeMonth : true,
-    changeYear : true,
-    minDate : minDate,
-    maxDate : maxDate,
-    onSelect : function(date, inst) {
-	$('#endValue').val(moment(date, "MM/DD/YYYY").format("DD-MMM-YY"));
-	$('#startDate').datepicker("option", "maxDate", date);
-	$(this).hide();
-	getEvents();
-    },
-}).datepicker("setDate", moment($('#endValue').val(), "DD-MMM-YY").format("MM/DD/YYYY")).hide();
-
-if ($('#endValue').val() != '') {
-    $('#endDate').datepicker("option", "defaultDate", moment($('#endValue').val()).format("mm/dd/yy"));
-}
-
-$("#endPicker").mousedown(function() {
-    dp = $('#endDate');
-    if (dp.is(":visible")) {
-	dp.hide();
-    } else {
-	dp.show();
+	for (var i = 0; i < chartData.length; i++) {
+	    if (chartData[i]["key"] == $(this).val()) {
+		chartData.splice(i, 1);
+	    }
+	}
+	if (chartData.length > 2) {
+	    for (var i = 0; i < chartData.length; i++) {
+		if (chartData[i]["key"] == "average") {
+		    chartData.splice(i, 1);
+		}
+	    }
+	    var average = [];
+	    for (var j = lowerWindow; j <= upperWindow; j++) {
+		average.splice(j - lowerWindow, 0, 0.0);
+		for (var i = 0; i < chartData.length; i++) {
+		    average[j - lowerWindow] += chartData[i]["values"][j - lowerWindow]["y"];
+		}
+		average[j - lowerWindow] /= chartData.length;
+	    }
+	    var aveData = {
+		"key" : "average",
+		"color" : "red",
+		"values" : []
+	    };
+	    for (var i = lowerWindow; i <= upperWindow; i++) {
+		aveData["values"].splice(i - lowerWindow, 0, {
+		    "x" : i,
+		    "y" : average[i - lowerWindow]
+		});
+	    }
+	    chartData.push(aveData);
+	} else if (chartData.length > 1) {
+	    for (var i = 0; i < chartData.length; i++) {
+		if (chartData[i]["key"] == "average") {
+		    chartData.splice(i, 1);
+		}
+	    }
+	}
+	d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
     }
 });
 
@@ -360,8 +477,7 @@ nv.addGraph(function() {
 	return d["y"] / 100
     }).useInteractiveGuideline(true).noData("Please choose input in Options tab");
 
-    chart.xAxis.axisLabel('Date')
-		.tickFormat(function(d) {
+    chart.xAxis.axisLabel('Date').tickFormat(function(d) {
 	return moment($('#datedropdown').parents(".dropdown").find('.btn-primary').text(), "DD-MMM-YY").add(d, 'days').format("DD-MMM-YY");
     });
 
@@ -372,11 +488,6 @@ nv.addGraph(function() {
     nv.utils.windowResize(chart.update);
 
     return chart;
-});
-
-$('#graphTab').on('shown.bs.tab', function(e) {
-    console.log("resizing");
-    window.dispatchEvent(new Event('resize'));
 });
 
 $('#uploadForm').ajaxForm({

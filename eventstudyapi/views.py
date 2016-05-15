@@ -10,6 +10,7 @@ import timeit
 import datetime
 import os
 import cProfile, pstats, io
+import requests
 
 def index(request):
     return HttpResponse("Hello world, you are at the Event Study API index.")
@@ -202,15 +203,25 @@ def events_view(request):
         return HttpResponse(error);
 
     fileParsed = EventsParser(fileLoc + 'stock_characteristic_file.csv')
-    
-    # if requested, filter dates
-    if ('earliest' in request_GET_dict):
-        earliest_date = datetime.datetime.strptime(request.GET['earliest'], "%d-%b-%y").date() # assumes "dd-Mon-yy" format
-    else:
-        earliest_date = datetime.date(datetime.MINYEAR,1,1)
-    if ('latest' in request_GET_dict):
-        latest_date = datetime.datetime.strptime(request.GET['latest'], "%d-%b-%y").date()
-    else:
-        latest_date = datetime.date(datetime.MAXYEAR,12,31)
-    
-    return JsonResponse(fileParsed.getEventsBetween(earliest_date, latest_date))
+
+    return JsonResponse(fileParsed.getEvents())
+
+@api_view(['GET'])
+def get_news(request):
+    request_GET_dict = dict(request.GET)
+    url = 'http://bhsl.blue/news_request/'
+    earliest_date = datetime.datetime.strptime(request.GET['earliest'], "%d-%b-%y")
+    latest_date = datetime.datetime.strptime(request.GET['latest'], "%d-%b-%y")
+    start = earliest_date.strftime("%Y-%m-%dT%H:%I:%S.%f")[:-3]+"Z"
+    end = latest_date.strftime("%Y-%m-%dT%H:%I:%S.%f")[:-3]+"Z"
+    url += 'start_date='+start+'/end_date='+end
+    if ('RICs' in request_GET_dict):
+        num_ric = int(request.GET['RICs'])
+        url += '/instr_list='
+        for i in range(0,num_ric):        
+            url += request.GET["ric"+str(i)]+","
+        url = url[:-1]
+    url += '/'    
+    print (url)
+    r = requests.get(url,auth=('cool','seng3011'))
+    return JsonResponse(r.json())
