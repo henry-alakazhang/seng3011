@@ -4,6 +4,7 @@ from string import ascii_uppercase
 from django.http import HttpResponse, JsonResponse
 from eventstudyapi.upload_handler import handle_uploaded_file
 from eventstudyapi.parser import EventsParser
+from eventstudyapi.models import UserProfileExtras
 from rest_framework.decorators import api_view
 from . import requestProcessor
 import timeit
@@ -78,6 +79,14 @@ def upload_files(request):
 
     if fatal:
         return(0, error, True)
+
+    if request.user:
+        try:
+            user = UserProfileExtras.objects.get(user=request.user)
+        except:
+            user = UserProfileExtras.objects.create(user=request.user)
+        user.file_key = file_key
+        user.save()
     
     requestResponse = dict()
     requestResponse['file_key'] = file_key

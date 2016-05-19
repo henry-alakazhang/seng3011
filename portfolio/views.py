@@ -1,9 +1,10 @@
 from django.shortcuts import render
 
 from django.http import HttpResponse, JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
 try: import simplejson as json
 except ImportError: import json
-from eventstudyapi.models import UserPortfolio
+from eventstudyapi.models import UserPortfolio, UserProfileExtras
 
 # Create your views here.
 def profile(request):
@@ -26,6 +27,12 @@ def profile(request):
             for p in toDelete:
                 p.delete()
         portfolio = list(UserPortfolio.objects.filter(user=user).values('portfolio'))
-        return render(request, 'portfolio/profile.html', {'user ': user, 'portfolio' : portfolio, 'notice' : notice})
+        try:
+            profile = UserProfileExtras.objects.get(user=user)
+            print(profile.file_key)
+        except ObjectDoesNotExist: 
+            profile = None
+        return render(request, 'portfolio/profile.html', {'user ': user, 'portfolio' : portfolio, 
+                                                          'notice' : notice, 'profile':profile})
     else:
         return render(request, 'portfolio/profile.html')
