@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 try: import simplejson as json
 except ImportError: import json
-from eventstudyapi.models import UserPortfolio
+from eventstudyapi.models import UserPortfolio, UserProfileExtras
 def index(request):
     return render(request, 'home/home.html', {'home':True});
 
@@ -22,11 +22,21 @@ def api_bugs(request):
     return render(request, 'home/api_bugs.html', {'api':True});
 
 def analytics_home(request):
+    userData = None
     portfolio = []
+    jsonObj = {'analytics':True}
     if request.user.is_authenticated():
         portfolio = list(UserPortfolio.objects.filter(user=request.user).values('portfolio'))
-    portJson = json.dumps(portfolio)
-    return render(request, 'home/analytics.html', {'analytics':True,'portfolio':portJson});
+        try: 
+            userData = UserProfileExtras.objects.get(user=request.user)
+        except:
+            userData = UserProfileExtras.objects.create(user=request.user)
+            userData.file_key = 0
+            userData.save()
+        jsonObj['file_key'] = userData.file_key
+    jsonObj['portfolio'] = json.dumps(portfolio)
+    
+    return render(request, 'home/analytics.html', jsonObj);
 
 def analytics_howtouse(request):
     return render(request, 'home/analytics_howtouse.html', {'analytics':True});

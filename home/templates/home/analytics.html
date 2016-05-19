@@ -190,16 +190,18 @@
 							title="Hover the mouse over the graph to show the exact cumulative returns for a particular date.
                                     Click on the graph to rescale the RICs to 0% on that date, and show the data relative to that date. ">
 						</button>
-
-						<div id="chart">
-							<svg></svg>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-<script src='{% static "graph.js" %}'></script>
+            <div id="chart">
+                <svg></svg>
+            </div>
+        </div>
+        </div>
+     </div>
+     </div>
+     </div>
+    </div>
+    <script type="text/javascript">
+        file_key = "{{ file_key }}"
+    </script>
+    <script src='{% static "graph.js" %}'></script>
 
 {% endblock %}
