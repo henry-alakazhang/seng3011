@@ -11,7 +11,7 @@ Created on 5 Apr 2016
 '''
 import re, datetime
 from eventstudyapi.parser import Parser
-from eventstudyapi.request import Request, Data
+from eventstudyapi.request import Request, Data, DataCore
 
 #Process request
 def process(request,error):   
@@ -79,3 +79,39 @@ def processData(priceFile,charFile,params,error):
     request = Request(upperWindow,lowerWindow,optVar,stockData)
     return process(request,error)
     
+def processWithDate(priceFile,params,error):
+    priceData = Parser(priceFile)
+    stockData = DataCore(priceData)
+    
+    upper = re.compile("^upper_")
+    lower = re.compile("^lower_")
+    optVar = dict()
+    for param in params:
+        param_name = re.sub(re.compile("^[a-z]*_(.*)$"), '\\1', param).replace('_',' ')
+        if param_name == "window":
+            if upper.match(param):
+                upperWindow = params[param]
+            elif lower.match(param):
+                lowerWindow = params[param]
+            else:
+                raise Exception('Invalid Variable ' + param)            
+        elif param == "date":
+            searchDate = params[param]
+        else :
+            raise Exception('Invalid Variable ' + param)
+    
+    result = list()
+    for ric in stockData.RIC:
+        cumRet = dict()
+        # for compatibility and laziness
+        stockChar = {"#RIC" : ric, "Event Date" : searchDate}
+        for i in range(int(lowerWindow),int(upperWindow)+1):
+            date = datetime.datetime.strptime(searchDate,"%d-%b-%y") + datetime.timedelta(days=i)
+            indivRet = stockData.getCumRet(stockChar,date.strftime("%d-%b-%y").lstrip('0'))
+            if (indivRet != None):       
+                cumRet[i] = indivRet
+        if (cumRet != None):
+            result.append((stockChar,cumRet))
+        else:
+            print ("Invalid Date range")
+    return (result, error)
