@@ -107,9 +107,11 @@ def process_files(request):
         error.append('ERROR File key was none')
         fatal = True
     else:
+        print (request.GET['file_key'])
         # Check against existing files in media folder
         if (request.GET['file_key'] == '0'):
-            fileLoc = 'static/' 
+            fileLoc = 'static/'
+            fileFound = True
         else:           
             files_dict = list()
             for fn in os.listdir('media/'):
@@ -166,19 +168,24 @@ def convertToJson(cumRets,params,lowerWindow,upperWindow):
     for chars in cumRets:
         dateFound = False
         indivCumRets = list()
+        volume = list()
         for i in range(int(lowerWindow),int(upperWindow)+1):            
             indivCumRets.append(float(chars[1][i]))
+            volume.append(chars[2][i])
         for event in JsonCumRets["events"]:
             date = reformat_date(chars[0]["Event Date"])
             if event["date"] == date:
                 event["returns"][chars[0]["#RIC"]] = indivCumRets
+                event["volume"][chars[0]["#RIC"]] = volume
                 dateFound = True      
                 break
         if not dateFound:
             event = dict()
             event["date"] = reformat_date(chars[0]["Event Date"])
             event["returns"] = dict()
-            event["returns"][chars[0]["#RIC"]] = indivCumRets   
+            event["returns"][chars[0]["#RIC"]] = indivCumRets
+            event["volume"] = dict()
+            event["volume"][chars[0]["#RIC"]] = volume
             JsonCumRets["events"].append(event)
     for event in JsonCumRets["events"]:
         average_cum_ret = list()

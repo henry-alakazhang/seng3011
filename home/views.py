@@ -34,8 +34,10 @@ def analytics_home(request):
             userData.file_key = 0
             userData.save()
         jsonObj['file_key'] = userData.file_key
+    else:        
+        jsonObj['file_key'] = 0
     jsonObj['portfolio'] = json.dumps(portfolio)
-    
+    print (jsonObj)
     return render(request, 'home/analytics.html', jsonObj);
 
 def analytics_howtouse(request):

@@ -1,12 +1,9 @@
 var apiResults;
 var news;
-var chart;
-var chartObjData;
-var chartData = [];
+var chartData = {};
 var minDate = new Date(2010, 1 - 1, 1)
 var maxDate = new Date(2015, 2 - 1, 28)
 // get filey_key from context variable in embedded script
-
 function escapeHtml(unsafe) {
     return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
@@ -150,7 +147,7 @@ $.get("eventapi/events", {
 
 var graphChanged = false;
 var loadEvents = function() {
-    $(".in").find("#event_input").select2("destroy").empty();
+    $(".in").find("#event_input").empty();
     $(".in").find("#event_input").select2({
 	width : "100%",
 	data : eventList,
@@ -180,7 +177,7 @@ var loadRics = function() {
 		fullRicNames.push(val);
 	    }
 	})
-	$(".in").find("#rics_search").select2('destroy').select2({
+	$(".in").find("#rics_search").empty().select2({
 	    width : '100%',
 	    data : fullRicNames,
 	    templateSelection : template,
@@ -250,35 +247,109 @@ var updateEvent = function() {
     loadEvents();
 };
 
+var insCharData = function(ric, data) {
+    var array = chartData[ric]["data"]
+    var low = 0, high = array.length;
+    if (high > 0 && array[high - 1]["date"] > data["date"]) {
+	while (low < high) {
+	    var mid = (low + high) >>> 1;
+	    if (array[mid]["date"] < data["date"])
+		low = mid + 1;
+	    else if (array[mid]["date"] == data["date"]) {
+		return;
+	    } else {
+		high = mid;
+	    }
+	}
+    } else {
+	low = high;
+    }
+    array.splice(low, 0, data);
+}
+
+var processData = function(data, lower, upper) {
+    chart.dataSets = [];
+    $.each(data["events"], function(i, event) {
+	var date = moment(event["date"], "DD-MM-YY").utc().hour(0);
+	$.each(event["returns"], function(j, ric) {
+	    if (!(j in chartData)) {
+		chartData[j] = {
+		    data : []
+		};
+	    }
+	    if ("dataset" in chartData[j]) {
+		chartData[j]["dataset"].dataProvider = [];
+	    }
+	    $.each(ric, function(k, ret) {
+		var newDate = date.clone().add(parseInt(lower) + k, 'd');
+		insCharData(j, {
+		    date : newDate.toDate(),
+		    value : ret,
+		    volume : event["volume"][j][k]
+		})
+	    });
+	    if (!("dataset" in chartData[j])) {
+		var dataSet = new AmCharts.DataSet();
+		chartData[j]["dataset"] = dataSet;
+		dataSet.title = j;
+		dataSet.fieldMappings = [ {
+		    fromField : "value",
+		    toField : "value"
+		}, {
+		    fromField : "volume",
+		    toField : "volume"
+		} ];
+		dataSet.dataProvider = chartData[j]["data"];
+		dataSet.categoryField = "date";
+		chart.dataSets.push(dataSet);
+		chart.write("chartdiv");
+	    } else {
+		chartData[j]["dataset"].dataProvider = chartData[j]["data"];
+	    }
+	    chartData[j]["dataset"].stockEvents.push({
+		date : date.toDate(),
+		type : "pin",
+		graph : graph1,
+		text : "E",
+		description : "test"
+	    });
+	    chart.validateData();
+	    chart.write("chartdiv");
+	});
+    });
+    chart.dataSets.sort(function(a, b) {
+	if (a.title < b.title)
+	    return -1;
+	if (a.title > b.title)
+	    return 1;
+	return 0;
+    });
+};
+
 var submit = function() {
     var events = $(".in").find("#event_input").select2("data");
     var params = {
-	upper_window : $(".in").find("#startValue").val(),
-	lower_window : $(".in").find("#endValue").val(),
+	upper_window : $(".in").find("#endValue").val(),
+	lower_window : $(".in").find("#startValue").val(),
 	file_key : file_key
     };
     console.log(events);
-    $.each(events, function(i, val) {
-	var newParams = $.extend(true, {}, params);
-	pName = val["text"];
-	newParams["upper_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['max'];
-	newParams["lower_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['min'];
-	console.log(newParams);
-	$.get("eventapi", newParams, function(data) {
-	    var rics = [];
-	    console.log(data);
-	    $.each(data["events"], function(i, val) {
-		$.each(val["returns"], function(j, ric) {
-		    if ($.inArray(j, rics) == -1) {
-			rics.push(j);
-		    }
-		});
+    if (events.length == 0) {
+	$.get("eventapi", params, function(data) {
+	    processData(data, params['lower_window'], params['upper_window']);
+	})
+    } else {
+	$.each(events, function(i, val) {
+	    var newParams = $.extend(true, {}, params);
+	    pName = val["text"];
+	    newParams["upper_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['max'];
+	    newParams["lower_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['min'];
+	    console.log(newParams);
+	    $.get("eventapi", newParams, function(data) {
+		processData(data, params['lower_window'], params['upper_window']);
 	    });
-	    console.log(rics);
-	    rics.sort();
-	});
-    })
-
+	})
+    }
 };
 
 var bindSubmit = function() {
@@ -289,255 +360,113 @@ function template(data, container) {
     return data.text.replace(/ -.*$/, "");
 }
 
-$('select').select2({});
-var drawGraph;
+var chart;
+AmCharts.ready(function() {
+    createStockChart();
+});
+var graph1;
+function createStockChart() {
+    chart = new AmCharts.AmStockChart();
+    // PANELS ///////////////////////////////////////////
+    // first stock panel
+    var stockPanel1 = new AmCharts.StockPanel();
+    stockPanel1.showCategoryAxis = false;
+    stockPanel1.title = "Value";
+    stockPanel1.percentHeight = 70;
 
-var getEvents = function() {
-    start = $('#startValue').val();
-    end = $('#endValue').val();
-    if (start != '' && end != '') {
-	$.get("eventapi/events", {
-	    earliest : start,
-	    latest : end,
-	    file_key : file_key
-	}, function(data) {
-	    $('#ricTable').empty();
-	    chartData = [];
-	    d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
-	    $('#eventSection').show();
-	    window.scrollTo(0, document.body.scrollHeight);
-	    var keys = [];
-	    for ( var key in data) {
-		if (data.hasOwnProperty(key)) {
-		    keys.push(key);
-		}
-	    }
-	    keys.sort(function(a, b) {
-		return moment(a, "DD-MMM-YY").diff(moment(b, "DD-MMM-YY"))
-	    })
-	    var items = [];
-	    if (keys.length > 0) {
-		$.each(keys, function(i, val) {
-		    items.push('<li><a>' + val + '</a></li>');
-		});
-		$('#datedropdown').empty().append(items.join('')).parents(".dropdown").find('.btn-primary').removeClass("disabled").text("No Date Chosen");
-		$("#datedropdown li a").click(function() {
-		    chartData = [];
-		    d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
-		    $('#eventdropdown').empty();
-		    $('#ricTable').empty();
-		    $(this).parents(".dropdown").find('.btn-primary').text($(this).text());
-		    $(this).parents(".dropdown").find('.btn-primary').val($(this).text());
-		    var vars = [];
-		    date = $(this).text();
-		    var ric_keys = [];
-		    for ( var key in data[date]) {
-			if (data[date].hasOwnProperty(key)) {
-			    ric_keys.push(key);
-			}
-		    }
-		    for (var j = 0; j < ric_keys.length; j++) {
-			for ( var key in data[date][ric_keys[j]]) {
-			    if (data[date][ric_keys[j]].hasOwnProperty(key)) {
-				if (data[date][ric_keys[j]][key] > 0) {
-				    if ($.inArray(key, vars) == -1) {
-					vars.push(key);
-				    }
-				}
-			    }
-			}
-		    }
-		    vars.sort();
-		    vars.push("None");
-		    items = [];
-		    $.each(vars, function(i, val) {
-			items.push('<li><a>' + val + '</a></li>');
-		    });
-		    $('#eventdropdown').empty().append(items.join('')).parents(".dropdown").find('.btn-primary').removeClass("disabled").text("No Event Chosen");
-		    $("#eventdropdown li a").click(function() {
+    // graph of first stock panel
+    graph1 = new AmCharts.StockGraph();
+    graph1.valueField = "value";
+    graph1.comparable = true;
+    graph1.compareField = "value";
+    graph1.bullet = "round";
+    graph1.bulletBorderColor = "#FFFFFF";
+    graph1.bulletBorderAlpha = 1;
+    graph1.balloonText = "[[title]]:<b>[[value]]</b>";
+    graph1.compareGraphBalloonText = "[[title]]:<b>[[value]]</b>";
+    graph1.compareGraphBullet = "round";
+    graph1.compareGraphBulletBorderColor = "#FFFFFF";
+    graph1.compareGraphBulletBorderAlpha = 1;
+    stockPanel1.addStockGraph(graph1);
 
-			$(this).parents(".dropdown").find('.btn-primary').text($(this).text());
-			$(this).parents(".dropdown").find('.btn-primary').val($(this).text());
-			$('#ricTable').empty();
-			// call api
-			var startTime = moment(start, "DD-MMM-YY");
-			var endTime = moment(end, "DD-MMM-YY");
-			var eventTime = moment(date, "DD-MMM-YY")
-			var upperWindow = -eventTime.diff(endTime, 'days') - 1;
-			var lowerWindow = -eventTime.diff(startTime, 'days') + 1;
-			if ($(this).text() == "None") {
-			    var params = {
-				upper_window : upperWindow,
-				lower_window : lowerWindow,
-				file_key : file_key
-			    };
-			} else {
-			    var params = {
-				upper_window : upperWindow,
-				lower_window : lowerWindow,
-				file_key : file_key
-			    };
-			    params["upper_" + $(this).text().toLowerCase().replace(/ /g, "_")] = 1.5;
-			    params["lower_" + $(this).text().toLowerCase().replace(/ /g, "_")] = 0.5;
-			}
-			console.log(params);
-			$('#ricSection').show();
-			$.get("eventapi", params, function(data) {
-			    apiResults = data;
-			    var rics = [];
-			    console.log(data);
-			    $.each(data["events"], function(i, val) {
-				if (val["date"] == moment($('#datedropdown').parents(".dropdown").find('.btn-primary').text(), "DD-MMM-YY").format("DD/MM/YY")) {
-				    $.each(val["returns"], function(j, ric) {
-					if ($.inArray(j, rics) == -1) {
-					    rics.push(j);
-					}
-				    });
-				}
-			    });
-			    console.log(keys);
-			    console.log(rics);
-			    rics.sort();
-			    items = [];
-			    $.each(rics, function(i, val) {
-				items.push('<tr><td><div class="RICcheckbox"><label><input type="checkbox" value="' + val + '"></label></div></td><td>' + val + '</td></tr>');
-			    });
-			    $('#ricTable').empty().append(items.join('')).show();
+    // create stock legend
+    var stockLegend1 = new AmCharts.StockLegend();
+    stockLegend1.periodValueTextComparing = "[[percents.value.close]]%";
+    stockLegend1.periodValueTextRegular = "[[value.close]]";
+    stockLegend1.valueTextRegular = " ";
+    stockLegend1.markerType = "none";
+    stockPanel1.stockLegend = stockLegend1;
 
-			})
-		    });
-		});
-	    } else {
-		$('#datedropdown').empty().append(items.join('')).parents(".dropdown").find('.btn-primary').addClass("disabled").text("No Events in Chosen Range");
-	    }
-	});
-    }
-};
+    // second stock panel
+    var stockPanel2 = new AmCharts.StockPanel();
+    stockPanel2.title = "Volume";
+    stockPanel2.percentHeight = 30;
+    var graph2 = new AmCharts.StockGraph();
+    graph2.valueField = "volume";
+    graph2.type = "column";
+    graph2.showBalloon = false;
+    graph2.fillAlphas = 1;
+    stockPanel2.addStockGraph(graph2);
 
-$('.RICcheckbox input:checkbox').on('change', function() {
-    // From the other examples
-    if (this.checked) {
-	var newData = {
-	    "key" : $(this).val(),
-	    "values" : []
-	};
-	var cumRets;
-	var Date = $('#datedropdown').parents(".dropdown").find('.btn-primary').text();
-	Date = moment(Date, "DD-MMM-YY").format("DD/MM/YY");
-	for (var i = 0; i < apiResults["events"].length; i++) {
-	    if (apiResults["events"][i]["date"] == Date) {
-		var event = apiResults["events"][i]["returns"];
-		var ric_keys = [];
-		for ( var key in event) {
-		    if (event.hasOwnProperty(key)) {
-			ric_keys.push(key);
-		    }
-		}
-		for (var j = 0; j < ric_keys.length; j++) {
-		    if (ric_keys[j] == $(this).val()) {
-			cumRets = apiResults["events"][i]["returns"][ric_keys[j]];
-			break;
-		    }
-		}
-	    }
-	}
-	for (var i = lowerWindow; i <= upperWindow; i++) {
-	    newData["values"].splice(i - lowerWindow, 0, {
-		"x" : i,
-		"y" : cumRets[i - lowerWindow]
-	    });
-	}
-	chartData.push(newData);
-	if (chartData.length > 1) {
-	    for (var i = 0; i < chartData.length; i++) {
-		if (chartData[i]["key"] == "average") {
-		    chartData.splice(i, 1);
-		}
-	    }
-	    var average = [];
-	    for (var j = lowerWindow; j <= upperWindow; j++) {
-		average.splice(j - lowerWindow, 0, 0.0);
-		for (var i = 0; i < chartData.length; i++) {
-		    average[j - lowerWindow] += chartData[i]["values"][j - lowerWindow]["y"];
-		}
-		average[j - lowerWindow] /= chartData.length;
-	    }
-	    var aveData = {
-		"key" : "average",
-		"color" : "red",
-		"values" : []
-	    };
-	    for (var i = lowerWindow; i <= upperWindow; i++) {
-		aveData["values"].splice(i - lowerWindow, 0, {
-		    "x" : i,
-		    "y" : average[i - lowerWindow]
-		});
-	    }
-	    chartData.push(aveData);
-	}
-	d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
+    var stockLegend2 = new AmCharts.StockLegend();
+    stockLegend2.periodValueTextRegular = "[[value.close]]";
+    stockPanel2.stockLegend = stockLegend2;
+
+    // set panels to the chart
+    chart.panels = [ stockPanel1, stockPanel2 ];
+
+    var scrollbarSettings = new AmCharts.ChartScrollbarSettings();
+    scrollbarSettings.graph = graph1;
+    scrollbarSettings.updateOnReleaseOnly = false;
+    chart.chartScrollbarSettings = scrollbarSettings;
+
+    var cursorSettings = new AmCharts.ChartCursorSettings();
+    cursorSettings.valueBalloonsEnabled = true;
+    cursorSettings.graphBulletSize = 1;
+    chart.chartCursorSettings = cursorSettings;
+
+    var panelsSettings = new AmCharts.PanelsSettings();
+    panelsSettings.marginRight = 16;
+    panelsSettings.marginLeft = 16;
+    panelsSettings.usePrefixes = true;
+    chart.panelsSettings = panelsSettings;
+
+    // PERIOD SELECTOR ///////////////////////////////////
+    var periodSelector = new AmCharts.PeriodSelector();
+    periodSelector.position = "left";
+    periodSelector.periods = [ {
+	period : "DD",
+	count : 10,
+	label : "10 days"
+    }, {
+	period : "MM",
+	selected : true,
+	count : 1,
+	label : "1 month"
+    }, {
+	period : "YYYY",
+	count : 1,
+	label : "1 year"
+    }, {
+	period : "YTD",
+	label : "YTD"
+    }, {
+	period : "MAX",
+	label : "MAX"
+    } ];
+    chart.periodSelector = periodSelector;
+
+    // DATA SET SELECTOR
+    var dataSetSelector = new AmCharts.DataSetSelector();
+    dataSetSelector.position = "left";
+    chart.dataSetSelector = dataSetSelector;
+
+    if (Object.keys(chartData).length == 0) {
+	$("#chartdiv").append('<h2 style="display: flex;justify-content:center;align-items:center;height:100%">Please Enter Data</h2>');
     } else {
-	for (var i = 0; i < chartData.length; i++) {
-	    if (chartData[i]["key"] == $(this).val()) {
-		chartData.splice(i, 1);
-	    }
-	}
-	if (chartData.length > 2) {
-	    for (var i = 0; i < chartData.length; i++) {
-		if (chartData[i]["key"] == "average") {
-		    chartData.splice(i, 1);
-		}
-	    }
-	    var average = [];
-	    for (var j = lowerWindow; j <= upperWindow; j++) {
-		average.splice(j - lowerWindow, 0, 0.0);
-		for (var i = 0; i < chartData.length; i++) {
-		    average[j - lowerWindow] += chartData[i]["values"][j - lowerWindow]["y"];
-		}
-		average[j - lowerWindow] /= chartData.length;
-	    }
-	    var aveData = {
-		"key" : "average",
-		"color" : "red",
-		"values" : []
-	    };
-	    for (var i = lowerWindow; i <= upperWindow; i++) {
-		aveData["values"].splice(i - lowerWindow, 0, {
-		    "x" : i,
-		    "y" : average[i - lowerWindow]
-		});
-	    }
-	    chartData.push(aveData);
-	} else if (chartData.length > 1) {
-	    for (var i = 0; i < chartData.length; i++) {
-		if (chartData[i]["key"] == "average") {
-		    chartData.splice(i, 1);
-		}
-	    }
-	}
-	d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
+	chart.write('chartdiv');
     }
-});
-
-nv.addGraph(function() {
-    chart = nv.models.cumulativeLineChart().x(function(d) {
-	return d["x"]
-    }).y(function(d) {
-	return d["y"] / 100
-    }).useInteractiveGuideline(true).noData("Please choose input in Options tab");
-
-    chart.xAxis.axisLabel('Date').tickFormat(function(d) {
-	return moment($('#datedropdown').parents(".dropdown").find('.btn-primary').text(), "DD-MMM-YY").add(d, 'days').format("DD-MMM-YY");
-    });
-
-    chart.yAxis.axisLabel('Cumulative Returns').tickFormat(d3.format('.2%')).showMaxMin(false);
-
-    d3.select('#chart svg').datum(chartData).transition().duration(500).call(chart);
-
-    nv.utils.windowResize(chart.update);
-
-    return chart;
-});
+}
 
 $('#uploadForm').ajaxForm({
     beforeSend : function() {

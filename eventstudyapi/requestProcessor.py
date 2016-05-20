@@ -28,9 +28,9 @@ def process(request,error):
     data = request.Data
     result = list()
     for stockChar in charsToProcess:
-        cumRet = calcCumRet(stockChar,upperWindow,lowerWindow,data)
+        cumRet, volume = calcCumRet(stockChar,upperWindow,lowerWindow,data)
         if (cumRet != None):
-            result.append((stockChar,cumRet))
+            result.append((stockChar,cumRet,volume))
         else:            
             error.append("Invalid Date Range for {}: {} with window {} to {}\n".format(stockChar["#RIC"], stockChar["Event Date"], lowerWindow, upperWindow))
     return (result, error)
@@ -38,15 +38,17 @@ def process(request,error):
 #Process each individual stock characteristic
 def calcCumRet(stockChar,upperWindow,lowerWindow,data):
     cumRet = dict()
+    volume = dict()
     minDate = datetime.datetime.strptime(stockChar['Event Date'],"%d-%b-%y")
     for i in range(lowerWindow,upperWindow+1):
-        date = minDate + datetime.timedelta(days=i)
-        indivRet = data.getCumRet(stockChar,date.strftime("%d-%b-%y").lstrip('0'))
+        date = (minDate + datetime.timedelta(days=i)).strftime("%d-%b-%y").lstrip('0')
+        indivRet, vol = data.getCumRet(stockChar,date)
         if (indivRet != None):       
             cumRet[i] = indivRet
+            volume[i] = vol
         else:
-            return None        
-    return cumRet
+            return None, None    
+    return cumRet, volume
 
 def processData(priceFile,charFile,params,error):
     #parse Files
