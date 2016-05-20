@@ -140,6 +140,8 @@ def process_files(request):
         if key.startswith('upper_') or key.startswith('lower_'):
             print(key, value)
             valid_params_dict[key] = value[0]
+        elif (key == 'date'):
+            valid_params_dict[key] = value[0]
         elif not (key.startswith('stock_price_data_file') or key.startswith('stock_characteristic_file')):
             if not fileFound:
                 error.append('Warning: The following parameter is invalid: ' + str(key) + str(value))
@@ -155,8 +157,13 @@ def process_files(request):
     if fatal:
         return(0, error, fatal)
 
-    # Process query
-    (total_cum_rets, error) = requestProcessor.processData(fileLoc + str('stock_price_data_file.csv'), fileLoc + str('stock_characteristic_file.csv'), valid_params_dict, error)
+    # process query
+    if 'date' in valid_params_dict:
+        (total_cum_rets, error) = requestProcessor.processWithDate(fileLoc + str('stock_price_data_file.csv'), valid_params_dict, error)
+    else:
+        (total_cum_rets, error) = requestProcessor.processData(fileLoc + str('stock_price_data_file.csv'), 
+                                        fileLoc + str('stock_characteristic_file.csv'), valid_params_dict, error)
+
     requestResponse = convertToJson(total_cum_rets,valid_params_dict,lowerWindow,upperWindow)
     return (requestResponse, error, False)
 

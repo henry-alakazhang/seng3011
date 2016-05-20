@@ -45,14 +45,10 @@ class OptVar:
             return value <= self.varMax        
         return value >= self.varMin and value <= self.varMax
             
-
-class Data:
-    # Takes the output of the parsers and puts it all into one object
-    def __init__(self, F1, F2):
+class DataCore(object):
+    def __init__(self, F1):
         self.RIC = F1.getRICs()
         self.PriceInfo = F1
-        self.Variables = F2.getVars()
-        self.CharInfo = F2
         self.calcCumRet()
 
     # Calculate the cumulative return for all data
@@ -79,14 +75,7 @@ class Data:
                     self.Volume[RIC][priceData["Date[L]"]] = priceData["Volume"]
             del prevPrice     
 
-    # Check if a given variable was in File2
-    def isExistingVariable(self, var):
-        if var in map(str.lower, self.Variables):
-            return True
-        else:
-            return False
-        
-    # Gets the cumulative return for a stock at a given date
+      # Gets the cumulative return and volume for a stock at a given date
     def getCumRet(self, stockChar, eventDate):
         if (eventDate in self.CumRet[stockChar["#RIC"]]):
             if (eventDate in self.Volume[stockChar["#RIC"]]):
@@ -95,4 +84,22 @@ class Data:
                 return self.CumRet[stockChar["#RIC"]][eventDate], 0                
         else:
             return None, 0
-        
+
+class Data(DataCore):
+    #Takes the output of the parsers and puts it all into one object
+    def __init__(self,F1,F2):
+        super(Data, self).__init__(F1)
+        self.RIC = F1.getRICs()
+        self.PriceInfo = F1
+        self.Variables = F2.getVars()
+        self.CharInfo = F2
+
+    # Check if a given variable was in File2
+    def isExistingVariable(self, var):
+        if var in map(str.lower, self.Variables):
+            return True
+        else:
+            return False
+
+    def getCumRet(self,stockChar,eventDate):
+        return super(Data, self).getCumRet(stockChar,eventDate);
