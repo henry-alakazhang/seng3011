@@ -30,7 +30,7 @@ function updateNews(e) {
     }
     var url = "https://bhsl.blue/news_request/start_date=" + start + "/end_date=" + end;
     if (ric_list.length > 0)
-	url += "instr_list=" + ric_list.toString();
+	url += "instr_list=" + ric_list.toString() + "/tpc_list=''";
     url += '/';
     $.ajax({
 	type : "Post",
@@ -86,7 +86,9 @@ function updateNews(e) {
 
 var eventData;
 var ricList = [];
+var ricNames = {};
 var eventList = [];
+var allEvents;
 var paramVals = {};
 $.get("eventapi/events", {
     file_key : file_key
@@ -118,6 +120,10 @@ $.get("eventapi/events", {
 				    paramVals[ev] = {};
 				}
 				var val = parseFloat(data[keys[j]][i][ev]);
+				if (val == 0) {
+				    continue
+				}
+				;
 				if (!("min" in paramVals[ev])) {
 				    paramVals[ev]["min"] = val;
 				} else {
@@ -139,108 +145,151 @@ $.get("eventapi/events", {
 	    }
 	}
     }
-    console.log(eventList);
-    loadEvents();
-    loadRics();
+    allEvents = $.extend(true, [], eventList);
 })
 
 var graphChanged = false;
 var loadEvents = function() {
-    $("#eventSlider").slider({
-	min : 0,
-	max : 1,
-	values : [ 0, 1 ],
-	slide : function(e, ui) {
-	    $(ui.handle).text(ui.value / 10);
-	},
-	disabled : true,
-    });
-    var btnHeight = $('#eventSlider').parent().height(), slideHeight = $('#eventSlider').height(), buffer = ((btnHeight - slideHeight) / 2);
-    $('#eventSlider').css({
-	'margin-top' : buffer
-    }); // set margin accordingly
-    var items = [];
-    $.each(eventList, function(i, val) {
-	items.push('<option value="' + val + '">');
-    });
-    $('#events').empty().append(items.join(''));
-    $('#eventInput').bind("enterKey", function(e) {
-	if ($.inArray($(this).val(), eventList) == -1) {
-	    alert("Invalid Event");
-	} else {
-	    $("#eventSlider").slider("option", "disabled", false).slider("option", "max", Math.floor(paramVals[$(this).val()]["max"] * 10));
-	    $("#addEvent").removeClass("disabled").click(addEvent);
+    $(".in").find("#event_input").select2("destroy").empty();
+    $(".in").find("#event_input").select2({
+	width : "100%",
+	data : eventList,
+    })
+};
+
+var ricsToDisplay = [];
+var oldData = [];
+var loadRics = function() {
+    var fullRicNames = [];
+    ricList.sort();
+    var $ajaxCalls = [];
+    $.each(ricList, function(i, val) {
+	if (!(val in ricNames)) {
+	    $ajaxCalls.push($.get("https://query.yahooapis.com/v1/public/yql?q=select%20Name%20from%20yahoo.finance.quotes%20where%20symbol%20in%20(%22" + val
+		    + "%22)%0A%09%09&format=json&diagnostics=true&env=http%3A%2F%2Fdatatables.org%2Falltables.env&callback=", function(data) {
+		ricNames[val] = data["query"]["results"]["quote"]["Name"];
+	    }));
 	}
     });
-    $('#eventInput').keyup(function(e) {
-	if (e.keyCode == 13) {
-	    $(this).trigger("enterKey");
-	}
+    console.log(ricNames);
+    $.when.apply(null, $ajaxCalls).then(function() {
+	$.each(ricList, function(i, val) {
+	    if (ricNames[val] != null) {
+		fullRicNames.push(val + ' - ' + ricNames[val]);
+	    } else {
+		fullRicNames.push(val);
+	    }
+	})
+	$(".in").find("#rics_search").select2('destroy').select2({
+	    width : '100%',
+	    data : fullRicNames,
+	    templateSelection : template,
+	    matcher : function(params, data) {
+		// should return:
+		// - null if no matches were found
+		// - `data` if data.text matches params.term
+		if ($.trim(params.term) === '') {
+		    return data;
+		}
+		if (data.text.toUpperCase().indexOf(params.term.toUpperCase()) == 0) {
+		    return data;
+		}
+		if ((data.text.toUpperCase().indexOf(params.term.toUpperCase()) == data.text.indexOf('-') + 2) && data.text.indexOf('-') != -1) {
+		    return data;
+		}
+
+		return null;
+	    },
+	}).on("change", function(e) {
+	    var diff = $($(this).select2("data")).not(oldData).get();
+	    if (diff.length == 0) {
+		var diff = $(oldData).not($(this).select2("data")).get();
+		ricsToDisplay.splice(ricsToDisplay.indexOf(diff[0]["text"].replace(/ -.*$/, "")), 1);
+	    } else {
+		ricsToDisplay.push(diff[0]["text"].replace(/ -.*$/, ""));
+	    }
+	    oldData = $(this).select2("data");
+	    console.log(ricsToDisplay);
+	    /*
+	     * if (e.val in $(this).val()) { ricsToDisplay.push(e.val.replace(/
+	     * -.*$/, "")); } else {
+	     * ricsToDisplay.splice(ricsToDisplay.indexOf(e.val.replace(/ -.*$/,
+	     * "")),1); }
+	     */
+	    if ($("#companys").hasClass("in")) { // active panel is company
+		updateEvent();
+	    }
+	});
     });
 };
 
-var requests = {};
-var addEvent = function() {
-    var event = $("#eventInput").val();
-    var min = $("#eventSlider").slider("values", 0);
-    var max = $("#eventSlider").slider("values", 1);
-    var temp = min < max ? -1 : max;
-    if (temp != -1) {
-	max = min;
-	min = temp;
+var updateEvent = function() {
+    var keys = [];
+    for ( var key in eventData) {
+	if (eventData.hasOwnProperty(key)) {
+	    keys.push(key);
+	}
     }
-    min /= 10;
-    max /= 10;
-    if (event in requests) {
-	alert("Already Chosen Event");
-	return;
-    } else {
-	requests[event] = {};
-	requests[event]["min"] = min;
-	requests[event]["max"] = max;
-    }
-	console.log(requests);
-    $('#eventLabels').append('<span class="label label-default">' + event + " " + min + ":" + max + ' <span class="glyphicon glyphicon-remove remEvent" id="'+ event +'lbl" aria-hidden="true" style="cursor:pointer"></span></span>')
-    $('#eventLabels span').click(function() {
-	if ($(this).hasClass("remEvent")) {
-	    var r = confirm("Are you sure you want to remove this event?");
-	    if (r) {
-		var event = $(this).attr("id").slice(0,-3);
-		delete requests[event];
-		$(this).parent().remove();
-		console.log(requests);
+    eventList = [];
+    for (var j = 0; j < keys.length; j++) {
+	for ( var key in eventData[keys[j]]) {
+	    if ($.inArray(key, ricsToDisplay) > -1) {
+		for ( var ev in eventData[keys[j]][key]) {
+		    if (ev == "Event Date" || ev == "#RIC") {
+			continue;
+		    }
+		    if (eventData[keys[j]][key][ev] > 0) {
+			if ($.inArray(ev, eventList) == -1) {
+			    eventList.push(ev);
+			}
+		    }
+		}
 	    }
 	}
-    });
-};
-var loadEventDate;
-var ricsToDisplay = [];
-var loadRics = function() {
-    ricList.sort();
-    var items = [];
-    $.each(ricList, function(i, val) {
-	if (i % 4 == 0) {
-	    items.push('<div class="row">');
-	}
-	items.push('<div class="col-sm-3"><span class="label-block label-default">' + val + '</span></div>');
-	if (i % 4 == 3) {
-	    items.push('</div><hr style="margin-top: 2px; margin-bottom: 2px">');
-	}
-    });
-    if (ricList.length % 4 != 3) {
-	items.push('</div><hr style="margin-top: 2px; margin-bottom: 2px">');
     }
-    $("#rics").empty().append(items.join(''));
-    $("#rics span").css('cursor', 'pointer').click(function() {
-	if ($(this).hasClass("label-default")) {
-	    $(this).removeClass("label-default").addClass("label-info");
-	    ricsToDisplay.push($(this).text());
-	} else {
-	    $(this).removeClass("label-info").addClass("label-default");
-	    ricsToDisplay.splice(ricsToDisplay.indexOf($(this).text()), 1);
-	}
-    });
+    loadEvents();
 };
+
+var submit = function() {
+    var events = $(".in").find("#event_input").select2("data");
+    var params = {
+	upper_window : $(".in").find("#startValue").val(),
+	lower_window : $(".in").find("#endValue").val(),
+	file_key : file_key
+    };
+    console.log(events);
+    $.each(events, function(i, val) {
+	var newParams = $.extend(true, {}, params);
+	pName = val["text"];
+	newParams["upper_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['max'];
+	newParams["lower_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['min'];
+	console.log(newParams);
+	$.get("eventapi", newParams, function(data) {
+	    var rics = [];
+	    console.log(data);
+	    $.each(data["events"], function(i, val) {
+		$.each(val["returns"], function(j, ric) {
+		    if ($.inArray(j, rics) == -1) {
+			rics.push(j);
+		    }
+		});
+	    });
+	    console.log(rics);
+	    rics.sort();
+	});
+    })
+
+};
+
+var bindSubmit = function() {
+    $(".in").find("#submitOptions").click(submit);
+}
+
+function template(data, container) {
+    return data.text.replace(/ -.*$/, "");
+}
+
+$('select').select2({});
 var drawGraph;
 
 var getEvents = function() {
@@ -511,4 +560,50 @@ $('#uploadForm').ajaxForm({
 	}
 	$('#uploadProgress').hide();
     }
+});
+
+var optPanel = false;
+
+$('#eventopt').click(function() {
+    if ($(this).hasClass("disabled")) {
+	return;
+    }
+    if (optPanel) {
+	r = confirm("Are you sure you want to change data input?")
+	if (!(r)) {
+	    return;
+	}
+	$('#compopt').removeClass("disabled");
+    }
+    optPanel = true;
+    $(this).addClass("disabled");
+    eventList = $.extend(true, [], allEvents);
+    $('#event').collapse("show");
+});
+
+$('#compopt').click(function() {
+    if ($(this).hasClass("disabled")) {
+	return;
+    }
+    if (optPanel) {
+	r = confirm("Are you sure you want to change data input?")
+	if (!(r)) {
+	    return;
+	}
+	$('#eventopt').removeClass("disabled");
+    }
+    optPanel = true;
+    $(this).addClass("disabled");
+    $('#companys').collapse("show");
+});
+
+$('#event').on("shown.bs.collapse", function() {
+    loadEvents();
+    loadRics();
+    bindSubmit();
+});
+$('#companys').on("shown.bs.collapse", function() {
+    loadRics();
+    loadEvents();
+    bindSubmit();
 });

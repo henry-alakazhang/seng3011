@@ -24,6 +24,7 @@ def api_bugs(request):
 def analytics_home(request):
     userData = None
     portfolio = []
+    jsonObj = {'analytics':True}
     if request.user.is_authenticated():
         portfolio = list(UserPortfolio.objects.filter(user=request.user).values('portfolio'))
         try: 
@@ -32,8 +33,10 @@ def analytics_home(request):
             userData = UserProfileExtras.objects.create(user=request.user)
             userData.file_key = 0
             userData.save()
-    portJson = json.dumps(portfolio)
-    return render(request, 'home/analytics.html', {'analytics':True,'portfolio':portJson, 'file_key': userData.file_key});
+        jsonObj['file_key'] = userData.file_key
+    jsonObj['portfolio'] = json.dumps(portfolio)
+    
+    return render(request, 'home/analytics.html', jsonObj);
 
 def analytics_howtouse(request):
     return render(request, 'home/analytics_howtouse.html', {'analytics':True});
