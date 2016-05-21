@@ -104,16 +104,11 @@ def processWithDate(priceFile,params,error):
     
     result = list()
     for ric in stockData.RIC:
-        cumRet = dict()
         # for compatibility and laziness
         stockChar = {"#RIC" : ric, "Event Date" : searchDate}
-        for i in range(int(lowerWindow),int(upperWindow)+1):
-            date = datetime.datetime.strptime(searchDate,"%d-%b-%y") + datetime.timedelta(days=i)
-            indivRet = stockData.getCumRet(stockChar,date.strftime("%d-%b-%y").lstrip('0'))
-            if (indivRet != None):       
-                cumRet[i] = indivRet
-        if (cumRet != None):
-            result.append((stockChar,cumRet))
+        cumRet, volume = calcCumRet(stockChar, int(upperWindow), int(lowerWindow), stockData)
+        if cumRet != None:
+            result.append((stockChar,cumRet,volume))
         else:
-            print ("Invalid Date range")
+            error.append("Invalid Date Range for {}: {} with window {} to {}\n".format(ric, searchDate, lowerWindow, upperWindow))
     return (result, error)

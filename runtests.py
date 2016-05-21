@@ -1,4 +1,4 @@
-import http.client, json, sys
+import http.client, json, sys, datetime
 
 def printHelp():
     print("usage: runtests.py ([-hupe] [args])*")
@@ -165,3 +165,39 @@ if passed:
     print ("1/1 OK!")
 else:
     print ("FAIL!")
+
+#
+# Test 6 - Date-based results return the same as event-based results
+#
+
+print("-----------------")
+print("Testing date-based results are the same as event-based results")
+passed = True
+
+conn.request("GET", endpoint + "?" + keyname + "=" + filekey + "&upper_window=5&lower_window=-5", headers=headers)
+res = conn.getresponse()
+data = json.loads(res.read().decode("utf-8"))
+
+# get date of first event
+date = data['events'][0]['date']
+longdate = datetime.datetime.strptime(date, "%d/%m/%y").strftime("%d-%b-%y").lstrip('0')
+
+conn.request("GET", endpoint + "?" + keyname + "=" + filekey + "&upper_window=5&lower_window=-5&date=" + longdate, headers=headers)
+res = conn.getresponse()
+data2 = json.loads(res.read().decode("utf-8"))
+print (".")
+
+for ric in data['events'][0]['returns'].keys():
+    ret1 = data['events'][0]['returns'][ric]
+    ret2 = data2['events'][0]['returns'][ric]
+    for i in range(0,11):
+        if ret1[i] != ret2[i]:
+            passed = False
+            break
+    if not passed:
+        break
+
+if passed:
+    print ("1/1 OK!")
+else:
+    print ("FAIL")
