@@ -1,6 +1,6 @@
 var apiResults;
 var news;
-var chartData = {average:{}};
+var chartData = {average:{data:[]}};
 var stockEventData = {};
 var minDate = new Date(2010, 1 - 1, 1)
 var maxDate = new Date(2015, 2 - 1, 28)
@@ -254,7 +254,7 @@ var insCharData = function(ric, data) {
 	    var mid = (low + high) >>> 1;
 	    if (array[mid]["date"] < data["date"])
 		low = mid + 1;
-	    else if (array[mid]["date"] == data["date"]) {
+	    else if (array[mid]["date"].getTime() == data["date"].getTime()) {
 		return;
 	    } else {
 		high = mid;
@@ -266,11 +266,103 @@ var insCharData = function(ric, data) {
     array.splice(low, 0, data);
 }
 
-var processData = function(data, lower, upper) {
-    chart.dataSets = [];
-    chartData = {average:{}}
+var insAve = function(date) {
+    var array = chartData["average"]["data"];
+    var low = 0, high = array.length;
+    if (high > 0 && array[high-1]["date"].getTime() >= date) {
+	while (low < high) {
+	    var mid = (low + high) >>> 1;
+	    console.log(low,mid,high,array);
+	    if (array[mid]["date"] < date)
+		low = mid + 1;
+	    else if (array[mid]["date"].getTime() == date.getTime()) {
+		return array[mid];
+	    } else {
+		high = mid;
+	    }
+	}
+    } else {
+	low = high;
+    }
+    array.splice(low, 0, {date:date,items:0,volume:0,value:0.0});
+    return array[low];
+}
+
+var comparedSets = {};
+
+var changedMainSet = function(e) {    
+    setTimeout(function() {
+	console.log("main");
+    $.each(chart.dataSets, function(i, val) {
+	val.showInCompare = false;
+    });
+    $.each(comparedSets, function(i, val) {
+	if ($.inArray(e.dataSet,val) != -1) {
+	    $.each(val, function(j, ds) {
+		 ds.showInCompare = true;
+	    });
+	}
+    });  
+    var ave = chart.dataSets[0];
+    $.each(e.dataSet.dataProvider, function(i,val) {	
+	var j = insAve(val.date);
+	j["value"] = (j["value"]*j["items"] + val["value"])/++j["items"];
+	console.log(j);
+    });  
+    
+    chart.validateData();;
+    }, 100);
+};
+
+var addAverage = function(e) {
+    console.log(e);
+    if (e.dataSet.title == "Average") {
+	return;
+    }
+    if (chart.comparedDataSets.length == 0) {
+    chartData.average.dataset.compared = true;
+    chart.dataSetSelector.fire({type:"dataSetCompared",dataSet:chartData["average"]["dataset"],chart:chart});
+    }
+    var ave = chart.dataSets[0];
+    $.each(e.dataSet.dataProvider, function(i,val) {
+	
+	var j = insAve(val.date);
+	console.log(j,i,val);
+	j["value"] = (j["value"]*j["items"] + val["value"])/++j["items"];
+	console.log(j);
+    });
+    chart.validateData();
+};
+var remAverage = function(e) {
+    console.log(e);
+    if (e.dataSet.title == "Average") {
+	return;
+    }
+    if (chart.comparedDataSets.length == 1+1) {
+	chartData.average.dataset.compared = false;
+	    chart.dataSetSelector.fire({type:"dataSetUncompared",dataSet:chartData["average"]["dataset"],chart:chart});
+    }
+    var ave = chart.dataSets[0];
+    $.each(e.dataSet.dataProvider, function(i,val) {
+	
+	var j = insAve(val.date);
+	console.log(j,i,val);
+	j["value"] = (j["value"]*j["items"] - val["value"])/--j["items"];
+	console.log(j);
+    });
+    chart.validateData();
+};
+var processData = function(data, lower, upper, clear) {
+    if (clear) {
+        chart.dataSets.splice(1,chart.dataSets.length-1);
+        chartData = {average:{data:[],dataset:chartData["average"]["dataset"]}}
+	chartData["average"]["dataset"].dataProvider = chartData["average"]["data"];
+    }
     $.each(data["events"], function(i, event) {
 	var date = moment(event["date"], "DD-MM-YY").utc().hour(0);
+	if (!(date in comparedSets)) {
+	    comparedSets[date] = [];
+	}
 	$.each(event["returns"], function(j, ric) {
 	    if (!(j in chartData)) {
 		chartData[j] = {
@@ -284,7 +376,7 @@ var processData = function(data, lower, upper) {
 		var newDate = date.clone().add(parseInt(lower) + k, 'd');
 		insCharData(j, {
 		    date : newDate.toDate(),
-		    value : ret,
+		    value : ret*100,
 		    volume : event["volume"][j][k]
 		})
 	    });
@@ -301,13 +393,14 @@ var processData = function(data, lower, upper) {
 		} ];
 		dataSet.dataProvider = chartData[j]["data"];
 		dataSet.categoryField = "date";
+		dataSet.showInCompare = false;
 		chart.dataSets.push(dataSet);
 	    } else {
 		chartData[j]["dataset"].dataProvider = chartData[j]["data"];
-	    }/*
-	    var desc = "Events:\n";	    
-	    $.each(stockEventData[j][moment(event["date"], "DD-MM-YY").format("DD-MMM-YY")],function (i,val) {
-		console.log(i, val);
+	    }
+	    comparedSets[date].push(chartData[j]["dataset"]);	    
+	    var desc = "Events:\n";
+	    $.each(stockEventData[j][moment(event["date"], "DD-MM-YY").format("DD-MMM-YY").replace(/^0/,'')],function (i,val) {
 		if (val > 0) {
 		    desc += i + ": " + val + "\n";
 		}
@@ -318,8 +411,7 @@ var processData = function(data, lower, upper) {
 		graph : graph1,
 		text : "E",
 		description : desc
-	    });*/
-	    chart.validateData();
+	    });
 	});
     });
     chart.dataSets.sort(function(a, b) {
@@ -329,6 +421,7 @@ var processData = function(data, lower, upper) {
 	    return 1;
 	return 0;
     });
+    chart.validateData();
     chart.write("chartdiv");
 };
 
@@ -342,17 +435,23 @@ var submit = function() {
     console.log(events);
     if (events.length == 0) {
 	$.get("eventapi", params, function(data) {	    
-	    processData(data, params['lower_window'], params['upper_window']);
+	    processData(data, params['lower_window'], params['upper_window'],true);
 	});
     } else {
+	var x = 0;
 	$.each(events, function(i, val) {
 	    var newParams = $.extend(true, {}, params);
 	    pName = val["text"];
-	    newParams["upper_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['max'];
-	    newParams["lower_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['min'];
+	    newParams["upper_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['max'] || 1;
+	    newParams["lower_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['min'] || 0.1;
 	    console.log(newParams);
 	    $.get("eventapi", newParams, function(data) {
-		processData(data, params['lower_window'], params['upper_window']);
+		if (x == 0) {
+		    processData(data, params['lower_window'], params['upper_window'],true);
+		    x++;
+		} else {
+		    processData(data, params['lower_window'], params['upper_window'],false);		    
+		}
 	    });
 	})
     }
@@ -373,6 +472,10 @@ AmCharts.ready(function() {
 var graph1;
 function createStockChart() {
     chart = new AmCharts.AmStockChart();
+    chart.zoomOutOnDataSetChange = true;
+    chart.addListener("rendered",function(e) {
+	 chart.dataSetSelector.fire({type:"dataSetSelected",dataSet:chart.mainDataSet,chart:chart});	
+    });
     // AVERAGE DATASET //
 	var dataSet = new AmCharts.DataSet();
 	chartData["average"]["dataset"] = dataSet;
@@ -386,6 +489,7 @@ function createStockChart() {
 	} ];
 	dataSet.dataProvider = chartData["average"]["data"];
 	dataSet.showInSelect = false;
+	dataSet.showInCompare = false;
 	dataSet.categoryField = "date";
 	chart.dataSets = [dataSet];
     
@@ -396,6 +500,7 @@ function createStockChart() {
     stockPanel1.showCategoryAxis = false;
     stockPanel1.title = "Value";
     stockPanel1.percentHeight = 70;
+    stockPanel1.precision = 3;
 
     // graph of first stock panel
     graph1 = new AmCharts.StockGraph();
@@ -405,19 +510,19 @@ function createStockChart() {
     graph1.bullet = "round";
     graph1.bulletBorderColor = "#FFFFFF";
     graph1.bulletBorderAlpha = 1;
-    graph1.balloonText = "[[title]]:<b>[[value]]</b>";
-    graph1.compareGraphBalloonText = "[[title]]:<b>[[value]]</b>";
+    graph1.balloonText = "[[title]]:<b>[[value]]%</b>";
+    graph1.compareGraphBalloonText = "[[title]]:<b>[[value]]%</b>";
     graph1.compareGraphBullet = "round";
     graph1.compareGraphBulletBorderColor = "#FFFFFF";
     graph1.compareGraphBulletBorderAlpha = 1;
+    graph1.showEventsOnComparedGraphs = true;
     stockPanel1.addStockGraph(graph1);
 
     // create stock legend
     var stockLegend1 = new AmCharts.StockLegend();
-    stockLegend1.periodValueTextComparing = "[[percents.value.close]]%";
-    stockLegend1.periodValueTextRegular = "[[value.close]]";
-    stockLegend1.valueTextRegular = " ";
-    stockLegend1.markerType = "none";
+    stockLegend1.valueTextComparing = "[[value]]%";
+    stockLegend1.periodValueTextComparing = "[[percent.value.close]]%";
+    stockLegend1.periodValueTextRegular = "[[value.close]]%";
     stockPanel1.stockLegend = stockLegend1;
 
     // second stock panel
@@ -452,6 +557,7 @@ function createStockChart() {
     panelsSettings.marginRight = 16;
     panelsSettings.marginLeft = 16;
     panelsSettings.usePrefixes = true;
+    panelsSettings.recalculateToPercents = "never"
     chart.panelsSettings = panelsSettings;
 
     // PERIOD SELECTOR ///////////////////////////////////
@@ -482,6 +588,9 @@ function createStockChart() {
     // DATA SET SELECTOR
     var dataSetSelector = new AmCharts.DataSetSelector();
     dataSetSelector.position = "left";
+    dataSetSelector.addListener("dataSetSelected",changedMainSet);
+    dataSetSelector.addListener("dataSetCompared",addAverage);
+    dataSetSelector.addListener("dataSetUncompared",remAverage);
     chart.dataSetSelector = dataSetSelector;
 
     if (Object.keys(chartData).length == 1) {
