@@ -1,6 +1,7 @@
 var apiResults;
 var news;
-var chartData = {};
+var chartData = {average:{}};
+var stockEventData = {};
 var minDate = new Date(2010, 1 - 1, 1)
 var maxDate = new Date(2015, 2 - 1, 28)
 // get filey_key from context variable in embedded script
@@ -102,39 +103,37 @@ $.get("eventapi/events", {
 	    if (data[keys[j]].hasOwnProperty(key)) {
 		if ($.inArray(key, ricList) == -1) {
 		    ricList.push(key);
+		    stockEventData[key] = {};
 		}
-		for ( var i in data[keys[j]]) {
-		    if (data[keys[j]].hasOwnProperty(i)) {
-			for ( var ev in data[keys[j]][i]) {
-			    if (data[keys[j]][i].hasOwnProperty(ev)) {
-				if (ev == "Event Date" || ev == "#RIC") {
-				    continue;
-				}
-				if ($.inArray(ev, eventList) == -1) {
-				    eventList.push(ev);
-				}
-				if (!(ev in paramVals)) {
-				    paramVals[ev] = {};
-				}
-				var val = parseFloat(data[keys[j]][i][ev]);
-				if (val == 0) {
-				    continue
-				}
-				;
-				if (!("min" in paramVals[ev])) {
-				    paramVals[ev]["min"] = val;
-				} else {
-				    if (val < paramVals[ev]["min"]) {
-					paramVals[ev]["min"] = val;
-				    }
-				}
-				if (!("max" in paramVals[ev])) {
-				    paramVals[ev]["max"] = val;
-				} else {
-				    if (val > paramVals[ev]["max"]) {
-					paramVals[ev]["max"] = val;
-				    }
-				}
+		stockEventData[key][keys[j]] = data[keys[j]][key];
+		for ( var ev in data[keys[j]][key]) {
+		    if (data[keys[j]][key].hasOwnProperty(ev)) {
+			if (ev == "Event Date" || ev == "#RIC") {
+			    continue;
+			}
+			if ($.inArray(ev, eventList) == -1) {
+			    eventList.push(ev);
+			}
+			if (!(ev in paramVals)) {
+			    paramVals[ev] = {};
+			}
+			var val = parseFloat(data[keys[j]][key][ev]);
+			if (val == 0) {
+			    continue
+			}
+			;
+			if (!("min" in paramVals[ev])) {
+			    paramVals[ev]["min"] = val;
+			} else {
+			    if (val < paramVals[ev]["min"]) {
+				paramVals[ev]["min"] = val;
+			    }
+			}
+			if (!("max" in paramVals[ev])) {
+			    paramVals[ev]["max"] = val;
+			} else {
+			    if (val > paramVals[ev]["max"]) {
+				paramVals[ev]["max"] = val;
 			    }
 			}
 		    }
@@ -269,6 +268,7 @@ var insCharData = function(ric, data) {
 
 var processData = function(data, lower, upper) {
     chart.dataSets = [];
+    chartData = {average:{}}
     $.each(data["events"], function(i, event) {
 	var date = moment(event["date"], "DD-MM-YY").utc().hour(0);
 	$.each(event["returns"], function(j, ric) {
@@ -302,19 +302,24 @@ var processData = function(data, lower, upper) {
 		dataSet.dataProvider = chartData[j]["data"];
 		dataSet.categoryField = "date";
 		chart.dataSets.push(dataSet);
-		chart.write("chartdiv");
 	    } else {
 		chartData[j]["dataset"].dataProvider = chartData[j]["data"];
-	    }
+	    }/*
+	    var desc = "Events:\n";	    
+	    $.each(stockEventData[j][moment(event["date"], "DD-MM-YY").format("DD-MMM-YY")],function (i,val) {
+		console.log(i, val);
+		if (val > 0) {
+		    desc += i + ": " + val + "\n";
+		}
+	    });
 	    chartData[j]["dataset"].stockEvents.push({
 		date : date.toDate(),
 		type : "pin",
 		graph : graph1,
 		text : "E",
-		description : "test"
-	    });
+		description : desc
+	    });*/
 	    chart.validateData();
-	    chart.write("chartdiv");
 	});
     });
     chart.dataSets.sort(function(a, b) {
@@ -324,6 +329,7 @@ var processData = function(data, lower, upper) {
 	    return 1;
 	return 0;
     });
+    chart.write("chartdiv");
 };
 
 var submit = function() {
@@ -335,9 +341,9 @@ var submit = function() {
     };
     console.log(events);
     if (events.length == 0) {
-	$.get("eventapi", params, function(data) {
+	$.get("eventapi", params, function(data) {	    
 	    processData(data, params['lower_window'], params['upper_window']);
-	})
+	});
     } else {
 	$.each(events, function(i, val) {
 	    var newParams = $.extend(true, {}, params);
@@ -367,6 +373,23 @@ AmCharts.ready(function() {
 var graph1;
 function createStockChart() {
     chart = new AmCharts.AmStockChart();
+    // AVERAGE DATASET //
+	var dataSet = new AmCharts.DataSet();
+	chartData["average"]["dataset"] = dataSet;
+	dataSet.title = "Average";
+	dataSet.fieldMappings = [ {
+	    fromField : "value",
+	    toField : "value"
+	}, {
+	    fromField : "volume",
+	    toField : "volume"
+	} ];
+	dataSet.dataProvider = chartData["average"]["data"];
+	dataSet.showInSelect = false;
+	dataSet.categoryField = "date";
+	chart.dataSets = [dataSet];
+    
+    
     // PANELS ///////////////////////////////////////////
     // first stock panel
     var stockPanel1 = new AmCharts.StockPanel();
@@ -461,13 +484,12 @@ function createStockChart() {
     dataSetSelector.position = "left";
     chart.dataSetSelector = dataSetSelector;
 
-    if (Object.keys(chartData).length == 0) {
+    if (Object.keys(chartData).length == 1) {
 	$("#chartdiv").append('<h2 style="display: flex;justify-content:center;align-items:center;height:100%">Please Enter Data</h2>');
     } else {
 	chart.write('chartdiv');
     }
 }
-
 $('#uploadForm').ajaxForm({
     beforeSend : function() {
 	$('#uploadProgress').addClass("progress");
@@ -507,7 +529,7 @@ $('#eventopt').click(function() {
     optPanel = true;
     $(this).addClass("disabled");
     eventList = $.extend(true, [], allEvents);
-    $('#event').collapse("show");
+    $('#events').collapse("show");
 });
 
 $('#compopt').click(function() {
@@ -526,7 +548,7 @@ $('#compopt').click(function() {
     $('#companys').collapse("show");
 });
 
-$('#event').on("shown.bs.collapse", function() {
+$('#events').on("shown.bs.collapse", function() {
     loadEvents();
     loadRics();
     bindSubmit();
