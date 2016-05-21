@@ -9,77 +9,78 @@ function escapeHtml(unsafe) {
     return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
-function updateNews(e) {
-    console.log(e);
-    var ric = jQuery.parseJSON(e);
+function updateNews(data, lowerWindow, upperWindow) {
+	$('#newsItems').empty()
+    if (data['events'].length == 0)
+    	return;
+    var ric = jQuery.parseJSON(portfolio);
     var ric_list = [];
     $.each(ric, function(i, val) {
 	if (val != '') {
 	    ric_list.push(val["portfolio"]);
 	}
     });
-    var start = moment("2015-10-01").utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
-    var end = moment("2015-10-02").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
-    var input = {
-	"start_date" : start,
-	"end_date" : end,
-	instr_list : [ ric_list ],
-	tpc_list : []
-    }
-    var url = "https://bhsl.blue/news_request/start_date=" + start + "/end_date=" + end;
-    if (ric_list.length > 0)
-	url += "instr_list=" + ric_list.toString() + "/tpc_list=''";
-    url += '/';
-    $.ajax({
-	type : "Post",
-	url : "https://pacificpygmyowl.herokuapp.com/api/query",
-	contentType : 'application/json',
-	data : JSON.stringify(input),
-	success : function(data) {
-	    data.sort(function(a, b) {
-		return moment(b.date, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.date, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
-	    })
-	    var news = data;
-	    var items = [];
-	    $.each(data, function(i, val) {
-		items.push('<a href="#" id="article' + i + '" class="list-group-item"> <h4 class="list-group-item-heading">' + escapeHtml(val["headline"]) + '</h4>');
-		if (val["body"] != '') {
-		    var s = val["body"]
-		    var n = s.indexOf('.', 200);
-		    var m = s.indexOf('。', 200);
-		    s = s.substring(0, n != -1 ? n < 300 ? n + 1 : 250 : m != -1 ? m + 1 : 250);
-		    items.push('<p class="list-group-item-text">' + escapeHtml(s) + '</p>');
-		} else {
-		    items.push('<p class="list-group-item-text">No Body Available</p>');
-		}
-		items.push('<small>' + val['date'] + '</small>')
-		$.each(val["instr_list"], function(i, val) {
-		    items.push(' <span class="label label-default">' + val + '</span>');
+
+    for (var event in data['events']) {
+	    var start = moment(data['events'][event]['date'], "DD-MM-YY").add(-1, 'days').format("DD-MMM-YY");
+	    var end = moment(data['events'][event]['date'], "DD-MM-YY").add(1, 'days').format("DD-MMM-YY");
+	    var param = {
+		"earliest" : start,
+		"latest" : end,
+		"RICs" : [ ric_list ],
+	    }
+	    $.get("eventapi/news", param, function(data) {
+		    data['results'].sort(function(a, b) {
+			return moment(b.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
+		    })
+		    var news = data['results'];
+//		    console.log(news);
+		    var items = [];
+		    $.each(news, function(i, val) {
+			items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
+			 id="article' + i + '" class="list-group-item"> \
+			 <h4 class="list-group-item-heading">' + escapeHtml(val["title"]) + '</h4>');
+			if (val["body"] != null) {
+			    var s = val["body"]
+			    var n = s.indexOf('.', 200);
+			    var m = s.indexOf('。', 200);
+			    s = s.substring(0, n != -1 ? n < 300 ? n + 1 : 250 : m != -1 ? m + 1 : 250);
+			    items.push('<p class="collapse list-group-item-text" id="body' + i + '">' + escapeHtml(s) + '</p>');
+			} else {
+			    items.push('<p class="collapse list-group-item-text" id="body' + i + '"> No Body Available </p>');
+			}
+			/*
+			$.each(val["instr_list"], function(i, val) {
+			    items.push(' <span class="label label-default">' + val + '</span>');
+			});
+			*/
+			items.push('<small>' + val['timestamp'] + '</small></a>')
+		    });
+		    $('#newsItems').append(items.join(''));
+		    /*
+		    $("#newsItems a").click(function() {
+			var id = $(this).attr('id').substring(7);
+//			console.log(id);
+			items = [];
+			var s = news[id]["title"];
+			var n = s.indexOf(' ', 15);
+			var m = s.indexOf('，');
+			var o = s.indexOf('、');
+			s = s.substring(0, m != -1 ? m : o != -1 ? o : n != -1 ? n + 1 : 20);
+			$('#artTab').parent().remove()
+			$("#tabs").append('<li><a data-toggle="tab" href="#art" id = "artTab">' + escapeHtml(s) + '</a></li>');
+			items.push('<h2>' + escapeHtml(news[id]["title"]) + '</h2>');
+			items.push('<small>Date: ' + news[id]["timestamp"] + '</small>');
+			$.each(news[id]["instr_list"], function(i, val) {
+			    items.push(' <span class="label label-default">' + val + '</span>');
+			});
+			items.push('<hr><p>' + escapeHtml(news[id]["body"]) + '</p>');
+			$("#artCont").empty().append(items.join(''));
+			$("#artTab").tab('show');
+		    });
+		    */
 		});
-	    });
-	    $('#newsItems').empty().append(items.join(''));
-	    $("#newsItems a").click(function() {
-		var id = $(this).attr('id').substring(7);
-		console.log(id);
-		items = [];
-		var s = news[id]["headline"];
-		var n = s.indexOf(' ', 15);
-		var m = s.indexOf('，');
-		var o = s.indexOf('、');
-		s = s.substring(0, m != -1 ? m : o != -1 ? o : n != -1 ? n + 1 : 20);
-		$('#artTab').parent().remove()
-		$("#tabs").append('<li><a data-toggle="tab" href="#art" id = "artTab">' + escapeHtml(s) + '</a></li>');
-		items.push('<h2>' + escapeHtml(news[id]["headline"]) + '</h2>');
-		items.push('<small>Date: ' + news[id]["date"] + '</small>');
-		$.each(news[id]["instr_list"], function(i, val) {
-		    items.push(' <span class="label label-default">' + val + '</span>');
-		});
-		items.push('<hr><p>' + escapeHtml(news[id]["body"]) + '</p>');
-		$("#artCont").empty().append(items.join(''));
-		$("#artTab").tab('show');
-	    });
 	}
-    });
 }
 
 var eventData;
@@ -167,7 +168,7 @@ var loadRics = function() {
 	    }));
 	}
     });
-    console.log(ricNames);
+//    console.log(ricNames);
     $.when.apply(null, $ajaxCalls).then(function() {
 	$.each(ricList, function(i, val) {
 	    if (ricNames[val] != null) {
@@ -205,7 +206,7 @@ var loadRics = function() {
 		ricsToDisplay.push(diff[0]["text"].replace(/ -.*$/, ""));
 	    }
 	    oldData = $(this).select2("data");
-	    console.log(ricsToDisplay);
+//	    console.log(ricsToDisplay);
 	    /*
 	     * if (e.val in $(this).val()) { ricsToDisplay.push(e.val.replace(/
 	     * -.*$/, "")); } else {
@@ -272,7 +273,7 @@ var insAve = function(date) {
     if (high > 0 && array[high-1]["date"].getTime() >= date) {
 	while (low < high) {
 	    var mid = (low + high) >>> 1;
-	    console.log(low,mid,high,array);
+//	    console.log(low,mid,high,array);
 	    if (array[mid]["date"] < date)
 		low = mid + 1;
 	    else if (array[mid]["date"].getTime() == date.getTime()) {
@@ -307,7 +308,6 @@ var changedMainSet = function(e) {
     $.each(e.dataSet.dataProvider, function(i,val) {	
 	var j = insAve(val.date);
 	j["value"] = (j["value"]*j["items"] + val["value"])/++j["items"];
-	console.log(j);
     });  
     
     chart.validateData();;
@@ -446,12 +446,14 @@ var submit = function() {
 	    newParams["lower_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['min'] || 0.1;
 	    console.log(newParams);
 	    $.get("eventapi", newParams, function(data) {
+	   	console.log(data)
 		if (x == 0) {
 		    processData(data, params['lower_window'], params['upper_window'],true);
 		    x++;
 		} else {
 		    processData(data, params['lower_window'], params['upper_window'],false);		    
 		}
+		updateNews(data, params['lower_window'], params['upper_window']);
 	    });
 	})
     }
