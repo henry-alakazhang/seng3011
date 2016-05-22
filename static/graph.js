@@ -152,6 +152,14 @@ $.get("eventapi/events", {
 	    }
 	}
     }
+
+    $.each(ricList, function(i, val) {
+	if (!(val in ricNames)) {
+	    $.get("https://query.yahooapis.com/v1/public/yql?q=select%20Name%20from%20yahoo.finance.quotes%20where%20symbol%20in%20(%22" + val
+		    + "%22)%0A%09%09&format=json&diagnostics=true&env=http%3A%2F%2Fdatatables.org%2Falltables.env&callback=", function(data) {
+		ricNames[val] = data["query"]["results"]["quote"]["Name"];
+	    });
+    }});
     allEvents = $.extend(true, [], eventList);
 })
 
@@ -169,17 +177,6 @@ var oldData = [];
 var loadRics = function() {
     var fullRicNames = [];
     ricList.sort();
-    var $ajaxCalls = [];
-    $.each(ricList, function(i, val) {
-	if (!(val in ricNames)) {
-	    $ajaxCalls.push($.get("https://query.yahooapis.com/v1/public/yql?q=select%20Name%20from%20yahoo.finance.quotes%20where%20symbol%20in%20(%22" + val
-		    + "%22)%0A%09%09&format=json&diagnostics=true&env=http%3A%2F%2Fdatatables.org%2Falltables.env&callback=", function(data) {
-		ricNames[val] = data["query"]["results"]["quote"]["Name"];
-	    }));
-	}
-    });
-//    console.log(ricNames);
-    $.when.apply(null, $ajaxCalls).then(function() {
 	$.each(ricList, function(i, val) {
 	    if (ricNames[val] != null) {
 		fullRicNames.push(val + ' - ' + ricNames[val]);
@@ -227,7 +224,6 @@ var loadRics = function() {
 		updateEvent();
 	    }
 	});
-    });
 };
 
 var updateEvent = function() {
@@ -440,7 +436,6 @@ var processData = function(data, lower, upper, clear) {
 	    });
 	});
     });
-    chart.mainDataSet = chart.dataSets[1];
     chart.dataSets.sort(function(a, b) {
 	if (a.title < b.title)
 	    return -1;
@@ -448,6 +443,19 @@ var processData = function(data, lower, upper, clear) {
 	    return 1;
 	return 0;
     });
+    var foundRic = false;
+    if (ricsToDisplay.length > 0) {	
+	$.each(ricsToDisplay, function(i,val) {
+	    if (val in chartData) {
+		chart.mainDataSet = chartData[val]["dataset"]
+		foundRic = true;
+		return false;
+	    }
+	});
+    }
+    if (!foundRic) {
+	chart.mainDataSet = chart.dataSets[0].title == "average" ? chart.dataSets[1] : chart.dataSets[0];
+    }
     chart.validateData()
     
         if (chartDrawn) {
