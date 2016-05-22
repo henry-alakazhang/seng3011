@@ -10,3 +10,13 @@ class UserPortfolio(models.Model):
 class UserProfileExtras(models.Model):
     user = models.OneToOneField(User)
     file_key = models.CharField(max_length=12)
+
+class UserSavedNews(models.Model):
+    user = models.ForeignKey(User)
+    title = models.TextField(blank=True, null=True)
+    body = models.TextField(blank=True, null=True)
+    date = models.CharField(max_length=26)
+    tags = models.TextField(blank=True, null=True)
+
+class UserSavedSearch(models.Model):
+    user = models.ForeignKey(User)

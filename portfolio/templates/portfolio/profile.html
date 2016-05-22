@@ -1,5 +1,9 @@
 {% extends "home/base.html" %}
-
+{% block scripts %}
+<src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js'></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.full.min.js"></script>
+{% endblock %}
 {% block title %}Team Cool - {{ user }}'s Profile{% endblock %}
 
 {% block content %}
@@ -79,6 +83,18 @@
         <div class="row">
         File key = {{ profile.file_key }}
         </div>
+        <hr>
+        <div class="row">
+            <panel id="newsItems">
+            Saved news = {{ news }}
+            </panel>
+        </div>
+        <script>
+            savedArticles = {{ news }}
+            $('#newsItems').append(savedArticles)
+        </script>
+        {% load staticfiles %}
+        <script src='{% static "news.js" %}'></script>
     {% else %}
         Please log in or register an account.
     {% endif %}
