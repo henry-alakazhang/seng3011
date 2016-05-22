@@ -290,7 +290,7 @@ var insAve = function(date) {
 }
 
 var comparedSets = {};
-
+var clearChart = false;
 var changedMainSet = function(e) {    
     setTimeout(function() {
 	console.log("main");
@@ -305,6 +305,22 @@ var changedMainSet = function(e) {
 	}
     });  
     var ave = chart.dataSets[0];
+    $.each(chart.comparedDataSets, function(i, val) {
+	val.compared = false;
+	chart.dataSetSelector.fire({type:"dataSetUncompared",dataSet:val,chart:chart});	
+    });
+    if (!clearChart) {
+	    $.each(e.chart.mainDataSet.dataProvider, function(i,val) {	
+		var j = insAve(val.date);
+		if (j.items > 1) {
+		    j["value"] = (j["value"]*j["items"] - val["value"])/--j["items"];
+		} else {
+		    j.value = 0;
+		    j.items = 0;
+		}
+	    });  	
+    }
+    clearChart = false;
     $.each(e.dataSet.dataProvider, function(i,val) {	
 	var j = insAve(val.date);
 	j["value"] = (j["value"]*j["items"] + val["value"])/++j["items"];
@@ -313,7 +329,7 @@ var changedMainSet = function(e) {
     chart.validateData();;
     }, 100);
 };
-
+var chartDrawn = false;
 var addAverage = function(e) {
     console.log(e);
     if (e.dataSet.title == "Average") {
@@ -354,7 +370,7 @@ var remAverage = function(e) {
 };
 var processData = function(data, lower, upper, clear) {
     if (clear) {
-        chart.dataSets.splice(1,chart.dataSets.length-1);
+        chart.dataSets = [chartData.average.dataset];
         chartData = {average:{data:[],dataset:chartData["average"]["dataset"]}}
 	chartData["average"]["dataset"].dataProvider = chartData["average"]["data"];
     }
@@ -414,6 +430,7 @@ var processData = function(data, lower, upper, clear) {
 	    });
 	});
     });
+    chart.mainDataSet = chart.dataSets[1];
     chart.dataSets.sort(function(a, b) {
 	if (a.title < b.title)
 	    return -1;
@@ -421,8 +438,15 @@ var processData = function(data, lower, upper, clear) {
 	    return 1;
 	return 0;
     });
-    chart.validateData();
+    chart.validateData()
+    
+        if (chartDrawn) {
+            chart.chartCreated = false;
+        	chart.validateNow();
+        } else {
     chart.write("chartdiv");
+    chartDrawn = true;
+        }
 };
 
 var submit = function() {
@@ -475,7 +499,8 @@ var graph1;
 function createStockChart() {
     chart = new AmCharts.AmStockChart();
     chart.zoomOutOnDataSetChange = true;
-    chart.addListener("rendered",function(e) {
+    chart.addListener("init",function(e) {
+	clearChart = true;
 	 chart.dataSetSelector.fire({type:"dataSetSelected",dataSet:chart.mainDataSet,chart:chart});	
     });
     // AVERAGE DATASET //
@@ -599,6 +624,7 @@ function createStockChart() {
 	$("#chartdiv").append('<h2 style="display: flex;justify-content:center;align-items:center;height:100%">Please Enter Data</h2>');
     } else {
 	chart.write('chartdiv');
+	chartDrawn = true;
     }
 }
 $('#uploadForm').ajaxForm({
