@@ -13,7 +13,7 @@ function escapeHtml(unsafe) {
 
 function updateNewsOn(data, date2, clear) {
     if (clear) {
-		$('#newsItems').empty();
+		$('#newsItems').empty().append("Loading news items...");
     }
 
     if (data['events'].length == 0)
@@ -41,7 +41,7 @@ function updateNewsOn(data, date2, clear) {
 		news.sort(function(a, b) {
 		return moment(b.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
 	    });
-        $("#newsItems").append(displayNews(news));
+        $("#newsItems").empty().append(displayNews(news));
 	});
 }
 
@@ -54,7 +54,7 @@ function updateNews(data, clear) {
 		 */
 
     if (clear) {
-		$('#newsItems').empty()
+		$('#newsItems').empty().append("Loading news items...")
     }
     for (var event in data['events']) {
 		var date = moment(data['events'][event]['date'], "DD-MM-YY");
@@ -88,7 +88,7 @@ function updateNews(data, clear) {
 	    	news.sort(function(a, b) {
 				return moment(b.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
 	    	})
-	    	$("#newsItems").append(displayNews(news));
+	    	$("#newsItems").empty().append(displayNews(news));
 	    });
 	}
 }
