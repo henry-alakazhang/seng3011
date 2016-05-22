@@ -18,6 +18,8 @@
 <script src='{% static "amcharts/amcharts.js" %}'type="text/javascript"></script>
 <script src='{% static "amcharts/serial.js" %}' type="text/javascript"></script>
 <script src='{% static "amcharts/amstock.js" %}' type="text/javascript"></script>
+<script type="text/javascript" src='{% static "bootstrap-multiselect.js" %}'></script>
+<link rel="stylesheet" href='{% static "bootstrap-multiselect.css" %}' type="text/css"/>
 {% endblock %}
 {% block title %}Team Cool - SENG 3011{% endblock %} 
 {% block content %}
@@ -46,11 +48,13 @@
 				<div class="panel-group">
 					<div class="panel panel-info">
 						<div class="panel-heading">
-							<h4 class="panel-title text-center">2. Choose an Event</h4>
-						</div>
+							<h4 class="panel-title text-center">2a. Choose an Event</h4>
+						</div>						
 						<div id="date" class="panel-body">
-							<select id="event_input" multiple="multiple"></select>
-						</div>
+								<select id="event_input" multiple="multiple"></select>
+							<h5 class="text-center">2b. Choose an Event Date</h5>
+								<select id="event_date" multiple="multiple" disabled></select>
+						</div>						
 					</div>
 					<hr style="margin-top: 8px; margin-bottom: 8px">
 					<div id="eventSection" class="panel panel-info">

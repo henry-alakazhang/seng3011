@@ -2,8 +2,10 @@ var apiResults;
 var news;
 var chartData = {average:{data:[]}};
 var stockEventData = {};
+var eventDateToDisplay = [];
 var minDate = new Date(2010, 1 - 1, 1)
 var maxDate = new Date(2015, 2 - 1, 28)
+var eventDateList = [];
 // get filey_key from context variable in embedded script
 function escapeHtml(unsafe) {
     return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
@@ -96,7 +98,9 @@ function updateNews(data, lowerWindow, upperWindow) {
 var eventData;
 var ricList = [];
 var ricNames = {};
+var allEvents = [];
 var eventList = [];
+var eventDates = {};
 var allEvents;
 var paramVals = {};
 $.get("eventapi/events", {
@@ -122,9 +126,11 @@ $.get("eventapi/events", {
 			if (ev == "Event Date" || ev == "#RIC") {
 			    continue;
 			}
-			if ($.inArray(ev, eventList) == -1) {
+			if ($.inArray(ev, allEvents) == -1) {
+			    allEvents.push(ev);
 			    eventList.push(ev);
-			}
+			    eventDates[ev] = [];
+			}		
 			if (!(ev in paramVals)) {
 			    paramVals[ev] = {};
 			}
@@ -132,7 +138,7 @@ $.get("eventapi/events", {
 			if (val == 0) {
 			    continue
 			}
-			;
+			eventDates[ev].push(keys[j]);
 			if (!("min" in paramVals[ev])) {
 			    paramVals[ev]["min"] = val;
 			} else {
@@ -163,17 +169,40 @@ $.get("eventapi/events", {
     allEvents = $.extend(true, [], eventList);
 })
 
+var eventToDisplay = [];
+var oldEvData = [];
 var graphChanged = false;
 var loadEvents = function() {
     $(".in").find("#event_input").empty();
     $(".in").find("#event_input").select2({
 	width : "100%",
 	data : eventList,
-    })
+    }).on("change", function(e) {
+	    var diff = $($(this).select2("data")).not(oldEvData).get();
+	    if (diff.length == 0) {		
+		var diff = $(oldEvData).not($(this).select2("data")).get();
+		eventToDisplay.splice(eventToDisplay.indexOf(diff[0].text),1);
+	    } else {
+		eventToDisplay.push(diff[0].text);
+	    }
+	    oldEvData = $(this).select2("data");
+		    eventDateList = [];
+		    $.each(eventToDisplay, function(i, val) {
+			$.each(eventDates[val], function(j, date) {
+			    if ($.inArray(date,eventDateList) == -1) {
+				eventDateList.push(date);
+			    }
+			})
+		    });
+		    eventDateList.sort(function(a,b) {
+			return moment(a, "DD-MMM-YY").diff(moment(b, "DD-MMM-YY"))
+		    });
+		 loadEventDate();
+	});
 };
 
 var ricsToDisplay = [];
-var oldData = [];
+var oldRicData = [];
 var loadRics = function() {
     var fullRicNames = [];
     ricList.sort();
@@ -205,14 +234,14 @@ var loadRics = function() {
 		return null;
 	    },
 	}).on("change", function(e) {
-	    var diff = $($(this).select2("data")).not(oldData).get();
+	    var diff = $($(this).select2("data")).not(oldRicData).get();
 	    if (diff.length == 0) {
-		var diff = $(oldData).not($(this).select2("data")).get();
+		var diff = $(oldRicData).not($(this).select2("data")).get();
 		ricsToDisplay.splice(ricsToDisplay.indexOf(diff[0]["text"].replace(/ -.*$/, "")), 1);
 	    } else {
 		ricsToDisplay.push(diff[0]["text"].replace(/ -.*$/, ""));
 	    }
-	    oldData = $(this).select2("data");
+	    oldRicData = $(this).select2("data");
 //	    console.log(ricsToDisplay);
 	    /*
 	     * if (e.val in $(this).val()) { ricsToDisplay.push(e.val.replace(/
@@ -381,7 +410,14 @@ var processData = function(data, lower, upper, clear) {
 	chartData["average"]["dataset"].dataProvider = chartData["average"]["data"];
     }
     $.each(data["events"], function(i, event) {
-	var date = moment(event["date"], "DD-MM-YY").utc().hour(0);
+	var date = moment(event["date"], "DD-MM-YY");
+	if (eventDateToDisplay.length > 0) {	    
+	    if ($.inArray(date.format("DD-MMM-YY").replace(/^0/,''),eventDateToDisplay) == -1) {
+		console.log(date.format("DD-MMM-YY").replace(/^0/,''), eventDateToDisplay);
+		return true;
+	    }
+	}
+	date = date.utc().hour(0);
 	if (!(date in comparedSets)) {
 	    comparedSets[date] = [];
 	}
@@ -504,6 +540,33 @@ var submit = function() {
 
 var bindSubmit = function() {
     $(".in").find("#submitOptions").click(submit);
+}
+
+var oldDateData = []
+var loadEventDate = function() {
+
+    $(".in").find("#event_date").empty();
+    if (eventDateList.length > 0) {
+	$(".in").find("#event_date").select2({
+		width : "100%",
+		data : eventDateList,
+		disabled: false}).on("change", function(e) {
+		    var diff = $($(this).select2("data")).not(oldDateData).get();
+		    if (diff.length == 0) {		
+			var diff = $(oldDateData).not($(this).select2("data")).get();
+			console.log(diff[0]);
+			eventDateToDisplay.splice(eventDateToDisplay.indexOf(diff[0].text),1);
+		    } else {
+			eventDateToDisplay.push(diff[0].text);
+		    }
+		    oldDateData = $(this).select2("data");
+		});	
+    } else {
+	$(".in").find("#event_date").select2({
+		width : "100%",
+		disabled: true});
+	
+    }
 }
 
 function template(data, container) {
@@ -706,6 +769,7 @@ $('#compopt').click(function() {
 
 $('#events').on("shown.bs.collapse", function() {
     loadEvents();
+    loadEventDate();
     loadRics();
     bindSubmit();
 });
@@ -713,4 +777,5 @@ $('#companys').on("shown.bs.collapse", function() {
     loadRics();
     loadEvents();
     bindSubmit();
+    loadEventDate();
 });
