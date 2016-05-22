@@ -1,112 +1,142 @@
-var apiResults;
+var apiResults = [];
 var news;
 var chartData = {average:{data:[]}};
 var stockEventData = {};
+var eventDateToDisplay = [];
 var minDate = new Date(2010, 1 - 1, 1)
 var maxDate = new Date(2015, 2 - 1, 28)
+var eventDateList = [];
 // get filey_key from context variable in embedded script
 function escapeHtml(unsafe) {
     return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
-function updateNews(data, lowerWindow, upperWindow) {
-	$('#newsItems').empty()
-    if (data['events'].length == 0)
-    	return;/*
-    var ric = jQuery.parseJSON(portfolio);
-    $.each(ric, function(i, val) {
-	if (val != '') {
-	    ric_list.push(val["portfolio"]);
-	}
-    });*/
+function updateNewsOn(data, date2, clear) {
+    if (clear) {
+		$('#newsItems').empty();
+    }
 
-    for (var event in data['events']) {
-	    var start = moment(data['events'][event]['date'], "DD-MM-YY").add(-1, 'days').format("DD-MMM-YY");
-	    var end = moment(data['events'][event]['date'], "DD-MM-YY").add(1, 'days').format("DD-MMM-YY");
-	    var ric_list = [];
-	    $.each(data.events[event].returns, function(i, val) {
-		ric_list.push(i);
-	    });
-	    var param = {
+    if (data['events'].length == 0)
+		return;
+
+    var date = moment(date2).local().hour(0);
+    var start = date.clone().add(-1, 'days').format("DD-MMM-YY");
+    var end = date.clone().add(1, 'days').format("DD-MMM-YY");
+    var ric_list = [ chart.mainDataSet.title ];
+    var param = {
 		"earliest" : start,
-		"latest" : end,
-	    }
-	    if (ric_list.length > 0) {
+		"latest" : end
+    }
+    if (ric_list.length > 0) {
 		param.RICs = ric_list.length
 		$.each(ric_list, function(i, val) {
-		   param["ric"+i] = val; 
+		    param["ric" + i] = val;
 		});
-	    }
-	    $.get("eventapi/news", param, function(data) {
+    }
+    var news = []
+    $.get("eventapi/news", param, function(data) {
 		$.each(data, function(i, ret) {
-			console.log(data);
-		    ret['results'].sort(function(a, b) {
-			return moment(b.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
-		    })
-		    var news = ret['results'];
-//		    console.log(news);
-		    var items = [];
-		    $.each(news, function(i, val) {
-			if (val["body"] != null) {
-			    var s = val["body"]
-			    var n = s.indexOf('.', 200);
-			    var m = s.indexOf('。', 200);
-			    s = s.substring(0, n != -1 ? n < 300 ? n + 1 : 250 : m != -1 ? m + 1 : 250);
-			    var sentiment = val["sentiment"];
-			    var colour = "#FFFFFF"
-			    if (sentiment.status == "OK") {
-				    var colour = (sentiment.docSentiment.score < 0) ? "#FF99AA" : "#AAFF99"
-			    }
-				items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
-				 style="background-color:' + colour + '" id="article' + i + '" class="list-group-item"> \
-				 <h4 class="list-group-item-heading">' + escapeHtml(val["title"]) + '</h4>');
-			    items.push('<p class="collapse list-group-item-text" id="body' + i + '">' + escapeHtml(s) + '</p>');
-			} else {
+		    news = news.concat(ret['results']);// console.log(news);
+		});
+		news.sort(function(a, b) {
+		return moment(b.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
+	    });
+		displayNews(news);
+	});
+}
 
-				items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
-				 id="article' + i + '" class="list-group-item"> \
-				 <h4 class="list-group-item-heading">' + escapeHtml(val["title"]) + '</h4>');
-			    items.push('<p class="collapse list-group-item-text" id="body' + i + '"> No Body Available </p>');
-			}
-			/*
-			$.each(val["instr_list"], function(i, val) {
-			    items.push(' <span class="label label-default">' + val + '</span>');
+function updateNews(data, clear) {
+    if (data['events'].length == 0)
+    	return;/*
+		 * var ric = jQuery.parseJSON(portfolio); $.each(ric,
+		 * function(i, val) { if (val != '') {
+		 * ric_list.push(val["portfolio"]); } });
+		 */
+
+    if (clear) {
+		$('#newsItems').empty()
+    }
+    for (var event in data['events']) {
+		var date = moment(data['events'][event]['date'], "DD-MM-YY");
+		if (eventDateToDisplay.length > 0) {	    
+		    if ($.inArray(date.format("DD-MMM-YY").replace(/^0/,''),eventDateToDisplay) == -1) {
+    			console.log(date.format("DD-MMM-YY").replace(/^0/,''), eventDateToDisplay);
+    			continue;
+    	    }
+    	}
+	    var start = date.clone().add(-1, 'days').format("DD-MMM-YY");
+	    var end = date.clone().add(1, 'days').format("DD-MMM-YY");
+	    var ric_list = [];
+	    $.each(data.events[event].returns, function(i, val) {
+			ric_list.push(i);
+	    });
+	    var param = {
+			"earliest" : start,
+			"latest" : end,
+	    }
+	    if (ric_list.length > 0) {
+			param.RICs = ric_list.length
+			$.each(ric_list, function(i, val) {
+		   		param["ric"+i] = val; 
 			});
-			*/
-			items.push('<small>' + val['timestamp'] + '</small></a>')
-		    });
-		    $('#newsItems').append(items.join(''));
-		});
-		    /*
-		    $("#newsItems a").click(function() {
-			var id = $(this).attr('id').substring(7);
-//			console.log(id);
-			items = [];
-			var s = news[id]["title"];
-			var n = s.indexOf(' ', 15);
-			var m = s.indexOf('，');
-			var o = s.indexOf('、');
-			s = s.substring(0, m != -1 ? m : o != -1 ? o : n != -1 ? n + 1 : 20);
-			$('#artTab').parent().remove()
-			$("#tabs").append('<li><a data-toggle="tab" href="#art" id = "artTab">' + escapeHtml(s) + '</a></li>');
-			items.push('<h2>' + escapeHtml(news[id]["title"]) + '</h2>');
-			items.push('<small>Date: ' + news[id]["timestamp"] + '</small>');
-			$.each(news[id]["instr_list"], function(i, val) {
-			    items.push(' <span class="label label-default">' + val + '</span>');
+	    }
+		var news = [];
+	    $.get("eventapi/news", param, function(data) {
+			$.each(data, function(i, ret) {
+			    news = news.concat(ret['results']);// console.log(news);
 			});
-			items.push('<hr><p>' + escapeHtml(news[id]["body"]) + '</p>');
-			$("#artCont").empty().append(items.join(''));
-			$("#artTab").tab('show');
-		    });
-		    */
-		});
+	    	news.sort(function(a, b) {
+				return moment(b.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
+	    	})
+	    	displayNews(news);
+	    });
 	}
+}
+
+function displayNews(news) {
+	var items = []
+    $.each(news, function(i, val) {
+    	var tags = val.tags.split(",");
+		if (val["body"] != null) {
+		    var s = val["body"]
+		    var n = s.indexOf('.', 200);
+		    var m = s.indexOf('。', 200);
+		    s = s.substring(0, n != -1 ? n < 300 ? n + 1 : 250 : m != -1 ? m + 1 : 250);
+		    var sentiment = val["sentiment"];
+		    var colour = "#FFFFFF"
+		    if (sentiment.status == "OK") {
+			    var colour = (sentiment.docSentiment.score < 0) ? "#FF99AA" : "#AAFF99"
+		    }
+			items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
+			 style="background-color:' + colour + '" id="article' + i + '" class="list-group-item"> \
+			 <h4 class="list-group-item-heading">' + escapeHtml(val["title"]) + '</h4>');
+		    items.push('<p class="collapse list-group-item-text" id="body' + i + '">' + escapeHtml(s) + '</p>');
+		} else {
+
+			items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
+			 id="article' + i + '" class="list-group-item"> \
+			 <h4 class="list-group-item-heading">' + escapeHtml(val["title"]) + '</h4>');
+		    items.push('<p class="collapse list-group-item-text" id="body' + i + '"> No Body Available </p>');
+		}
+		items.push('<small>' + val['timestamp'] + '</small>')
+		$.each(tags, function (i,tag) {
+		   if (tag.startsWith('R:')) {
+			items.push(' <span class="label label-default">' + tag.slice(2) + '</span>')		       
+		   } else {
+		       return true;
+		   }
+		});
+		items.push('</a>');
+    });
+    $('#newsItems').append(items.join(''));
 }
 
 var eventData;
 var ricList = [];
 var ricNames = {};
+var allEvents = [];
 var eventList = [];
+var eventDates = {};
 var allEvents;
 var paramVals = {};
 $.get("eventapi/events", {
@@ -132,9 +162,11 @@ $.get("eventapi/events", {
 			if (ev == "Event Date" || ev == "#RIC") {
 			    continue;
 			}
-			if ($.inArray(ev, eventList) == -1) {
+			if ($.inArray(ev, allEvents) == -1) {
+			    allEvents.push(ev);
 			    eventList.push(ev);
-			}
+			    eventDates[ev] = [];
+			}		
 			if (!(ev in paramVals)) {
 			    paramVals[ev] = {};
 			}
@@ -142,7 +174,7 @@ $.get("eventapi/events", {
 			if (val == 0) {
 			    continue
 			}
-			;
+			eventDates[ev].push(keys[j]);
 			if (!("min" in paramVals[ev])) {
 			    paramVals[ev]["min"] = val;
 			} else {
@@ -173,17 +205,42 @@ $.get("eventapi/events", {
     allEvents = $.extend(true, [], eventList);
 })
 
+var eventToDisplay = [];
+var oldEvData = [];
 var graphChanged = false;
 var loadEvents = function() {
     $(".in").find("#event_input").empty();
     $(".in").find("#event_input").select2({
 	width : "100%",
 	data : eventList,
-    })
+    }).on("change", function(e) {
+	    var diff = $($(this).select2("data")).not(oldEvData).get();
+	    if (diff.length == 0) {		
+		var diff = $(oldEvData).not($(this).select2("data")).get();
+		if (diff.length == 0)
+		    return;
+		eventToDisplay.splice(eventToDisplay.indexOf(diff[0].text),1);
+	    } else {
+		eventToDisplay.push(diff[0].text);
+	    }
+	    oldEvData = $(this).select2("data");
+		    eventDateList = [];
+		    $.each(eventToDisplay, function(i, val) {
+			$.each(eventDates[val], function(j, date) {
+			    if ($.inArray(date,eventDateList) == -1) {
+				eventDateList.push(date);
+			    }
+			})
+		    });
+		    eventDateList.sort(function(a,b) {
+			return moment(a, "DD-MMM-YY").diff(moment(b, "DD-MMM-YY"))
+		    });
+		 loadEventDate();
+	});
 };
 
 var ricsToDisplay = [];
-var oldData = [];
+var oldRicData = [];
 var loadRics = function() {
     var fullRicNames = [];
     ricList.sort();
@@ -215,14 +272,14 @@ var loadRics = function() {
 		return null;
 	    },
 	}).on("change", function(e) {
-	    var diff = $($(this).select2("data")).not(oldData).get();
+	    var diff = $($(this).select2("data")).not(oldRicData).get();
 	    if (diff.length == 0) {
-		var diff = $(oldData).not($(this).select2("data")).get();
+		var diff = $(oldRicData).not($(this).select2("data")).get();
 		ricsToDisplay.splice(ricsToDisplay.indexOf(diff[0]["text"].replace(/ -.*$/, "")), 1);
 	    } else {
 		ricsToDisplay.push(diff[0]["text"].replace(/ -.*$/, ""));
 	    }
-	    oldData = $(this).select2("data");
+	    oldRicData = $(this).select2("data");
 //	    console.log(ricsToDisplay);
 	    /*
 	     * if (e.val in $(this).val()) { ricsToDisplay.push(e.val.replace(/
@@ -391,7 +448,14 @@ var processData = function(data, lower, upper, clear) {
 	chartData["average"]["dataset"].dataProvider = chartData["average"]["data"];
     }
     $.each(data["events"], function(i, event) {
-	var date = moment(event["date"], "DD-MM-YY").utc().hour(0);
+	var date = moment(event["date"], "DD-MM-YY");
+	if (eventDateToDisplay.length > 0) {	    
+	    if ($.inArray(date.format("DD-MMM-YY").replace(/^0/,''),eventDateToDisplay) == -1) {
+		console.log(date.format("DD-MMM-YY").replace(/^0/,''), eventDateToDisplay);
+		return true;
+	    }
+	}
+	date = date.utc().hour(0);
 	if (!(date in comparedSets)) {
 	    comparedSets[date] = [];
 	}
@@ -486,11 +550,13 @@ var submit = function() {
     };
     console.log(events);
     if (events.length == 0) {
-	$.get("eventapi", params, function(data) {	    
+	$.get("eventapi", params, function(data) {	
+	    apiResults = [data];
 	    processData(data, params['lower_window'], params['upper_window'],true);
-		updateNews(data, params['lower_window'], params['upper_window']);
+		updateNews(data,true);
 	});
     } else {
+	apiResults = [];
 	var x = 0;
 	$.each(events, function(i, val) {
 	    var newParams = $.extend(true, {}, params);
@@ -499,14 +565,16 @@ var submit = function() {
 	    newParams["lower_" + pName.toLowerCase().replace(/ /g, "_")] = paramVals[pName]['min'] || 0.1;
 	    console.log(newParams);
 	    $.get("eventapi", newParams, function(data) {
+		apiResults.push(data);
 	   	console.log(data)
 		if (x == 0) {
 		    processData(data, params['lower_window'], params['upper_window'],true);
+			updateNews(data,true);
 		    x++;
 		} else {
-		    processData(data, params['lower_window'], params['upper_window'],false);		    
+		    processData(data, params['lower_window'], params['upper_window'],false);
+			updateNews(data,false);		    
 		}
-		updateNews(data, params['lower_window'], params['upper_window']);
 	    });
 	})
     }
@@ -516,9 +584,47 @@ var bindSubmit = function() {
     $(".in").find("#submitOptions").click(submit);
 }
 
+var oldDateData = []
+var loadEventDate = function() {
+
+    $(".in").find("#event_date").empty();
+    if (eventDateList.length > 0) {
+	$(".in").find("#event_date").select2({
+		width : "100%",
+		data : eventDateList,
+		disabled: false}).on("change", function(e) {
+		    var diff = $($(this).select2("data")).not(oldDateData).get();
+		    if (diff.length == 0) {		
+			var diff = $(oldDateData).not($(this).select2("data")).get();
+			console.log(diff[0]);
+			eventDateToDisplay.splice(eventDateToDisplay.indexOf(diff[0].text),1);
+		    } else {
+			eventDateToDisplay.push(diff[0].text);
+		    }
+		    oldDateData = $(this).select2("data");
+		});	
+    } else {
+	$(".in").find("#event_date").select2({
+		width : "100%",
+		disabled: true});
+	
+    }
+}
+
 function template(data, container) {
     return data.text.replace(/ -.*$/, "");
 }
+
+var clickedGraph = function (e) {
+    var date = e.item.category;
+    $.each(apiResults, function (i,data) {
+	if (i == 0) {
+	    updateNewsOn(data,date,true);
+	} else {
+	updateNewsOn(data,date,false);
+	}
+    });
+};
 
 var chart;
 AmCharts.ready(function() {
@@ -553,6 +659,7 @@ function createStockChart() {
     // PANELS ///////////////////////////////////////////
     // first stock panel
     var stockPanel1 = new AmCharts.StockPanel();
+    stockPanel1.addListener("clickGraphItem", clickedGraph);
     stockPanel1.showCategoryAxis = false;
     stockPanel1.title = "Value";
     stockPanel1.percentHeight = 70;
@@ -715,12 +822,20 @@ $('#compopt').click(function() {
 });
 
 $('#events').on("shown.bs.collapse", function() {
+    eventToDisplay = [];    
     loadEvents();
+    eventDateToDisplay = [];
+    loadEventDate();
+    ricsToDisplay = [];
     loadRics();
     bindSubmit();
 });
-$('#companys').on("shown.bs.collapse", function() {
+$('#companys').on("shown.bs.collapse", function() { 
+    ricsToDisplay = [];
     loadRics();
+    eventToDisplay = [];   
     loadEvents();
+    eventDateToDisplay = [];
+    loadEventDate();
     bindSubmit();
 });
