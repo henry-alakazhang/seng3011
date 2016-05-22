@@ -23,8 +23,15 @@ function updateNews(data, lowerWindow, upperWindow) {
     });*/
 
     for (var event in data['events']) {
-	    var start = moment(data['events'][event]['date'], "DD-MM-YY").add(-1, 'days').format("DD-MMM-YY");
-	    var end = moment(data['events'][event]['date'], "DD-MM-YY").add(1, 'days').format("DD-MMM-YY");
+	var date = moment(data['events'][event]['date'], "DD-MM-YY");
+    		if (eventDateToDisplay.length > 0) {	    
+    	    if ($.inArray(date.format("DD-MMM-YY").replace(/^0/,''),eventDateToDisplay) == -1) {
+    		console.log(date.format("DD-MMM-YY").replace(/^0/,''), eventDateToDisplay);
+    		continue;
+    	    }
+    	}
+	    var start = date.clone().add(-1, 'days').format("DD-MMM-YY");
+	    var end = date.clone().add(1, 'days').format("DD-MMM-YY");
 	    var ric_list = [];
 	    $.each(data.events[event].returns, function(i, val) {
 		ric_list.push(i);
