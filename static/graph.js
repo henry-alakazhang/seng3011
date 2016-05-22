@@ -11,81 +11,81 @@ function escapeHtml(unsafe) {
     return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
-function updateNewsOn(data,date2,clear) {
+function updateNewsOn(data, date2, clear) {
     console.log(date2);
-    if (clear)
+    if (clear) {
 	$('#newsItems').empty();
-	
-	    if (data['events'].length == 0)
-	    	return;
+    }
 
-	    for (var event in data['events']) {
-		var date = moment(data['events'][event]['date'], "DD-MM-YY").local().hour(0);
-	    		if (eventDateToDisplay.length > 0) {	    
-	    	    if ($.inArray(date.format("DD-MMM-YY").replace(/^0/,''),eventDateToDisplay) == -1) {
-	    		console.log(date.format("DD-MMM-YY").replace(/^0/,''), eventDateToDisplay);
-	    		continue;
-	    	    }
-	    	}
-	    		date = moment(date2);
-		    var start = date.clone().add(-1, 'days').format("DD-MMM-YY");
-		    var end = date.clone().add(1, 'days').format("DD-MMM-YY");
-		    var ric_list = [];
-		    $.each(data.events[event].returns, function(i, val) {
-			ric_list.push(i);
-		    });
-		    var param = {
-			"earliest" : start,
-			"latest" : end,
-		    }
-		    if (ric_list.length > 0) {
-			param.RICs = ric_list.length
-			$.each(ric_list, function(i, val) {
-			   param["ric"+i] = val; 
-			});
-		    }
-		    $.get("eventapi/news", param, function(data) {
-			var news = []
-			$.each(data, function(i, ret) {
-			    news = news.concat(ret['results']);// console.log(news);
-			    });
-			    news.sort(function(a, b) {
-				return moment(b.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
-			    })
-			    var items = [];
-			    $.each(news, function(i, val) {
-				items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
-				 id="article' + i + '" class="list-group-item"> \
-				 <h4 class="list-group-item-heading">' + escapeHtml(val["title"]) + '</h4>');
-				if (val["body"] != null) {
-				    var s = val["body"]
-				    var n = s.indexOf('.', 200);
-				    var m = s.indexOf('。', 200);
-				    s = s.substring(0, n != -1 ? n < 300 ? n + 1 : 250 : m != -1 ? m + 1 : 250);
-				    items.push('<p class="collapse list-group-item-text" id="body' + i + '">' + escapeHtml(s) + '</p>');
-				} else {
-				    items.push('<p class="collapse list-group-item-text" id="body' + i + '"> No Body Available </p>');
-				}
-				/*
-				 * $.each(val["instr_list"], function(i, val) {
-				 * items.push(' <span class="label
-				 * label-default">' + val + '</span>'); });
-				 */
-				items.push('<small>' + val['timestamp'] + '</small></a>')
-			    });
-			    $('#newsItems').append(items.join(''));
-			});
+    if (data['events'].length == 0)
+	return;
+
+    var date = moment(date2).local().hour(0);
+    var start = date.clone().add(-1, 'days').format("DD-MMM-YY");
+    var end = date.clone().add(1, 'days').format("DD-MMM-YY");
+    var ric_list = [ chart.mainDataSet.title ];
+    var param = {
+	"earliest" : start,
+	"latest" : end,
+    }
+    if (ric_list.length > 0) {
+	param.RICs = ric_list.length
+	$.each(ric_list, function(i, val) {
+	    param["ric" + i] = val;
+	});
+    }
+    var news = []
+    $.get("eventapi/news", param, function(data) {
+	$.each(data, function(i, ret) {
+	    
+	    news = news.concat(ret['results']);// console.log(news);
+	    console.log(ret,news);
+	});
+	news.sort(function(a, b) {
+		return moment(b.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
+	    })
+	    var items = [];
+	    $.each(news, function(i, val) {
+		var tags = val.tags.split(",");
+		items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
+					 id="article' + i + '" class="list-group-item"> \
+					 <h4 class="list-group-item-heading">'
+			+ escapeHtml(val["title"]) + '</h4>');
+		if (val["body"] != null) {
+		    var s = val["body"]
+		    var n = s.indexOf('.', 200);
+		    var m = s.indexOf('。', 200);
+		    s = s.substring(0, n != -1 ? n < 300 ? n + 1 : 250 : m != -1 ? m + 1 : 250);
+		    items.push('<p class="collapse list-group-item-text" id="body' + i + '">' + escapeHtml(s) + '</p>');
+		} else {
+		    items.push('<p class="collapse list-group-item-text" id="body' + i + '"> No Body Available </p>');
 		}
-	}
+		/*
+		 * $.each(val["instr_list"], function(i, val) { items.push(' <span
+		 * class="label label-default">' + val + '</span>'); });
+		 */
+		items.push('<small>' + val['timestamp'] + '</small>')
+		$.each(tags, function (i,tag) {
+		    console.log(tag);
+		   if (tag.startsWith('R:')) {
+			items.push(' <span class="label label-default">' + tag.slice(2) + '</span>')		       
+		   } else {
+		       return true;
+		   }
+		});
+		items.push('</a>');
+	    });
+	    $('#newsItems').append(items.join(''));
+    });
+}
+
 function updateNews(data, clear) {
     if (data['events'].length == 0)
     	return;/*
-    var ric = jQuery.parseJSON(portfolio);
-    $.each(ric, function(i, val) {
-	if (val != '') {
-	    ric_list.push(val["portfolio"]);
-	}
-    });*/
+		 * var ric = jQuery.parseJSON(portfolio); $.each(ric,
+		 * function(i, val) { if (val != '') {
+		 * ric_list.push(val["portfolio"]); } });
+		 */
 
     if (clear) {
 	$('#newsItems').empty()
@@ -126,6 +126,7 @@ function updateNews(data, clear) {
 		    })
 		var items = [];
 		    $.each(news, function(i, val) {
+			var tags = val.tags.split(",");
 			items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
 			 id="article' + i + '" class="list-group-item"> \
 			 <h4 class="list-group-item-heading">' + escapeHtml(val["title"]) + '</h4>');
@@ -143,7 +144,16 @@ function updateNews(data, clear) {
 			    items.push(' <span class="label label-default">' + val + '</span>');
 			});
 			*/
-			items.push('<small>' + val['timestamp'] + '</small></a>')
+			items.push('<small>' + val['timestamp'] + '</small>')
+			$.each(tags, function (i,tag) {
+			    console.log(tag);
+			   if (tag.startsWith('R:')) {
+				items.push(' <span class="label label-default">' + tag.slice(2) + '</span>')		       
+			   } else {
+			       return true;
+			   }
+			});
+			items.push('</a>');
 		    });
 		    $('#newsItems').append(items.join(''));
 		    /*
@@ -659,9 +669,11 @@ function template(data, container) {
 var clickedGraph = function (e) {
     var date = e.item.category;
     $.each(apiResults, function (i,data) {
-	if (i == 0)
+	if (i == 0) {
 	    updateNewsOn(data,date,true);
+	} else {
 	updateNewsOn(data,date,false);
+	}
     });
 };
 
