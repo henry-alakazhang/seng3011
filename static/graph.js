@@ -12,28 +12,37 @@ function escapeHtml(unsafe) {
 function updateNews(data, lowerWindow, upperWindow) {
 	$('#newsItems').empty()
     if (data['events'].length == 0)
-    	return;
+    	return;/*
     var ric = jQuery.parseJSON(portfolio);
-    var ric_list = [];
     $.each(ric, function(i, val) {
 	if (val != '') {
 	    ric_list.push(val["portfolio"]);
 	}
-    });
+    });*/
 
     for (var event in data['events']) {
 	    var start = moment(data['events'][event]['date'], "DD-MM-YY").add(-1, 'days').format("DD-MMM-YY");
 	    var end = moment(data['events'][event]['date'], "DD-MM-YY").add(1, 'days').format("DD-MMM-YY");
+	    var ric_list = [];
+	    $.each(data.events[event].returns, function(i, val) {
+		ric_list.push(i);
+	    });
 	    var param = {
 		"earliest" : start,
 		"latest" : end,
-		"RICs" : [ ric_list ],
+	    }
+	    if (ric_list.length > 0) {
+		param.RICs = ric_list.length
+		$.each(ric_list, function(i, val) {
+		   param["ric"+i] = val; 
+		});
 	    }
 	    $.get("eventapi/news", param, function(data) {
-		    data['results'].sort(function(a, b) {
+		$.each(data, function(i, ret) {
+		    ret['results'].sort(function(a, b) {
 			return moment(b.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
 		    })
-		    var news = data['results'];
+		    var news = ret['results'];
 //		    console.log(news);
 		    var items = [];
 		    $.each(news, function(i, val) {
@@ -57,6 +66,7 @@ function updateNews(data, lowerWindow, upperWindow) {
 			items.push('<small>' + val['timestamp'] + '</small></a>')
 		    });
 		    $('#newsItems').append(items.join(''));
+		});
 		    /*
 		    $("#newsItems a").click(function() {
 			var id = $(this).attr('id').substring(7);
@@ -460,6 +470,7 @@ var submit = function() {
     if (events.length == 0) {
 	$.get("eventapi", params, function(data) {	    
 	    processData(data, params['lower_window'], params['upper_window'],true);
+		updateNews(data, params['lower_window'], params['upper_window']);
 	});
     } else {
 	var x = 0;

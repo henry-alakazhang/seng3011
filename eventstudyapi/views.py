@@ -232,19 +232,21 @@ def events_view(request):
 @api_view(['GET'])
 def get_news(request):
     request_GET_dict = dict(request.GET)
-    url = 'http://bhsl.blue/news_request/'
     earliest_date = datetime.datetime.strptime(request.GET['earliest'], "%d-%b-%y")
     latest_date = datetime.datetime.strptime(request.GET['latest'], "%d-%b-%y")
     start = earliest_date.strftime("%Y-%m-%dT%H:%I:%S.%f")[:-3]+"Z"
     end = latest_date.strftime("%Y-%m-%dT%H:%I:%S.%f")[:-3]+"Z"
-    url += 'start_date='+start+'/end_date='+end
+    url = 'http://bhsl.blue/news_request/start_date='+start+'/end_date='+end
+    res = dict()
     if ('RICs' in request_GET_dict):
         num_ric = int(request.GET['RICs'])
-        url += '/instr_list='
-        for i in range(0,num_ric):        
-            url += request.GET["ric"+str(i)]+","
-        url = url[:-1]
-    url += '/'    
-    print (url)
-    r = requests.get(url,auth=('cool','seng3011'))
-    return JsonResponse(r.json())
+        for i in range(0,num_ric):
+            tmp_url = url + '/instr_list='+request.GET["ric"+str(i)] +"/tpc_list=''/"
+            r = requests.get(tmp_url,auth=('cool','seng3011'))
+            res[request.GET["ric"+str(i)]] = r.json()
+    else:
+        url += '/'    
+        print (url)
+        r = requests.get(url,auth=('cool','seng3011'))
+        res = r.json()
+    return JsonResponse(res)
