@@ -873,14 +873,20 @@ $('#compopt').click(function() {
 });
 
 $('#events').on("shown.bs.collapse", function() {
+    eventToDisplay = [];    
     loadEvents();
+    eventDateToDisplay = [];
     loadEventDate();
+    ricsToDisplay = [];
     loadRics();
     bindSubmit();
 });
-$('#companys').on("shown.bs.collapse", function() {
+$('#companys').on("shown.bs.collapse", function() { 
+    ricsToDisplay = [];
     loadRics();
+    eventToDisplay = [];   
     loadEvents();
-    bindSubmit();
+    eventDateToDisplay = [];
     loadEventDate();
+    bindSubmit();
 });
