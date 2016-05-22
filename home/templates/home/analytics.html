@@ -22,7 +22,7 @@
 {% block title %}Team Cool - SENG 3011{% endblock %} 
 {% block content %}
 <div class="row">
-	<div class="col-md-3">
+	<div class="col-md-2 nopadding">
 		<div id="options">
 			<div class="panel">
 			<!-- Button trigger modal -->
@@ -136,17 +136,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="col-md-5">
-		<div class="row" style="float:right">
-			{# <a href="/analytics/howtouse" class="btn pull-right btn-me">#}
-				{# <span class="btn btn-info glyphicon glyphicon-info-sign"></span>#}
-				{#			</a>#}
-			<button type="button"
-				class="btn btn-info glyphicon glyphicon-info-sign btn-xs pull-right"
-				data-toggle="tooltip" data-placement="right"
-				title="Upload data files or use ours! Use tabs to navigate the Analytics Platform">
-			</button>
-		</div>
+	<div class="col-md-7">
 		<!-- Modal -->
 		<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog"
 			aria-labelledby="uploadLabel">
@@ -185,9 +175,8 @@
 			</div>
 		</div>
 
-		<br>
-		<div class="col-md-12">
-			<div class="panel panel-default">
+		<div class="col-md-12 nopadding">
+			<div class="panel panel-default nopadding">
 				<div class="panel-heading">
 					<h4 class="panel-title">Cumulative returns</h4>
 				</div>
@@ -196,8 +185,7 @@
 		</div>
  	</div>
 
-	<br>
-	<div class="col-md-4">
+	<div class="col-md-3 nopadding">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h4 class="panel-title">Related News</h4>
@@ -214,3 +202,10 @@
 </script>
 <script src='{% static "graph.js" %}'></script>
 {% endblock %}
+
+{# Tool tip code #}
+{#			<button type="button"#}
+{#				class="btn btn-info glyphicon glyphicon-info-sign btn-xs pull-right"#}
+{#				data-toggle="tooltip" data-placement="right"#}
+{#				title="Upload data files or use ours! Use tabs to navigate the Analytics Platform">#}
+{#			</button>#}
