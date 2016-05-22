@@ -249,4 +249,19 @@ def get_news(request):
         print (url)
         r = requests.get(url,auth=('cool','seng3011'))
         res = r.json()
+    for ric in res.keys():
+        for article in res[ric]['results']:
+            if 'body' in article and article['body'] != '':
+                article['sentiment'] = requests.post(
+                    url="http://gateway-a.watsonplatform.net/calls/text/TextGetTextSentiment",
+                    headers={
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    data={
+                        "apikey": "43d8789a0576632dc197805731ca9abd54006afd",
+                        "text": article['body'],
+                        "outputMode": "json",
+                    },
+                ).json()
     return JsonResponse(res)
+

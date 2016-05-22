@@ -39,6 +39,7 @@ function updateNews(data, lowerWindow, upperWindow) {
 	    }
 	    $.get("eventapi/news", param, function(data) {
 		$.each(data, function(i, ret) {
+			console.log(data);
 		    ret['results'].sort(function(a, b) {
 			return moment(b.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").diff(moment(a.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
 		    })
@@ -46,16 +47,25 @@ function updateNews(data, lowerWindow, upperWindow) {
 //		    console.log(news);
 		    var items = [];
 		    $.each(news, function(i, val) {
-			items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
-			 id="article' + i + '" class="list-group-item"> \
-			 <h4 class="list-group-item-heading">' + escapeHtml(val["title"]) + '</h4>');
 			if (val["body"] != null) {
 			    var s = val["body"]
 			    var n = s.indexOf('.', 200);
 			    var m = s.indexOf('。', 200);
 			    s = s.substring(0, n != -1 ? n < 300 ? n + 1 : 250 : m != -1 ? m + 1 : 250);
+			    var sentiment = val["sentiment"];
+			    var colour = "#FFFFFF"
+			    if (sentiment.status == "OK") {
+				    var colour = (sentiment.docSentiment.score < 0) ? "#FF99AA" : "#AAFF99"
+			    }
+				items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
+				 style="background-color:' + colour + '" id="article' + i + '" class="list-group-item"> \
+				 <h4 class="list-group-item-heading">' + escapeHtml(val["title"]) + '</h4>');
 			    items.push('<p class="collapse list-group-item-text" id="body' + i + '">' + escapeHtml(s) + '</p>');
 			} else {
+
+				items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
+				 id="article' + i + '" class="list-group-item"> \
+				 <h4 class="list-group-item-heading">' + escapeHtml(val["title"]) + '</h4>');
 			    items.push('<p class="collapse list-group-item-text" id="body' + i + '"> No Body Available </p>');
 			}
 			/*
