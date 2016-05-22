@@ -105,7 +105,7 @@ function displayNews(news) {
 		    var sentiment = val["sentiment"];
 		    var colour = "#FFFFFF"
 		    if (sentiment.status == "OK") {
-			    var colour = (sentiment.docSentiment.score < 0) ? "#FF99AA" : "#AAFF99"
+			    var colour = (sentiment.docSentiment.score < 0) ? "#fedadd" : "#dffdc6"
 		    }
 			items.push('<a role="button" data-toggle="collapse" data-target="#body' + i + '" \
 			 style="background-color:' + colour + '" id="article' + i + '" class="list-group-item"> \
