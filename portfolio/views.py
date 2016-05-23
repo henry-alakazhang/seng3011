@@ -34,7 +34,7 @@ def profile(request):
             print(profile.file_key)
         except ObjectDoesNotExist: 
             profile = None
-        savedNews = get_news(request)['news']
+        savedNews = json.dumps(get_news(request)['news'])
         return render(request, 'portfolio/profile.html', {'user ': user, 'portfolio' : portfolio, 
                                                           'notice' : notice, 'profile':profile, 'news' : savedNews})
     else:

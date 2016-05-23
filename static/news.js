@@ -1,5 +1,9 @@
 var currNews = [];
 
+function escapeHtml(unsafe) {
+    return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
 function displayNews(news) {
     var items = []
     var checked = "";
@@ -21,7 +25,7 @@ function displayNews(news) {
             var sentiment = val["sentiment"];
             var colour = "#FFFFFF"
         	var date = moment(val.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").format("Do MMMM YYYY, h:mm:ss a");
-            if (sentiment.status == "OK") {
+            if (sentiment != null && sentiment.status == "OK") {
                 var colour = (sentiment.docSentiment.score < 0) ? "#FF99AA" : "#AAFF99"
             }
             items.push('<div class="row row-eq-height" style="background-color:' + colour + '"><div class="col-sm-2" style="padding-right:0;"><label style="display: flex;justify-content:center;align-items:center;height:100%">\
@@ -70,12 +74,12 @@ function handleClick(cb) {
     body: string
     date: string
     tags: string
-    sentiment: string
+    sentiment: dict probably
 }
 */
 function saveNews(article) {
     $.post(
-        "portfolio/news",
+        (window.location.pathname.endsWith("profile") ? "news" : "profile/news"),
         article
     )
 }
