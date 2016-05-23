@@ -591,6 +591,12 @@ var clickedGraph = function (e) {
 var chart;
 AmCharts.ready(function() {
     createStockChart();
+    var newsItem = jQuery.parseJSON(savedNews);
+    console.log(newsItem);
+    $.each(newsItem, function(i,val) {
+	    val.sentiment = jQuery.parseJSON(val.sentiment);	
+    });
+    $("#newsItems").empty().append(displayNews(newsItem));
 });
 var graph1;
 function createStockChart() {
