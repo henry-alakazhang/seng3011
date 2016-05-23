@@ -249,6 +249,7 @@ def get_news(request):
         print (url)
         r = requests.get(url,auth=('cool','seng3011'))
         res = r.json()
+    
     for ric in res.keys():
         for article in res[ric]['results']:
             if 'body' in article and article['body'] != '':
