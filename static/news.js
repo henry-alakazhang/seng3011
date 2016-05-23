@@ -4,9 +4,10 @@ function displayNews(news) {
         var tags = val.tags.split(",");
         if (val["body"] != null) {
             var s = val["body"]
-            var n = s.indexOf('.', 200);
-            var m = s.indexOf('。', 200);
-            s = s.substring(0, n != -1 ? n < 300 ? n + 1 : 250 : m != -1 ? m + 1 : 250);
+            var n = s.indexOf('.', 250);
+            var m = s.indexOf('。', 250);
+            s = s.substring(0, n != -1 ? (n < 400 ? n + 1 : 350) : (m != -1 ? m + 1 : 350));
+            s += m != -1 ? "。。" : (n != - 1 ? ".." : "...")
             var sentiment = val["sentiment"];
             var colour = "#FFFFFF"
             if (sentiment.status == "OK") {

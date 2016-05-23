@@ -90,7 +90,7 @@
             </panel>
         </div>
         <script>
-            savedArticles = {{ news }}
+            savedArticles = $.parseJson({{ news }})
             $('#newsItems').append(savedArticles)
         </script>
         {% load staticfiles %}
