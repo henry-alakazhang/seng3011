@@ -15,7 +15,8 @@ class UserSavedNews(models.Model):
     user = models.ForeignKey(User)
     title = models.TextField(blank=True, null=True)
     body = models.TextField(blank=True, null=True)
-    date = models.CharField(max_length=26)
+    sentiment = models.TextField(blank=True, null=True)
+    timestamp = models.CharField(max_length=26)
     tags = models.TextField(blank=True, null=True)
 
 class UserSavedSearch(models.Model):

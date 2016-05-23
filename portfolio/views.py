@@ -62,7 +62,8 @@ def save_news(request):
         article = UserSavedNews.objects.create(user=request.user)
         article.title = request.POST.get('title')
         article.body = request.POST.get('body')
-        article.date = request.POST.get('date')
+        article.timestamp = request.POST.get('date')
+        article.sentiment = request.POST.get('sentiment')
         article.tags = request.POST.get('tags')
         article.save()
     return {"status" : "OK"}
