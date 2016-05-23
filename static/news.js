@@ -1,4 +1,32 @@
 var currNews = [];
+function arrayContains(arr, val, equals) {
+    var i = arr.length;
+    while (i--) {
+        if ( equals(arr[i], val) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function removeDuplicates(arr, equals) {
+    var originalArr = arr.slice(0);
+    var i, len, j, val;
+    arr.length = 0;
+
+    for (i = 0, len = originalArr.length; i < len; ++i) {
+        val = originalArr[i];
+        if (!arrayContains(arr, val, equals)) {
+            arr.push(val);
+        }
+    }
+}
+
+function thingsEqual(thing1, thing2) {
+    return thing1.timestamp === thing2.timestamp
+        && thing1.headline === thing2.headline;
+}
+
 
 function escapeHtml(unsafe) {
     return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
@@ -8,14 +36,16 @@ function displayNews(news) {
     var items = []
     var checked = "";
     var newsItems = jQuery.parseJSON(savedNews);
+    removeDuplicates(news, thingsEqual);
     currNews = news;
-    $.each(news, function(i, val) {
-	if ($.inArray(val,newsItems)) {
+    $.each(currNews, function(i, val) {
+	if ($.inArray(val,newsItems) > -1) {
 	    checked = " checked";
 	} else {
 	    checked = "";
 	}
         var tags = val.tags.split(",");
+	var date = moment(val.timestamp, "YYYY-MM-DDTHH:mm:ss.SSS[Z]").format("Do MMMM YYYY, h:mm:ss a");
         if (val["body"] != null) {
             var s = val["body"]
             var n = s.indexOf('.', 250);
@@ -42,7 +72,7 @@ function displayNews(news) {
              <h4 class="list-group-item-heading">' + escapeHtml(val["title"]) + '</h4>');
             items.push('<p class="collapse list-group-item-text" id="body' + i + '"> No Body Available </p>');
         }
-        items.push('<span class="glyphicon glyphicon-floppy-disk"></span></span> <small>' + date + '</small>')
+        items.push('</span> <small>' + date + '</small>')
         $.each(tags, function (i,tag) {
            if (tag.startsWith('R:')) {
             items.push(' <span class="label label-default">' + tag.slice(2) + '</span>')               
