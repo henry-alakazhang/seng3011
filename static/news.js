@@ -108,8 +108,9 @@ function handleClick(cb) {
 }
 */
 function saveNews(article) {
+    console.log(window.location.pathname.endsWith("profile"));
     $.post(
-        (window.location.pathname.endsWith("profile") ? "news" : "profile/news"),
+        (window.location.pathname.endsWith("profile") ? "news" : "portfolio/news"),
         article
     )
 }
